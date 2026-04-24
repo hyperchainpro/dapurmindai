@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChefHat } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { GlowingText } from '@/components/dapurmind/ReactBits';
 import { ShineBorder } from '@/components/dapurmind/MagicUI';
 
-/* ── Floating food emojis ─────────────────────────────────────── */
-
-const FOOD_EMOJIS = ['🍳', '🍚', '🥬', '🌶️', '🧄', '🥑', '🍜', '🥘'];
+/* ── Floating food emojis (deterministic to avoid hydration mismatch) ── */
 
 interface FloatingEmoji {
   id: number;
@@ -22,18 +20,17 @@ interface FloatingEmoji {
   rotateRange: number;
 }
 
-function generateEmojis(): FloatingEmoji[] {
-  return FOOD_EMOJIS.map((emoji, i) => ({
-    id: i,
-    emoji,
-    x: 10 + Math.random() * 80,
-    y: 5 + Math.random() * 90,
-    size: 24 + Math.random() * 28,
-    duration: 4 + Math.random() * 4,
-    delay: i * 0.3,
-    rotateRange: 15 + Math.random() * 25,
-  }));
-}
+/* Deterministic positions so SSR and client always match */
+const FLOATING_EMOJIS: FloatingEmoji[] = [
+  { id: 0, emoji: '🍳', x: 15,  y: 20, size: 36, duration: 5.2, delay: 0,   rotateRange: 20 },
+  { id: 1, emoji: '🍚', x: 72,  y: 12, size: 30, duration: 6.0, delay: 0.3, rotateRange: 25 },
+  { id: 2, emoji: '🥬', x: 82,  y: 45, size: 42, duration: 4.8, delay: 0.6, rotateRange: 18 },
+  { id: 3, emoji: '🌶️', x: 25,  y: 70, size: 28, duration: 5.5, delay: 0.9, rotateRange: 30 },
+  { id: 4, emoji: '🧄', x: 60,  y: 80, size: 34, duration: 7.0, delay: 1.2, rotateRange: 22 },
+  { id: 5, emoji: '🥑', x: 8,   y: 55, size: 26, duration: 4.5, delay: 1.5, rotateRange: 28 },
+  { id: 6, emoji: '🍜', x: 45,  y: 85, size: 38, duration: 5.8, delay: 1.8, rotateRange: 20 },
+  { id: 7, emoji: '🥘', x: 88,  y: 25, size: 32, duration: 6.3, delay: 2.1, rotateRange: 24 },
+];
 
 /* ── Component ────────────────────────────────────────────────── */
 
@@ -42,11 +39,7 @@ export default function SplashScreen() {
   const isDark = useAppStore((s) => s.isDark);
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [emojis] = useState<FloatingEmoji[]>(generateEmojis);
-
-  const transitionOut = useCallback(() => {
-    setIsVisible(false);
-  }, []);
+  const emojis = FLOATING_EMOJIS;
 
   useEffect(() => {
     // Progress bar animation
@@ -61,13 +54,13 @@ export default function SplashScreen() {
     }, 50);
 
     // After 3s, trigger exit
-    const timeout = setTimeout(transitionOut, 3000);
+    const timeout = setTimeout(() => setIsVisible(false), 3000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [transitionOut]);
+  }, []);
 
   const handleExitComplete = () => {
     if (!isVisible) {
