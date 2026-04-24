@@ -20,9 +20,10 @@ import {
   ChefHat,
   Sparkles,
   Shield,
+  ShoppingBag,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
-import type { Achievement } from '@/types';
+import type { Achievement, AppScreen } from '@/types';
 import { AnimatedList } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, StarBorder } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
@@ -435,6 +436,24 @@ export function ProfilePage() {
                 ID
               </Badge>
             </div>
+
+            {/* Admin Affiliate */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setScreen('admin-affiliate' as AppScreen)}
+              className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-card p-3.5 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+                  <ShoppingBag className="h-4.5 w-4.5 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Kelola Afiliasi</p>
+                  <p className="text-xs text-muted-foreground">Admin marketplace hub</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </motion.button>
 
             {/* About */}
             <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5">

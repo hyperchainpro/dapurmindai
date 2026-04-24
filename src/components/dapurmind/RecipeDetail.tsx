@@ -16,6 +16,7 @@ import {
   Minus,
   Star,
   Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { Ingredient } from '@/types';
@@ -24,6 +25,7 @@ import { ShineBorder } from '@/components/dapurmind/MagicUI';
 import { Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AFFILIATE_MARKETPLACES, buildAffiliateUrl } from '@/lib/affiliate';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -512,6 +514,27 @@ export function RecipeDetail() {
                                 {scaledAmount % 1 === 0 ? scaledAmount : scaledAmount.toFixed(1)}{' '}
                                 {ingredient.unit}
                               </span>
+
+                              {/* Affiliate buy icon */}
+                              {!isChecked && (
+                                <motion.button
+                                  whileHover={{ scale: 1.15 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const mp = AFFILIATE_MARKETPLACES[0];
+                                    window.open(
+                                      buildAffiliateUrl(mp.id, ingredient.name),
+                                      '_blank',
+                                      'noopener,noreferrer'
+                                    );
+                                  }}
+                                  className="shrink-0 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 sm:opacity-60"
+                                  title={`Beli ${ingredient.name}`}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </motion.button>
+                              )}
                             </motion.button>
                           );
                         })}

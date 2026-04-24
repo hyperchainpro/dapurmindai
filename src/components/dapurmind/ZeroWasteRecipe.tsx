@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { AFFILIATE_MARKETPLACES, buildAffiliateUrl } from '@/lib/affiliate';
 import {
   ArrowLeft,
   Leaf,
@@ -22,6 +23,7 @@ import {
   Sparkles,
   CheckCircle2,
   X,
+  ExternalLink,
 } from 'lucide-react';
 import type { Recipe } from '@/types';
 
@@ -546,17 +548,46 @@ function ResultCard({
           </div>
         )}
 
-        {/* Action button */}
-        <motion.div whileTap={{ scale: 0.97 }}>
-          <Button
-            size="sm"
-            onClick={handleViewRecipe}
-            className="mt-1 w-full rounded-lg bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-700"
-          >
-            <ChefHat className="mr-1.5 h-3.5 w-3.5" />
-            Lihat Resep Lengkap
-          </Button>
-        </motion.div>
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+            <Button
+              size="sm"
+              onClick={handleViewRecipe}
+              className="w-full rounded-lg bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-700"
+            >
+              <ChefHat className="mr-1.5 h-3.5 w-3.5" />
+              Lihat Resep Lengkap
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* Affiliate: Beli Bahan Tambahan */}
+        {result.matchedIngredients.length > 0 && (
+          <div className="mt-1 space-y-1.5">
+            <p className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+              <ExternalLink className="h-3 w-3" />
+              Beli Bahan Tambahan
+            </p>
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+              {AFFILIATE_MARKETPLACES.slice(0, 4).map((mp) => (
+                <motion.button
+                  key={mp.id}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.03 }}
+                  onClick={() => {
+                    const query = result.title.split(' ').slice(0, 3).join(' ');
+                    window.open(buildAffiliateUrl(mp.id, query), '_blank', 'noopener,noreferrer');
+                  }}
+                  className={`flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors ${mp.borderColor} ${mp.bgColor}`}
+                >
+                  <span className="text-xs">{mp.logo}</span>
+                  <span className="max-w-[60px] truncate">{mp.name.split(' ')[0]}</span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

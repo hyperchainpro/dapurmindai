@@ -8,6 +8,8 @@ import type {
   ShoppingItem,
   Achievement,
   Recipe,
+  AffiliateAccount,
+  ProductLink,
 } from '@/types';
 
 interface AppState {
@@ -57,6 +59,17 @@ interface AppState {
   // Loading states
   isAILoading: boolean;
   setAILoading: (loading: boolean) => void;
+
+  // Affiliate
+  affiliateAccounts: AffiliateAccount[];
+  setAffiliateAccounts: (accounts: AffiliateAccount[]) => void;
+  addAffiliateAccount: (account: AffiliateAccount) => void;
+  removeAffiliateAccount: (id: string) => void;
+  productLinks: ProductLink[];
+  setProductLinks: (links: ProductLink[]) => void;
+  addProductLink: (link: ProductLink) => void;
+  isGeneratingLinks: boolean;
+  setGeneratingLinks: (loading: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -158,6 +171,26 @@ export const useAppStore = create<AppState>()(
       // Loading
       isAILoading: false,
       setAILoading: (loading) => set({ isAILoading: loading }),
+
+      // Affiliate
+      affiliateAccounts: [],
+      setAffiliateAccounts: (accounts) => set({ affiliateAccounts: accounts }),
+      addAffiliateAccount: (account) =>
+        set((state) => ({
+          affiliateAccounts: [...state.affiliateAccounts, account],
+        })),
+      removeAffiliateAccount: (id) =>
+        set((state) => ({
+          affiliateAccounts: state.affiliateAccounts.filter((a) => a.id !== id),
+        })),
+      productLinks: [],
+      setProductLinks: (links) => set({ productLinks: links }),
+      addProductLink: (link) =>
+        set((state) => ({
+          productLinks: [...state.productLinks, link],
+        })),
+      isGeneratingLinks: false,
+      setGeneratingLinks: (loading) => set({ isGeneratingLinks: loading }),
     }),
     {
       name: 'dapurmind-store',

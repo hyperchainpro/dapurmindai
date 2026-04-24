@@ -24,8 +24,10 @@ import {
   ShineBorder,
   AnimatedList,
   NumberTicker,
+  Marquee,
 } from '@/components/dapurmind/MagicUI';
-import { GlowingText, Bounce } from '@/components/dapurmind/ReactBits';
+import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
+import { AFFILIATE_MARKETPLACES } from '@/lib/affiliate';
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 
@@ -112,18 +114,18 @@ const quickActions: QuickAction[] = [
     gradient: 'from-amber-500/10 to-amber-500/5',
   },
   {
+    screen: 'marketplace',
+    icon: ShoppingCart,
+    title: 'Marketplace',
+    desc: 'Belanja bahan langsung dari app',
+    gradient: 'from-sky-500/10 to-sky-500/5',
+  },
+  {
     screen: 'recipes',
     icon: Search,
     title: 'Cari Resep',
     desc: 'Jelajahi 25+ resep Nusantara',
     gradient: 'from-rose-500/10 to-rose-500/5',
-  },
-  {
-    screen: 'shopping',
-    icon: ShoppingCart,
-    title: 'Belanja',
-    desc: 'Daftar belanja',
-    gradient: 'from-sky-500/10 to-sky-500/5',
   },
 ];
 
@@ -289,6 +291,65 @@ function DashboardInner() {
             </BentoGridItem>
           ))}
         </BentoGrid>
+      </motion.div>
+
+      {/* ── Affiliate Marketplace Banner ────────────────── */}
+      <motion.div variants={fadeUp} className="mb-6">
+        <ClickSpark color="#10b981" count={8}>
+          <button
+            onClick={() => handleNavigate('marketplace')}
+            className="w-full text-left"
+          >
+            <ShineBorder
+              borderRadius={16}
+              borderWidth={2}
+              duration={8}
+              color={['#10b981', '#f59e0b', '#10b981']}
+            >
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-lg shadow-emerald-500/25">
+                    <ShoppingCart className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <GlowingText color="emerald" intensity={1}>
+                      <h2 className="text-base font-bold">Marketplace Hub</h2>
+                    </GlowingText>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Belanja bahan segar dari {AFFILIATE_MARKETPLACES.length} marketplace terpercaya
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex -space-x-1">
+                        {AFFILIATE_MARKETPLACES.slice(0, 4).map((mp) => (
+                          <span
+                            key={mp.id}
+                            className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-background text-xs ${mp.bgColor}`}
+                          >
+                            {mp.logo}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">
+                        +{AFFILIATE_MARKETPLACES.length - 4} lainnya
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-emerald-500 shrink-0" />
+                </div>
+                <div className="mt-3 overflow-hidden rounded-lg">
+                  <Marquee pauseOnHover className="[--duration:20s]">
+                    {['Gratis Ongkir Tokopedia Now', 'Cashback 10% Shopee Segar', 'Produk Organik Sayurbox', 'Promo Harian Blibli Mart', 'Harga Grosir LotteMart', '24 Jam Klik Indomaret'].map((deal) => (
+                      <span key={deal} className="mx-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                        <Sparkles className="h-3 w-3" />
+                        {deal}
+                      </span>
+                    ))}
+                  </Marquee>
+                </div>
+              </div>
+            </ShineBorder>
+          </button>
+        </ClickSpark>
       </motion.div>
 
       {/* ── Featured Recipe Carousel ──────────────────────── */}

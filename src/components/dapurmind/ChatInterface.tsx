@@ -20,6 +20,7 @@ import {
 import { useAppStore } from '@/hooks/useAppState';
 import { ShineBorder, BorderBeam } from '@/components/dapurmind/MagicUI';
 import { Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
+import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl } from '@/lib/affiliate';
 import type {
   ChatMessage,
   MealPlan,
@@ -191,6 +192,37 @@ function MessageBubble({ message, onSavePlan, onViewShopping }: MessageBubblePro
               <ShoppingCart className="h-4 w-4 text-emerald-500" />
               <span>Lihat Daftar Belanja</span>
             </button>
+
+            {/* Belanja Cepat - Quick affiliate buy buttons */}
+            <div className="mt-1 space-y-2">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                <Sparkles className="h-3 w-3 text-amber-500" />
+                Belanja Cepat
+              </p>
+              <div className="flex gap-2">
+                {AFFILIATE_MARKETPLACES.slice(0, 3).map((mp) => (
+                  <ClickSpark key={mp.id} color="#10b981" count={4}>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        const items = message.mealPlan
+                          ? createShoppingItemsFromPlan(message.mealPlan)
+                          : [];
+                        const names = items.map((i) => i.name);
+                        if (names.length > 0) {
+                          const url = buildBulkAffiliateUrl(mp.id, names);
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                      className={`flex flex-1 items-center gap-1.5 rounded-lg border px-3 py-2 text-[11px] font-medium transition-all active:scale-95 ${mp.borderColor} ${mp.bgColor}`}
+                    >
+                      <span className="text-sm">{mp.logo}</span>
+                      <span className="truncate">{mp.name.split(' ')[0]}</span>
+                    </motion.button>
+                  </ClickSpark>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </div>

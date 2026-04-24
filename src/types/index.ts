@@ -111,4 +111,53 @@ export type AppScreen =
   | 'shopping'
   | 'profile'
   | 'recipe-detail'
-  | 'meal-plan-detail';
+  | 'meal-plan-detail'
+  | 'marketplace'
+  | 'admin-affiliate'
+  | 'admin-analytics';
+
+/* ── Affiliate Types ──────────────────────────────────── */
+
+export interface AffiliateAccount {
+  id: string;
+  platform: string;
+  affiliateId: string;
+  apiKey?: string;
+  baseUrlTemplate: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
+export interface ProductLink {
+  id: string;
+  productName: string;
+  category: string;
+  imageUrl?: string;
+  platform: string;
+  affiliateUrl: string;
+  originalPrice?: number;
+  createdByAi: boolean;
+  lastVerified?: number;
+  createdAt: number;
+  accountId: string;
+}
+
+export interface ClickLog {
+  id: string;
+  productLinkId: string;
+  platform: string;
+  userId?: string;
+  context: string;
+  clickedAt: number;
+}
+
+export interface AffiliateAnalytics {
+  totalClicks: number;
+  clicksByPlatform: Record<string, number>;
+  clicksByContext: Record<string, number>;
+  clicksByDay: { date: string; count: number }[];
+  topProducts: { productName: string; platform: string; clicks: number }[];
+  totalAffiliateAccounts: number;
+  totalProductLinks: number;
+  activePlatforms: string[];
+}

@@ -30,3 +30,43 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AffiliateAccount {
+  id              String   @id @default(cuid())
+  platform        String   // tokopedia, shopee, tiktokshop, sayurbox, happyfresh, etc.
+  affiliateId     String   // ID afiliasi di platform
+  apiKey          String?  // optional API key
+  baseUrlTemplate String   // URL template, e.g. "https://tokopedia.link/aff?product={productId}&aff={affiliateId}"
+  isActive        Boolean  @default(true)
+  createdAt       Int      @default(0) // Unix timestamp
+
+  productLinks ProductLink[]
+}
+
+model ProductLink {
+  id             String   @id @default(cuid())
+  productName    String
+  category       String   // sayuran, bumbu, alat masak, etc.
+  imageUrl       String?
+  platform       String
+  affiliateUrl   String
+  originalPrice  Float?   // reference price
+  createdByAi    Boolean  @default(false)
+  lastVerified   Int?     // Unix timestamp
+  createdAt      Int      @default(0)
+
+  account     AffiliateAccount @relation(fields: [accountId], references: [id])
+  accountId   String
+  clickLogs   ClickLog[]
+}
+
+model ClickLog {
+  id             String   @id @default(cuid())
+  productLinkId  String
+  platform       String
+  userId         String?  // optional, if user logged in
+  context        String   // weekly_plan, zero_waste, recommendation, etc.
+  clickedAt      Int      @default(0) // Unix timestamp
+
+  productLink ProductLink @relation(fields: [productLinkId], references: [id])
+}

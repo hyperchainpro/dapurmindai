@@ -12,6 +12,9 @@ import { ShoppingList } from '@/components/dapurmind/ShoppingList';
 import { ProfilePage } from '@/components/dapurmind/ProfilePage';
 import { RecipeDetail } from '@/components/dapurmind/RecipeDetail';
 import { MealPlanDetail } from '@/components/dapurmind/MealPlanDetail';
+import { MarketplaceHub } from '@/components/dapurmind/MarketplaceHub';
+import { AdminAffiliate } from '@/components/dapurmind/AdminAffiliate';
+import { AdminAnalytics } from '@/components/dapurmind/AdminAnalytics';
 import { BottomNav } from '@/components/dapurmind/BottomNav';
 import { ChefHat, MessageCircle, Leaf, BookOpen } from 'lucide-react';
 import type { AppScreen } from '@/types';
@@ -147,6 +150,45 @@ function ScreenRouter() {
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
           <MealPlanDetail />
+        </motion.div>
+      )}
+
+      {/* Marketplace Hub */}
+      {currentScreen === 'marketplace' && (
+        <motion.div
+          key="marketplace"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <MarketplaceHub />
+        </motion.div>
+      )}
+
+      {/* Admin Affiliate */}
+      {currentScreen === 'admin-affiliate' && (
+        <motion.div
+          key="admin-affiliate"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <AdminAffiliate />
+        </motion.div>
+      )}
+
+      {/* Admin Analytics */}
+      {currentScreen === 'admin-analytics' && (
+        <motion.div
+          key="admin-analytics"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <AdminAnalytics />
         </motion.div>
       )}
     </AnimatePresence>

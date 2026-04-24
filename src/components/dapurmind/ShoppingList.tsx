@@ -29,10 +29,10 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { NumberTicker, BorderBeam } from '@/components/dapurmind/MagicUI';
-import { Bounce, GlowingText } from '@/components/dapurmind/ReactBits';
+import { NumberTicker, BorderBeam, BentoGrid, BentoGridItem } from '@/components/dapurmind/MagicUI';
+import { Bounce, GlowingText, CountUp, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { AffiliatePicker } from '@/components/dapurmind/AffiliatePicker';
-import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl } from '@/lib/affiliate';
+import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl, buildAffiliateUrl } from '@/lib/affiliate';
 
 /* ── Category config ──────────────────────────────────────────── */
 
@@ -105,6 +105,7 @@ export function ShoppingList() {
   const [selectedAffiliateItem, setSelectedAffiliateItem] = useState<ShoppingItem | null>(null);
   const [showSingleAffiliate, setShowSingleAffiliate] = useState(false);
   const [showBulkAffiliate, setShowBulkAffiliate] = useState(false);
+  const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
 
   /* ── Derived state ──────────────────────────────────── */
   const uncheckedItems = useMemo(
@@ -167,6 +168,55 @@ export function ShoppingList() {
     setSelectedAffiliateItem(null);
     setShowBulkAffiliate(true);
   }, []);
+
+  /* ── Click logging ──────────────────────────────── */
+  const logAffiliateClick = useCallback(async (platform: string, context: string, productName?: string) => {
+    try {
+      await fetch('/api/affiliate/click-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productLinkId: `manual-${platform}-${productName || 'bulk'}-${Date.now()}`,
+          platform,
+          context,
+        }),
+      });
+    } catch { /* silent fail */ }
+  }, []);
+
+  /* ── Multi-platform buy handler ──────────────────── */
+  const handleMultiPlatformBuy = useCallback(() => {
+    setShowBuyAllDialog(false);
+    const itemNames = uncheckedItems.map((i) => i.name);
+    // Open top 3 marketplaces in new tabs
+    AFFILIATE_MARKETPLACES.slice(0, 3).forEach((mp, idx) => {
+      setTimeout(() => {
+        const url = buildBulkAffiliateUrl(mp.id, itemNames);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        logAffiliateClick(mp.platform, 'multi_platform_buy');
+      }, idx * 300);
+    });
+  }, [uncheckedItems, logAffiliateClick]);
+
+  /* ── AI Generate Links ───────────────────────────── */
+  const handleGenerateAILinks = useCallback(async (itemName: string, category: string) => {
+    setIsGeneratingLinks(true);
+    try {
+      const res = await fetch('/api/affiliate/generate-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productName: itemName, category }),
+      });
+      const data = await res.json();
+      if (data.links && data.links.length > 0) {
+        // Open the first link
+        window.open(data.links[0].affiliateUrl, '_blank', 'noopener,noreferrer');
+        logAffiliateClick(data.links[0].platform, 'ai_generated', itemName);
+      }
+    } catch { /* fallback to regular search */ } finally {
+      setIsGeneratingLinks(false);
+    }
+  }, [logAffiliateClick]);
 
   /* ── Empty state ───────────────────────────────────── */
   if (shoppingItems.length === 0) {
@@ -515,6 +565,20 @@ export function ShoppingList() {
             >
               Lihat semua marketplace ({AFFILIATE_MARKETPLACES.length}) →
             </button>
+            {/* Multi-platform buy button */}
+            <ClickSpark color="#f59e0b" count={6}>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleMultiPlatformBuy}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-semibold text-white shadow-md shadow-amber-500/25 transition-all hover:from-amber-600 hover:to-orange-600"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                Beli Semua (Multi-Platform)
+                <span className="ml-1 text-xs opacity-80">
+                  ({formatRupiah(totalUncheckedPrice)})
+                </span>
+              </motion.button>
+            </ClickSpark>
           </div>
           <DialogFooter className="gap-2">
             <Button
