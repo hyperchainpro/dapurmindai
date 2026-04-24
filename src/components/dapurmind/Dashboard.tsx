@@ -1,0 +1,406 @@
+'use client';
+
+import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Sun,
+  Moon,
+  Calendar,
+  Leaf,
+  Search,
+  ShoppingCart,
+  Clock,
+  ChefHat,
+  Trophy,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react';
+import { useAppStore } from '@/hooks/useAppState';
+import { recipes } from '@/lib/recipes';
+import type { AppScreen, Recipe } from '@/types';
+import {
+  BentoGrid,
+  BentoGridItem,
+  ShineBorder,
+  AnimatedList,
+  NumberTicker,
+} from '@/components/dapurmind/MagicUI';
+import { GlowingText, Bounce } from '@/components/dapurmind/ReactBits';
+
+/* ── Helpers ─────────────────────────────────────────────────── */
+
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 11) return 'Selamat Pagi';
+  if (h < 15) return 'Selamat Siang';
+  if (h < 18) return 'Selamat Sore';
+  return 'Selamat Malam';
+}
+
+function formatDateID(): string {
+  const months = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ];
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const now = new Date();
+  return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function formatRelativeDate(dateStr?: string): string {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return 'Hari ini';
+  if (days === 1) return 'Kemarin';
+  if (days < 7) return `${days} hari lalu`;
+  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+
+const difficultyColor: Record<string, string> = {
+  Mudah: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
+  Sedang: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400',
+  Susah: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400',
+};
+
+/* ── Stagger container ──────────────────────────────────────── */
+
+const stagger = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
+
+/* ── Featured recipes (pick 4) ──────────────────────────────── */
+
+const featuredIds = ['nasi-goreng', 'rendang', 'sate-ayam', 'klepon'];
+
+/* ── Quick Actions ──────────────────────────────────────────── */
+
+interface QuickAction {
+  screen: AppScreen;
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  gradient: string;
+}
+
+const quickActions: QuickAction[] = [
+  {
+    screen: 'chat',
+    icon: Calendar,
+    title: 'Rencana Menu',
+    desc: 'Buat rencana menu mingguan',
+    gradient: 'from-emerald-500/10 to-emerald-500/5',
+  },
+  {
+    screen: 'zero-waste',
+    icon: Leaf,
+    title: 'Zero Waste',
+    desc: 'Selamatkan bahan makananmu',
+    gradient: 'from-amber-500/10 to-amber-500/5',
+  },
+  {
+    screen: 'recipes',
+    icon: Search,
+    title: 'Cari Resep',
+    desc: 'Jelajahi 25+ resep Nusantara',
+    gradient: 'from-rose-500/10 to-rose-500/5',
+  },
+  {
+    screen: 'shopping',
+    icon: ShoppingCart,
+    title: 'Belanja',
+    desc: 'Daftar belanja',
+    gradient: 'from-sky-500/10 to-sky-500/5',
+  },
+];
+
+/* ── Sub-components ─────────────────────────────────────────── */
+
+function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
+  return (
+    <motion.div
+      whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      onClick={onClick}
+      className="min-w-[160px] max-w-[180px] cursor-pointer snap-start"
+    >
+      <div className="overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-shadow hover:shadow-md">
+        {/* Emoji image area */}
+        <div className="flex h-28 items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50 dark:from-emerald-500/10 dark:to-amber-500/10">
+          <span className="text-5xl">{recipe.image}</span>
+        </div>
+        <div className="p-3">
+          <h4 className="text-sm font-semibold leading-tight truncate">{recipe.name}</h4>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {recipe.cookTime} menit
+            </span>
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${difficultyColor[recipe.difficulty]}`}>
+              {recipe.difficulty}
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Dashboard ──────────────────────────────────────────────── */
+
+function DashboardInner() {
+  const user = useAppStore((s) => s.user);
+  const setScreen = useAppStore((s) => s.setScreen);
+  const setSelectedRecipe = useAppStore((s) => s.setSelectedRecipe);
+  const mealPlans = useAppStore((s) => s.mealPlans);
+  const shoppingItems = useAppStore((s) => s.shoppingItems);
+  const favoriteRecipes = useAppStore((s) => s.favoriteRecipes);
+  const achievements = useAppStore((s) => s.achievements);
+  const isDark = useAppStore((s) => s.isDark);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
+
+  const featuredRecipes = useMemo(
+    () => featuredIds.map((id) => recipes.find((r) => r.id === id)!).filter(Boolean),
+    [],
+  );
+
+  const latestPlan = useMemo(() => mealPlans[0] ?? null, [mealPlans]);
+
+  const unlockedAchievements = useMemo(
+    () =>
+      achievements
+        .filter((a) => a.unlockedAt)
+        .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
+        .slice(0, 3),
+    [achievements],
+  );
+
+  const achievementItems = useMemo(
+    () =>
+      unlockedAchievements.map((a) => ({
+        id: a.id,
+        content: (
+          <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-500/15">
+              {a.icon}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{a.title}</p>
+              <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt)}</p>
+            </div>
+            <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+          </div>
+        ),
+      })),
+    [unlockedAchievements],
+  );
+
+  const handleRecipeClick = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
+    setScreen('recipe-detail');
+  };
+
+  const handleNavigate = (screen: AppScreen) => {
+    setScreen(screen);
+  };
+
+  return (
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="visible"
+      className="min-h-screen px-4 pb-28 pt-4"
+    >
+      {/* ── Header ────────────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground">{formatDateID()}</p>
+            <h1 className="mt-1 text-2xl font-bold leading-tight">
+              {getGreeting()},{' '}
+              <GlowingText color="emerald" intensity={2}>
+                {user?.name || 'Chef'}
+              </GlowingText>
+              <span>! 👋</span>
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Apa yang mau dimasak hari ini?
+            </p>
+          </div>
+
+          {/* Dark mode toggle */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleTheme}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+            aria-label={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            <motion.div
+              initial={false}
+              animate={{ rotate: isDark ? 180 : 0 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5 text-amber-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-slate-600" />
+              )}
+            </motion.div>
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* ── Quick Actions ─────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="mb-6">
+        <BentoGrid columns={{ default: 2, sm: 2, md: 2, lg: 4 }} gap={0.625}>
+          {quickActions.map((action) => (
+            <BentoGridItem
+              key={action.screen}
+              className={`cursor-pointer bg-gradient-to-br ${action.gradient}`}
+              onClick={() => handleNavigate(action.screen)}
+            >
+              <motion.div whileTap={{ scale: 0.96 }} className="flex flex-col gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-background/80 shadow-sm">
+                  <action.icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{action.title}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                    {action.screen === 'shopping'
+                      ? `Daftar belanja ${shoppingItems.length} item`
+                      : action.desc}
+                  </p>
+                </div>
+              </motion.div>
+            </BentoGridItem>
+          ))}
+        </BentoGrid>
+      </motion.div>
+
+      {/* ── Featured Recipe Carousel ──────────────────────── */}
+      <motion.div variants={fadeUp} className="mb-6">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <h2 className="text-base font-semibold">Resep Populer</h2>
+          </div>
+          <button
+            onClick={() => setScreen('recipes')}
+            className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+          >
+            Lihat Semua
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
+          {featuredRecipes.map((recipe, i) => (
+            <Bounce key={recipe.id} delay={i * 0.1} intensity={1}>
+              <RecipeCard recipe={recipe} onClick={() => handleRecipeClick(recipe)} />
+            </Bounce>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* ── Latest Meal Plan ──────────────────────────────── */}
+      {latestPlan && (
+        <motion.div variants={fadeUp} className="mb-6">
+          <div className="mb-3 flex items-center gap-2">
+            <ChefHat className="h-4 w-4 text-emerald-500" />
+            <h2 className="text-base font-semibold">Rencana Menu Minggu Ini</h2>
+          </div>
+          <ShineBorder
+            borderRadius={16}
+            color={['#10b981', '#f59e0b', '#10b981']}
+            borderWidth={1.5}
+            duration={6}
+          >
+            <div className="rounded-2xl p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Mulai {new Date(latestPlan.weekStart).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold">
+                    {latestPlan.days.length} hari rencana menu
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Estimasi budget:{' '}
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                      Rp {latestPlan.totalPrice.toLocaleString('id-ID')}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                  <Calendar className="h-5 w-5 text-emerald-500" />
+                </div>
+              </div>
+              <button
+                onClick={() => handleNavigate('meal-plan-detail')}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-medium text-white shadow-sm shadow-emerald-500/25 transition-colors hover:bg-emerald-600"
+              >
+                Lihat Detail
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </ShineBorder>
+        </motion.div>
+      )}
+
+      {/* ── Achievements Preview ──────────────────────────── */}
+      {unlockedAchievements.length > 0 && (
+        <motion.div variants={fadeUp} className="mb-6">
+          <div className="mb-3 flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            <h2 className="text-base font-semibold">Pencapaian Terbaru</h2>
+          </div>
+          <AnimatedList items={achievementItems} staggerDelay={0.12} animationDuration={0.45} />
+        </motion.div>
+      )}
+
+      {/* ── Stats Section ─────────────────────────────────── */}
+      <motion.div variants={fadeUp} className="mb-6">
+        <h2 className="mb-3 text-base font-semibold">Statistik Kamu</h2>
+        <BentoGrid columns={{ default: 3, sm: 3, md: 3, lg: 3 }} gap={0.625}>
+          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+            <span className="text-2xl mb-1">❤️</span>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <NumberTicker value={favoriteRecipes.length} duration={1.5} />
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Resep Disimpan</p>
+          </BentoGridItem>
+          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+            <span className="text-2xl mb-1">📋</span>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              <NumberTicker value={mealPlans.length} duration={1.5} />
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Menu Direncanakan</p>
+          </BentoGridItem>
+          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+            <span className="text-2xl mb-1">🛒</span>
+            <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+              <NumberTicker value={shoppingItems.length} duration={1.5} />
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">Item Belanja</p>
+          </BentoGridItem>
+        </BentoGrid>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export const Dashboard = DashboardInner;
+export default Dashboard;
