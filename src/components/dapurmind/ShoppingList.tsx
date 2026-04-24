@@ -11,7 +11,6 @@ import {
   Circle,
   ShoppingBag,
   Sparkles,
-  ChefHat,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { ShoppingItem } from '@/types';
@@ -30,9 +29,10 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { NumberTicker } from '@/components/dapurmind/MagicUI';
-import { BorderBeam } from '@/components/dapurmind/MagicUI';
+import { NumberTicker, BorderBeam } from '@/components/dapurmind/MagicUI';
 import { Bounce, GlowingText } from '@/components/dapurmind/ReactBits';
+import { AffiliatePicker } from '@/components/dapurmind/AffiliatePicker';
+import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl } from '@/lib/affiliate';
 
 /* ── Category config ──────────────────────────────────────────── */
 
@@ -100,9 +100,17 @@ export function ShoppingList() {
   const goBack = useAppStore((s) => s.goBack);
   const setScreen = useAppStore((s) => s.setScreen);
 
-  const [showAffiliateDialog, setShowAffiliateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
   const [showBuyAllDialog, setShowBuyAllDialog] = useState(false);
+  const [selectedAffiliateItem, setSelectedAffiliateItem] = useState<ShoppingItem | null>(null);
+  const [showSingleAffiliate, setShowSingleAffiliate] = useState(false);
+  const [showBulkAffiliate, setShowBulkAffiliate] = useState(false);
+
+  /* ── Derived state ──────────────────────────────────── */
+  const uncheckedItems = useMemo(
+    () => shoppingItems.filter((i) => !i.checked),
+    [shoppingItems]
+  );
 
   /* ── Group by category ─────────────────────────────── */
   const grouped = useMemo(() => {
@@ -112,13 +120,11 @@ export function ShoppingList() {
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     });
-    // Order categories
     const order = ['Sayuran', 'Daging', 'Bumbu', 'Bahan Pokok', 'Susu & Telur', 'Lainnya'];
     const sorted: [string, ShoppingItem[]][] = [];
     order.forEach((cat) => {
       if (groups[cat]) sorted.push([cat, groups[cat]]);
     });
-    // Any extra categories
     Object.keys(groups).forEach((cat) => {
       if (!order.includes(cat)) sorted.push([cat, groups[cat]]);
     });
@@ -131,16 +137,12 @@ export function ShoppingList() {
     [shoppingItems]
   );
   const totalPrice = useMemo(
-    () =>
-      shoppingItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
+    () => shoppingItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
     [shoppingItems]
   );
   const totalUncheckedPrice = useMemo(
-    () =>
-      shoppingItems
-        .filter((i) => !i.checked)
-        .reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
-    [shoppingItems]
+    () => uncheckedItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
+    [uncheckedItems]
   );
 
   /* ── Handlers ──────────────────────────────────────── */
@@ -151,6 +153,20 @@ export function ShoppingList() {
     },
     [shoppingItems, setShoppingItems]
   );
+
+  const handleAffiliateSingle = useCallback(
+    (item: ShoppingItem) => {
+      setSelectedAffiliateItem(item);
+      setShowSingleAffiliate(true);
+    },
+    []
+  );
+
+  const handleAffiliateBulk = useCallback(() => {
+    setShowBuyAllDialog(false);
+    setSelectedAffiliateItem(null);
+    setShowBulkAffiliate(true);
+  }, []);
 
   /* ── Empty state ───────────────────────────────────── */
   if (shoppingItems.length === 0) {
@@ -231,16 +247,47 @@ export function ShoppingList() {
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Estimasi</p>
               <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                <NumberTicker
-                  value={totalPrice}
-                  duration={1.5}
-                  prefix="Rp "
-                  formatNumber={true}
-                />
+                <NumberTicker value={totalPrice} duration={1.5} />
               </p>
             </div>
           </div>
         </header>
+
+        {/* ── Affiliate Marketplace Banner ───────────── */}
+        {uncheckedItems.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mt-3"
+          >
+            <button
+              onClick={handleAffiliateBulk}
+              className="flex w-full items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-3 text-left transition-all hover:shadow-md dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10 border border-emerald-200/50 dark:border-emerald-800/30"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-amber-500 text-white">
+                <ShoppingBag className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Beli Online Sekarang
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {uncheckedItems.length} bahan belum dibeli · {formatRupiah(totalUncheckedPrice)}
+                </p>
+              </div>
+              <div className="flex -space-x-1.5">
+                {['🛒', '🧡', '🥬'].map((e, i) => (
+                  <span
+                    key={i}
+                    className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-muted text-xs"
+                  >
+                    {e}
+                  </span>
+                ))}
+              </div>
+            </button>
+          </motion.div>
+        )}
 
         {/* ── Category grouped list ──────────────────── */}
         <motion.section
@@ -293,7 +340,7 @@ export function ShoppingList() {
                             item={item}
                             onToggle={toggleShoppingItem}
                             onDelete={() => setShowDeleteDialog(item.id)}
-                            onAffiliate={() => setShowAffiliateDialog(true)}
+                            onAffiliate={() => handleAffiliateSingle(item)}
                           />
                         ))}
                       </div>
@@ -353,7 +400,7 @@ export function ShoppingList() {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowBuyAllDialog(true)}
-              disabled={checkedCount === shoppingItems.length && shoppingItems.length > 0}
+              disabled={uncheckedItems.length === 0}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ShoppingBag className="h-4 w-4" />
@@ -368,38 +415,19 @@ export function ShoppingList() {
         </div>
       </div>
 
-      {/* ── Affiliate Dialog ─────────────────────────── */}
-      <Dialog open={showAffiliateDialog} onOpenChange={setShowAffiliateDialog}>
-        <DialogContent className="rounded-2xl sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ExternalLink className="h-5 w-5 text-emerald-500" />
-              Beli Online
-            </DialogTitle>
-            <DialogDescription>
-              Kamu akan diarahkan ke toko online untuk membeli bahan ini.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="rounded-xl bg-emerald-50 p-4 text-center dark:bg-emerald-500/10">
-            <ChefHat className="mx-auto mb-2 h-8 w-8 text-emerald-500" />
-            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-              Mengarahkan ke Tokopedia Now...
-            </p>
-            <p className="mt-1 text-xs text-emerald-600/60 dark:text-emerald-400/60">
-              Fitur affiliate akan segera hadir!
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowAffiliateDialog(false)}
-              className="flex-1 rounded-full"
-            >
-              Tutup
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* ── Single Item Affiliate Picker ──────────────── */}
+      <AffiliatePicker
+        open={showSingleAffiliate}
+        onOpenChange={setShowSingleAffiliate}
+        singleItem={selectedAffiliateItem}
+      />
+
+      {/* ── Bulk Affiliate Picker ──────────────────────── */}
+      <AffiliatePicker
+        open={showBulkAffiliate}
+        onOpenChange={setShowBulkAffiliate}
+        bulkItems={uncheckedItems}
+      />
 
       {/* ── Delete Confirmation Dialog ───────────────── */}
       <Dialog
@@ -435,7 +463,7 @@ export function ShoppingList() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Buy All Dialog ───────────────────────────── */}
+      {/* ── Buy All Confirmation Dialog ────────────────── */}
       <Dialog open={showBuyAllDialog} onOpenChange={setShowBuyAllDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>
@@ -444,10 +472,10 @@ export function ShoppingList() {
               Beli Semua Bahan
             </DialogTitle>
             <DialogDescription>
-              Mengarahkan ke Tokopedia Now untuk membeli semua bahan yang belum dicentang.
+              Pilih marketplace untuk membeli {uncheckedItems.length} bahan yang belum dicentang.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="rounded-xl bg-muted/50 p-3">
               <p className="text-xs text-muted-foreground">
                 Total bahan belum dibeli
@@ -456,9 +484,37 @@ export function ShoppingList() {
                 {formatRupiah(totalUncheckedPrice)}
               </p>
             </div>
-            <p className="text-xs text-center text-muted-foreground">
-              Fitur affiliate akan segera hadir!
-            </p>
+            {/* Quick marketplace shortcuts */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">Pilih Marketplace:</p>
+              {['tokopedia-now', 'shopee-segar', 'sayurbox'].map((mpId) => {
+                const mp = AFFILIATE_MARKETPLACES.find((m) => m.id === mpId);
+                if (!mp) return null;
+                const url = buildBulkAffiliateUrl(mp.id, uncheckedItems.map((i) => i.name));
+                return (
+                  <button
+                    key={mp.id}
+                    onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+                    className="flex w-full items-center gap-3 rounded-xl border border-border/50 p-3 text-left transition-colors hover:bg-muted/50"
+                  >
+                    <span className={`flex h-9 w-9 items-center justify-center rounded-lg text-lg ${mp.bgColor}`}>
+                      {mp.logo}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">{mp.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{mp.tagline}</p>
+                    </div>
+                    <ExternalLink className={`h-4 w-4 ${mp.textColor}`} />
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={handleAffiliateBulk}
+              className="w-full text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+            >
+              Lihat semua marketplace ({AFFILIATE_MARKETPLACES.length}) →
+            </button>
           </div>
           <DialogFooter className="gap-2">
             <Button
@@ -466,14 +522,7 @@ export function ShoppingList() {
               onClick={() => setShowBuyAllDialog(false)}
               className="flex-1 rounded-full"
             >
-              Batal
-            </Button>
-            <Button
-              onClick={() => setShowBuyAllDialog(false)}
-              className="flex-1 rounded-full bg-emerald-500 hover:bg-emerald-600"
-            >
-              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-              Lanjutkan
+              Kembali
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -563,22 +612,20 @@ function ShoppingItemRow({
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        {/* Affiliate button */}
-        {item.affiliateUrl && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={onAffiliate}
-            className="flex h-7 items-center gap-1 rounded-full bg-emerald-50 px-2.5 text-[10px] font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
-          >
-            Beli
-            <ExternalLink className="h-2.5 w-2.5" />
-          </motion.button>
-        )}
+        {/* Affiliate Buy button - always show */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onAffiliate}
+          className="flex h-7 items-center gap-1 rounded-full bg-emerald-50 px-2.5 text-[10px] font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+        >
+          Beli
+          <ExternalLink className="h-2.5 w-2.5" />
+        </motion.button>
         {/* Delete button */}
         <motion.button
           whileTap={{ scale: 0.8 }}
           onClick={onDelete}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/40 opacity-0 transition-all group-hover:opacity-100 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
+          className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/40 opacity-0 transition-all group-hover:opacity-100 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10 sm:opacity-100"
           aria-label="Hapus item"
         >
           <Trash2 className="h-3.5 w-3.5" />
