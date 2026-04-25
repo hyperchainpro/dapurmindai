@@ -287,62 +287,31 @@ export function RecipeBrowser() {
 
                 {/* Filter button (local mode only) */}
                 {mode === 'local' && filteredRecipes.length > 0 && (
-            <div>
-              <motion.div
-                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.06 } },
-                }}
-              >
-                {paginatedRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    isFavorite={favoriteRecipes.includes(recipe.id)}
-                    onClick={() => handleRecipeClick(recipe)}
-                    onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
-                  />
-                ))}
-              </motion.div>
-              {hasMore && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-5 flex flex-col items-center gap-2"
-                >
-                  <p className="text-xs text-muted-foreground">
-                    Menampilkan {paginatedRecipes.length} dari {filteredRecipes.length} resep
-                  </p>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setVisibleCount(prev => prev + 50)}
-                    className="rounded-full border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                    onClick={() => setShowFilter(!showFilter)}
+                    className="rounded-full text-xs"
                   >
-                    <ChevronDown className="mr-1 h-4 w-4" />
-                    Muat 50 Resep Berikutnya
+                    <Sparkles className="mr-1 h-3.5 w-3.5" />
+                    Filter
                   </Button>
-                </motion.div>
-              )}
-              {!hasMore && filteredRecipes.length > 50 && (
-                <p className="mt-4 text-center text-xs text-muted-foreground">
-                  Semua {filteredRecipes.length} resep ditampilkan
-                </p>
-              )}
-            </div>
-          )}
-          {mode === 'local' && filteredRecipes.length === 0 && (
-            <EmptyState
-              onReset={() => {
-                setSearchQuery('');
-                setActiveCategory('Semua');
-                clearFilters();
-              }}
-            />
-          )}
+                )}
+                {mode === 'local' && filteredRecipes.length === 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActiveCategory('Semua');
+                      clearFilters();
+                    }}
+                    className="rounded-full text-xs"
+                  >
+                    <X className="mr-1 h-3.5 w-3.5" />
+                    Reset
+                  </Button>
+                )}
                 {/* Refresh button (API mode) */}
                 {mode === 'api' && (
                   <Button
@@ -538,25 +507,52 @@ export function RecipeBrowser() {
           {mode === 'local' && (
             /* Local recipes */
             filteredRecipes.length > 0 ? (
-              <motion.div
-                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.06 } },
-                }}
-              >
-                {filteredRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    isFavorite={favoriteRecipes.includes(recipe.id)}
-                    onClick={() => handleRecipeClick(recipe)}
-                    onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
-                  />
-                ))}
-              </motion.div>
+              <>
+                <motion.div
+                  className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.06 } },
+                  }}
+                >
+                  {paginatedRecipes.map((recipe) => (
+                    <RecipeCard
+                      key={recipe.id}
+                      recipe={recipe}
+                      isFavorite={favoriteRecipes.includes(recipe.id)}
+                      onClick={() => handleRecipeClick(recipe)}
+                      onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
+                    />
+                  ))}
+                </motion.div>
+                {hasMore && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-5 flex flex-col items-center gap-2"
+                  >
+                    <p className="text-xs text-muted-foreground">
+                      Menampilkan {paginatedRecipes.length} dari {filteredRecipes.length} resep
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setVisibleCount((prev) => prev + 50)}
+                      className="rounded-full border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                    >
+                      <ChevronDown className="mr-1 h-4 w-4" />
+                      Muat 50 Resep Berikutnya
+                    </Button>
+                  </motion.div>
+                )}
+                {!hasMore && filteredRecipes.length > 50 && (
+                  <p className="mt-4 text-center text-xs text-muted-foreground">
+                    Semua {filteredRecipes.length} resep ditampilkan
+                  </p>
+                )}
+              </>
             ) : (
               <EmptyState
                 onReset={() => {

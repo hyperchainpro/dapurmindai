@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -116,17 +116,20 @@ export function RecipeDetail() {
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
   const [ingredientsExpanded, setIngredientsExpanded] = useState(true);
   const [stepsExpanded, setStepsExpanded] = useState(true);
-  const [prevRecipeId, setPrevRecipeId] = useState<string | null>(null);
+  const prevRecipeIdRef = useRef<string | null>(null);
 
   const recipe = selectedRecipe;
 
-  // Reset state when recipe changes (derived state from props pattern)
-  if (recipe?.id !== prevRecipeId) {
-    setPrevRecipeId(recipe?.id ?? null);
-    setPortionScale(1);
-    setCheckedIngredients(new Set());
-    setCheckedSteps(new Set());
-  }
+  // Reset state when recipe changes via useEffect (not during render)
+  useEffect(() => {
+    const recipeId = recipe?.id ?? null;
+    if (recipeId !== prevRecipeIdRef.current) {
+      prevRecipeIdRef.current = recipeId;
+      setPortionScale(1);
+      setCheckedIngredients(new Set());
+      setCheckedSteps(new Set());
+    }
+  }, [recipe?.id]);
 
   /* ── Compute scaled values ───────────────────────── */
   const scaledServings = useMemo(
@@ -298,17 +301,15 @@ export function RecipeDetail() {
             </div>
           ) : (
             <div className="relative flex h-56 items-center justify-center overflow-hidden">
-              {/* Check for western recipe with real image */}
-              {true && (
-                <img
-                  src={`/recipes/${recipe.id}.jpg`}
-                  alt={recipe.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              )}
+              {/* Real image attempt for local recipes */}
+              <img
+                src={recipe.category === 'Western' ? `/recipes/western/${recipe.id}.jpg` : `/recipes/${recipe.id}.jpg`}
+                alt={recipe.name}
+                className="absolute inset-0 h-full w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
               <div className={`relative z-10 flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
                 {/* Floating decorative elements */}
                 <motion.div

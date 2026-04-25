@@ -86,6 +86,7 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   mealPlan?: MealPlan;
+  editedAt?: string;
 }
 
 export interface ZeroWasteInput {

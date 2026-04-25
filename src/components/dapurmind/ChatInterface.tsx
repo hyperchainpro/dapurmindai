@@ -16,6 +16,11 @@ import {
   ShoppingCart,
   Save,
   Flame,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Copy,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { ShineBorder, BorderBeam } from '@/components/dapurmind/MagicUI';
@@ -94,10 +99,42 @@ interface MessageBubbleProps {
   message: ChatMessage;
   onSavePlan?: (mealPlan: MealPlan) => void;
   onViewShopping?: () => void;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string, content: string) => void;
 }
 
-function MessageBubble({ message, onSavePlan, onViewShopping }: MessageBubbleProps) {
+function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }: MessageBubbleProps) {
   const isUser = message.role === 'user';
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(message.content);
+  const [showActions, setShowActions] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(message.content);
+  }, [message.content]);
+
+  const handleDelete = useCallback(() => {
+    onDelete?.(message.id);
+  }, [message.id, onDelete]);
+
+  const handleEditStart = useCallback(() => {
+    setEditValue(message.content);
+    setIsEditing(true);
+    setShowActions(false);
+  }, [message.content]);
+
+  const handleEditSave = useCallback(() => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== message.content) {
+      onEdit?.(message.id, trimmed);
+    }
+    setIsEditing(false);
+  }, [editValue, message.id, message.content, onEdit]);
+
+  const handleEditCancel = useCallback(() => {
+    setEditValue(message.content);
+    setIsEditing(false);
+  }, [message.content]);
 
   if (isUser) {
     return (
@@ -106,14 +143,74 @@ function MessageBubble({ message, onSavePlan, onViewShopping }: MessageBubblePro
         initial="hidden"
         animate="visible"
         className="flex justify-end mb-3"
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
       >
-        <div className="max-w-[82%] rounded-2xl rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-3 shadow-md shadow-emerald-500/20">
-          <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">
-            {message.content}
-          </p>
-          <p className="mt-1.5 text-right text-[10px] text-emerald-100/70">
-            {formatTime(message.timestamp)}
-          </p>
+        <div className="max-w-[82%] relative group">
+          <div className="rounded-2xl rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-3 shadow-md shadow-emerald-500/20">
+            {isEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="w-full rounded-lg bg-white/20 border border-white/30 px-3 py-2 text-sm text-white placeholder:text-white/50 resize-none focus:outline-none focus:ring-1 focus:ring-white/50"
+                  rows={3}
+                  autoFocus
+                />
+                <div className="flex items-center justify-end gap-1.5">
+                  <button
+                    onClick={handleEditCancel}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5 text-white" />
+                  </button>
+                  <button
+                    onClick={handleEditSave}
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                  >
+                    <Check className="h-3.5 w-3.5 text-white" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">
+                {message.content}
+              </p>
+            )}
+            <p className="mt-1.5 text-right text-[10px] text-emerald-100/70">
+              {message.editedAt ? '(diedit) ' : ''}{formatTime(message.timestamp)}
+            </p>
+          </div>
+          {/* Action buttons for user messages */}
+          {!isEditing && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: showActions ? 1 : 0, scale: showActions ? 1 : 0.9 }}
+              className="absolute -top-3 right-2 z-10 flex items-center gap-1 rounded-lg border border-border/60 bg-card px-1.5 py-1 shadow-sm"
+            >
+              <button
+                onClick={handleCopy}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                title="Salin"
+              >
+                <Copy className="h-3 w-3" />
+              </button>
+              <button
+                onClick={handleEditStart}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                title="Edit"
+              >
+                <Pencil className="h-3 w-3" />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                title="Hapus"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </motion.div>
+          )}
         </div>
       </motion.div>
     );
@@ -129,6 +226,8 @@ function MessageBubble({ message, onSavePlan, onViewShopping }: MessageBubblePro
       initial="hidden"
       animate="visible"
       className="flex items-end gap-2 mb-3"
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
     >
       {/* Chef avatar badge */}
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-500/20">
@@ -154,9 +253,31 @@ function MessageBubble({ message, onSavePlan, onViewShopping }: MessageBubblePro
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
               {message.content}
             </p>
-            <p className="mt-1.5 text-right text-[10px] text-muted-foreground">
-              {formatTime(message.timestamp)}
-            </p>
+            <div className="mt-1.5 flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground">
+                {formatTime(message.timestamp)}
+              </p>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: showActions ? 1 : 0, scale: showActions ? 1 : 0.9 }}
+                className="flex items-center gap-1"
+              >
+                <button
+                  onClick={handleCopy}
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  title="Salin"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                  title="Hapus"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </motion.div>
+            </div>
           </div>
         </ShineBorder>
 
@@ -473,6 +594,8 @@ export function ChatInterface() {
   const user = useAppStore((s) => s.user);
   const chatMessages = useAppStore((s) => s.chatMessages);
   const addChatMessage = useAppStore((s) => s.addChatMessage);
+  const deleteChatMessage = useAppStore((s) => s.deleteChatMessage);
+  const updateChatMessage = useAppStore((s) => s.updateChatMessage);
   const setAILoading = useAppStore((s) => s.setAILoading);
   const isAILoading = useAppStore((s) => s.isAILoading);
   const setScreen = useAppStore((s) => s.setScreen);
@@ -736,6 +859,8 @@ export function ChatInterface() {
                 message={msg}
                 onSavePlan={handleSavePlan}
                 onViewShopping={handleViewShopping}
+                onDelete={deleteChatMessage}
+                onEdit={updateChatMessage}
               />
             ))}
           </AnimatePresence>

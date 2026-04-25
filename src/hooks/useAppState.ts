@@ -27,6 +27,8 @@ interface AppState {
   // Chat
   chatMessages: ChatMessage[];
   addChatMessage: (message: ChatMessage) => void;
+  deleteChatMessage: (id: string) => void;
+  updateChatMessage: (id: string, content: string) => void;
   clearChat: () => void;
 
   // Meal Plans
@@ -112,6 +114,16 @@ export const useAppStore = create<AppState>()(
       addChatMessage: (message) =>
         set((state) => ({
           chatMessages: [...state.chatMessages, message],
+        })),
+      deleteChatMessage: (id) =>
+        set((state) => ({
+          chatMessages: state.chatMessages.filter((m) => m.id !== id),
+        })),
+      updateChatMessage: (id, content) =>
+        set((state) => ({
+          chatMessages: state.chatMessages.map((m) =>
+            m.id === id ? { ...m, content, editedAt: new Date().toISOString() } : m
+          ),
         })),
       clearChat: () => set({ chatMessages: [] }),
 

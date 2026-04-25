@@ -56,3 +56,38 @@ Work Log:
 Stage Summary:
 - Duplicate ID `w-nachos-supreme` resolved by renaming the second entry to `w-nachos-loaded`
 - All 371 recipe IDs in western.ts are now unique
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Fix critical runtime errors and add chat features
+
+Work Log:
+- Fixed "Too many re-renders" infinite loop in RecipeDetail.tsx
+  - Root cause: setState called during render (lines 124-129) using derived state pattern
+  - Fix: Converted to useEffect + useRef pattern for recipe change detection
+- Fixed RecipeBrowser.tsx structural bug
+  - Root cause: Recipe grid was rendered INSIDE the header's filter button conditional (lines 289-336)
+  - This caused duplicate rendering (recipes shown twice) and duplicate key warnings
+  - Fix: Removed grid from header, kept only the proper grid in main body
+- Added proper pagination to main recipe grid
+  - Changed grid to use paginatedRecipes (50 per page) instead of all filteredRecipes
+  - Added "Muat 50 Resep Berikutnya" button with hasMore logic
+- Fixed real images in RecipeDetail hero section
+  - Changed hardcoded {true && (...) to proper conditional image path
+  - Western recipes now use /recipes/western/{id}.jpg path
+  - Non-western use /recipes/{id}.jpg path
+- Added chat message management features
+  - Added deleteChatMessage and updateChatMessage to useAppState store
+  - Added editedAt field to ChatMessage type
+  - Updated MessageBubble with: copy, edit, delete action buttons (hover to reveal)
+  - User messages: copy + edit (with textarea) + delete
+  - AI messages: copy + delete
+  - Edited messages show "(diedit)" label
+
+Stage Summary:
+- No type errors in src/ files
+- RecipeDetail infinite render loop fixed
+- RecipeBrowser layout structure fixed (no more duplicate rendering)
+- Pagination working (50 per page)
+- Chat has delete/edit/copy functionality like DeepSeek style
