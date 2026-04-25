@@ -38,6 +38,7 @@ interface AppState {
   // Shopping
   shoppingItems: ShoppingItem[];
   setShoppingItems: (items: ShoppingItem[]) => void;
+  addShoppingItem: (item: ShoppingItem) => void;
   toggleShoppingItem: (id: string) => void;
 
   // Recipes
@@ -127,6 +128,10 @@ export const useAppStore = create<AppState>()(
       // Shopping
       shoppingItems: [],
       setShoppingItems: (items) => set({ shoppingItems: items }),
+      addShoppingItem: (item) =>
+        set((state) => ({
+          shoppingItems: [...state.shoppingItems, item],
+        })),
       toggleShoppingItem: (id) =>
         set((state) => ({
           shoppingItems: state.shoppingItems.map((item) =>

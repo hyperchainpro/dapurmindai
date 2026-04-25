@@ -42,7 +42,8 @@ export type RecipeCategory =
   | 'Makan Malam'
   | 'Snack'
   | 'Minuman'
-  | 'Dessert';
+  | 'Dessert'
+  | 'Western';
 
 export interface MealPlan {
   id: string;

@@ -4,8 +4,6 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/hooks/useAppState';
 import { getRecipeById } from '@/lib/recipes';
-import { Particles } from '@/components/dapurmind/MagicUI';
-import { GlowingText } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
@@ -23,6 +21,7 @@ import {
   Sparkles,
   CheckCircle2,
   X,
+  ShoppingCart,
   ExternalLink,
 } from 'lucide-react';
 import type { Recipe } from '@/types';
@@ -65,6 +64,7 @@ interface ZeroWasteResult {
   difficulty: string;
   matchedIngredients: string[];
   steps: string[];
+  allIngredients?: string[];
   recipeId?: string;
 }
 
@@ -85,7 +85,6 @@ export function ZeroWasteRecipe() {
   // Get all selected ingredients
   const allIngredients = React.useMemo(() => {
     const list = [...selectedChips];
-    // Parse custom text for additional ingredients
     const customParts = customText
       .split(/[,\n;]+/)
       .map((s) => s.trim())
@@ -140,7 +139,6 @@ export function ZeroWasteRecipe() {
         return;
       }
 
-      // Parse AI response into structured results
       const parsed = parseAIResponse(data.response, allIngredients);
       setResults(parsed);
     } catch {
@@ -152,15 +150,6 @@ export function ZeroWasteRecipe() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
-      {/* Particles background */}
-      <Particles
-        className="z-0"
-        count={25}
-        colors={['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#059669']}
-        sizeRange={[3, 7]}
-        continuous
-      />
-
       {/* Content */}
       <div className="relative z-10 flex flex-col pb-24">
         {/* ── Header ───────────────────────────────────── */}
@@ -180,10 +169,7 @@ export function ZeroWasteRecipe() {
               </div>
               <div>
                 <h1 className="text-base font-bold leading-tight text-foreground">
-                  <GlowingText color="emerald" intensity={1}>
-                    Zero Waste
-                  </GlowingText>{' '}
-                  Recipe
+                  Zero Waste Recipe
                 </h1>
               </div>
             </div>
@@ -307,27 +293,6 @@ export function ZeroWasteRecipe() {
                   </span>
                 )}
               </Button>
-              {/* BorderBeam effect wrapper */}
-              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-                <motion.div
-                  className="absolute inset-[-50%]"
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                >
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        'conic-gradient(from 0deg, transparent 0%, transparent 35%, #34d399 48%, #10b981 50%, #059669 52%, transparent 65%, transparent 100%)',
-                    }}
-                  />
-                </motion.div>
-                <div className="absolute inset-[2px] rounded-[10px] bg-emerald-600" />
-              </div>
             </motion.div>
           </motion.section>
 
@@ -435,9 +400,11 @@ function ResultCard({
   result: ZeroWasteResult;
   index: number;
 }) {
-  const { setSelectedRecipe, setScreen } = useAppStore();
+  const { setSelectedRecipe, setScreen, addShoppingItem } = useAppStore();
+  const [addedToCart, setAddedToCart] = React.useState(false);
 
   const handleViewRecipe = () => {
+    // If recipe exists in DB, use it directly
     if (result.recipeId) {
       const recipe = getRecipeById(result.recipeId);
       if (recipe) {
@@ -446,29 +413,65 @@ function ResultCard({
         return;
       }
     }
+    // Otherwise create a synthetic recipe from AI result
+    const syntheticRecipe: Recipe = {
+      id: `zw-${result.title.toLowerCase().replace(/\s+/g, '-').slice(0, 40)}`,
+      name: result.title,
+      description: result.description || `Resep Zero Waste dari bahan: ${result.matchedIngredients.join(', ')}`,
+      image: '🌿',
+      category: 'Makan Siang',
+      difficulty: (result.difficulty as Recipe['difficulty']) || 'Mudah',
+      cookTime: parseInt(result.estimatedTime) || 20,
+      prepTime: 10,
+      servings: 2,
+      calories: 300,
+      ingredients: (result.allIngredients || result.matchedIngredients).map((ing) => ({
+        name: ing,
+        amount: 1,
+        unit: 'biji',
+        category: 'Bahan Utama',
+      })),
+      steps: result.steps.length > 0 ? result.steps : [
+        'Siapkan semua bahan yang tersedia.',
+        'Bersihkan dan potong bahan sesuai kebutuhan.',
+        'Masak dengan api sedang hingga matang.',
+        'Bumbui sesuai selera.',
+        'Sajikan selagi hangat.',
+      ],
+      tags: ['zero-waste', ...result.matchedIngredients.map(i => i.toLowerCase())],
+      rating: 4.5,
+    };
+    setSelectedRecipe(syntheticRecipe);
+    setScreen('recipe-detail');
+  };
+
+  const handleAddToShopping = () => {
+    const items = result.allIngredients || result.matchedIngredients;
+    items.forEach((ing) => {
+      addShoppingItem({
+        id: crypto.randomUUID(),
+        name: ing,
+        amount: 1,
+        unit: 'biji',
+        category: 'Bahan Utama',
+        checked: false,
+      });
+    });
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.5,
-        delay: index * 0.12,
-        ease: [0.25, 0.46, 0.45, 0.94],
+        duration: 0.4,
+        delay: index * 0.08,
       }}
-      className="group relative overflow-hidden rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-emerald-800/50 dark:bg-card/80"
+      className="group overflow-hidden rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 dark:border-emerald-800/50 dark:bg-card/80"
     >
-      {/* Subtle particles per card */}
-      <Particles
-        className="pointer-events-none z-0"
-        count={8}
-        colors={['#10b981', '#34d399', '#6ee7b7']}
-        sizeRange={[2, 4]}
-        continuous
-      />
-
-      <div className="relative z-10 space-y-3 p-4">
+      <div className="space-y-3 p-4">
         {/* Title row */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-base font-semibold leading-tight text-foreground">
@@ -557,7 +560,28 @@ function ResultCard({
               className="w-full rounded-lg bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-700"
             >
               <ChefHat className="mr-1.5 h-3.5 w-3.5" />
-              Lihat Resep Lengkap
+              Lihat Resep
+            </Button>
+          </motion.div>
+          <motion.div whileTap={{ scale: 0.97 }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleAddToShopping}
+              disabled={addedToCart}
+              className="rounded-lg border-emerald-200 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-950/30"
+            >
+              {addedToCart ? (
+                <>
+                  <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                  Ditambahkan
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                  Belanja
+                </>
+              )}
             </Button>
           </motion.div>
         </div>
@@ -601,8 +625,6 @@ function parseAIResponse(
 ): ZeroWasteResult[] {
   const results: ZeroWasteResult[] = [];
 
-  // Try to parse markdown-style recipe sections
-  // Split by numbered recipes or markdown headers
   const recipeBlocks = response.split(/(?:^|\n)(?:#{1,3}\s+|\d+\.\s+)/).filter(Boolean);
 
   if (recipeBlocks.length > 1) {
@@ -612,7 +634,6 @@ function parseAIResponse(
     }
   }
 
-  // Fallback: treat the entire response as one recipe
   if (results.length === 0) {
     const result = parseSingleRecipe(response, userIngredients);
     if (result) results.push(result);
@@ -629,27 +650,40 @@ function parseSingleRecipe(
 
   if (lines.length === 0) return null;
 
-  // Try to extract title from first meaningful line
   const titleLine = lines[0].replace(/^#+\s*/, '').replace(/^\d+\.\s*/, '').trim();
   const title = titleLine.length > 80 ? titleLine.slice(0, 80) + '...' : titleLine;
 
-  // Try to find matched ingredients
   const matchedIngredients = userIngredients.filter((ing) =>
     text.toLowerCase().includes(ing.toLowerCase())
   );
 
-  // Try to extract steps
+  // Extract all ingredients from the text
+  const allIngredients: string[] = [];
+  const ingSectionMatch = text.match(/(?:bahan[- ]?:?|ingredients?:?)([\s\S]*?)(?:langkah|cara|steps|directions)/i);
+  if (ingSectionMatch) {
+    const ingLines = ingSectionMatch[1]
+      .split(/[-*•\d+[\].]/)
+      .map(s => s.replace(/[^a-zA-Z\s,]/g, '').trim())
+      .filter(s => s.length > 2 && s.length < 60);
+    ingLines.forEach(s => {
+      const parts = s.split(',').map(p => p.trim()).filter(Boolean);
+      allIngredients.push(...parts.slice(0, 2));
+    });
+  }
+  if (allIngredients.length === 0) {
+    allIngredients.push(...matchedIngredients);
+  }
+
   const steps: string[] = [];
   const stepPattern = /^\s*(?:\d+[\.\)]|[-*])\s+(.{10,})/;
   for (const line of lines) {
     const match = line.match(stepPattern);
     if (match) {
       steps.push(match[1].trim());
-      if (steps.length >= 3) break;
+      if (steps.length >= 5) break;
     }
   }
 
-  // Try to extract description (first non-title, non-list line)
   const descriptionLines = lines
     .slice(1)
     .filter((l) => !l.match(stepPattern) && !l.match(/^#/))
@@ -657,16 +691,17 @@ function parseSingleRecipe(
   const description =
     descriptionLines.length > 0 ? descriptionLines.join(' ').trim() : '';
 
-  // Try to extract time
   let estimatedTime = '';
-  const timeMatch = text.match(/(\d+)\s*(?:menit|jam|mnt)/i);
+  const timeMatch = text.match(/(\d+)\s*(?:menit|jam|mnt|minutes?|hours?)/i);
   if (timeMatch) {
-    estimatedTime = `${timeMatch[1]} menit`;
+    const val = parseInt(timeMatch[1]);
+    estimatedTime = timeMatch[0].includes('jam') || timeMatch[0].includes('hour')
+      ? `${val} jam`
+      : `${val} menit`;
   }
 
-  // Try to extract difficulty
   let difficulty = 'Mudah';
-  if (/susah|difficult/i.test(text)) difficulty = 'Susah';
+  if (/susah|difficult|hard/i.test(text)) difficulty = 'Susah';
   else if (/sedang|medium/i.test(text)) difficulty = 'Sedang';
 
   return {
@@ -675,6 +710,7 @@ function parseSingleRecipe(
     estimatedTime,
     difficulty,
     matchedIngredients,
+    allIngredients,
     steps,
   };
 }

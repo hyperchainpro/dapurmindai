@@ -27,6 +27,7 @@ const CATEGORIES: { label: string; value: RecipeCategory | 'Semua' }[] = [
   { label: 'Snack', value: 'Snack' },
   { label: 'Minuman', value: 'Minuman' },
   { label: 'Dessert', value: 'Dessert' },
+  { label: 'Western', value: 'Western' },
 ];
 
 const FEATURED_TAGS = [
@@ -40,6 +41,12 @@ const FEATURED_TAGS = [
   'Klepon 🟢',
   'Pisang Goreng 🍌',
   'Es Campur 🍧',
+  'Pizza 🍕',
+  'Pasta 🍝',
+  'Burger 🍔',
+  'Steak 🥩',
+  'Pancake 🥞',
+  'Salad 🥗',
 ];
 
 const EMOJI_BG_COLORS: Record<string, string> = {
@@ -61,6 +68,26 @@ const EMOJI_BG_COLORS: Record<string, string> = {
   '🟢': 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/30',
   '🍌': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
   '🥞': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/30',
+,
+  '🍕': 'from-red-100 to-amber-100 dark:from-red-900/40 dark:to-amber-900/30',
+  '🍝': 'from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/30',
+  '🍔': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30',
+  '🥪': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
+  '🌮': 'from-lime-100 to-green-100 dark:from-lime-900/40 dark:to-green-900/30',
+  '🥘': 'from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/30',
+  '🍳': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
+  '🧁': 'from-pink-100 to-purple-100 dark:from-pink-900/40 dark:to-purple-900/30',
+  '🍰': 'from-pink-100 to-rose-100 dark:from-pink-900/40 dark:to-rose-900/30',
+  '🥧': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30',
+  '🌭': 'from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/30',
+  '🧀': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
+  '🥐': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-amber-900/30',
+  '🥖': 'from-amber-100 to-stone-100 dark:from-amber-900/40 dark:to-stone-800/30',
+  '🥙': 'from-green-100 to-lime-100 dark:from-green-900/40 dark:to-lime-900/30',
+  '🌿': 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/30',
+  '🍖': 'from-rose-100 to-red-100 dark:from-rose-900/40 dark:to-red-900/30',
+  '🥟': 'from-amber-100 to-stone-100 dark:from-amber-900/40 dark:to-stone-800/30',
+
 };
 
 const DIFFICULTY_COLORS: Record<string, string> = {
