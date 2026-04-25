@@ -8,13 +8,22 @@ import {
   searchRecipes,
   getRecipesByCategory,
 } from '@/lib/recipes';
+import {
+  searchApiRecipes,
+  searchByCategory,
+  getApiRecipeDetail,
+  getRandomRecipes,
+  getApiCategories,
+  type ApiMeal,
+  type ApiCategory,
+} from '@/lib/api-recipes';
 import { Marquee } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Heart, Search, Clock, ChevronRight, Star, X, Sparkles, Flame } from 'lucide-react';
+import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play } from 'lucide-react';
 import type { Recipe, RecipeCategory } from '@/types';
 
 /* ── Constants ──────────────────────────────────────────────── */
@@ -30,23 +39,14 @@ const CATEGORIES: { label: string; value: RecipeCategory | 'Semua' }[] = [
   { label: 'Western', value: 'Western' },
 ];
 
+const API_CATEGORIES = [
+  'Semua', 'Beef', 'Chicken', 'Dessert', 'Lamb', 'Miscellaneous',
+  'Pasta', 'Pork', 'Seafood', 'Side', 'Starter', 'Vegan', 'Vegetarian', 'Breakfast',
+];
+
 const FEATURED_TAGS = [
-  'Nasi Goreng 🍳',
-  'Rendang 🥩',
-  'Sate Ayam 🍢',
-  'Mie Goreng 🍜',
-  'Bakso 🥣',
-  'Soto Ayam 🍲',
-  'Gado-Gado 🥗',
-  'Klepon 🟢',
-  'Pisang Goreng 🍌',
-  'Es Campur 🍧',
-  'Pizza 🍕',
-  'Pasta 🍝',
-  'Burger 🍔',
-  'Steak 🥩',
-  'Pancake 🥞',
-  'Salad 🥗',
+  'Nasi Goreng', 'Rendang', 'Sate Ayam', 'Mie Goreng', 'Bakso',
+  'Soto Ayam', 'Pizza', 'Pasta', 'Burger', 'Steak', 'Pancake', 'Salad',
 ];
 
 const EMOJI_BG_COLORS: Record<string, string> = {
@@ -59,7 +59,7 @@ const EMOJI_BG_COLORS: Record<string, string> = {
   '🍚': 'from-stone-100 to-amber-100 dark:from-stone-800/40 dark:to-amber-900/30',
   '🥣': 'from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30',
   '🍢': 'from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/30',
-  '🥔': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/30',
+  '🥔': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-amber-900/30',
   '🫘': 'from-amber-100 to-stone-100 dark:from-amber-900/40 dark:to-stone-800/30',
   '🥬': 'from-green-100 to-lime-100 dark:from-green-900/40 dark:to-lime-900/30',
   '🌶️': 'from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/30',
@@ -67,17 +67,17 @@ const EMOJI_BG_COLORS: Record<string, string> = {
   '🍧': 'from-pink-100 to-rose-100 dark:from-pink-900/40 dark:to-rose-900/30',
   '🟢': 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/30',
   '🍌': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
-  '🥞': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/30',
+  '🥞': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-amber-900/30',
   '🍕': 'from-red-100 to-amber-100 dark:from-red-900/40 dark:to-amber-900/30',
-  '🍝': 'from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/30',
-  '🍔': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30',
+  '🍝': 'from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-amber-900/30',
+  '🍔': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-amber-900/30',
   '🥪': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
   '🌮': 'from-lime-100 to-green-100 dark:from-lime-900/40 dark:to-green-900/30',
   '🥘': 'from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/30',
   '🍳': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
   '🧁': 'from-pink-100 to-purple-100 dark:from-pink-900/40 dark:to-purple-900/30',
   '🍰': 'from-pink-100 to-rose-100 dark:from-pink-900/40 dark:to-rose-900/30',
-  '🥧': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30',
+  '🥧': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-amber-900/30',
   '🌭': 'from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/30',
   '🧀': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
   '🥐': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-amber-900/30',
@@ -86,7 +86,6 @@ const EMOJI_BG_COLORS: Record<string, string> = {
   '🌿': 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/30',
   '🍖': 'from-rose-100 to-red-100 dark:from-rose-900/40 dark:to-red-900/30',
   '🥟': 'from-amber-100 to-stone-100 dark:from-amber-900/40 dark:to-stone-800/30',
-
 };
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -100,54 +99,92 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 export function RecipeBrowser() {
   const { setSelectedRecipe, setScreen, favoriteRecipes, toggleFavorite } = useAppStore();
 
+  // Mode: 'local' or 'api'
+  const [mode, setMode] = useState<'local' | 'api'>('local');
+
+  // Shared state
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<RecipeCategory | 'Semua'>('Semua');
   const [showFilter, setShowFilter] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Local mode state
+  const [activeCategory, setActiveCategory] = useState<RecipeCategory | 'Semua'>('Semua');
   const [maxCookTime, setMaxCookTime] = useState(180);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // API mode state
+  const [apiCategory, setApiCategory] = useState('Semua');
+  const [apiMeals, setApiMeals] = useState<ApiMeal[]>([]);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   // Debounce search
   const [debouncedQuery, setDebouncedQuery] = useState('');
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 250);
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Filter recipes
+  // ── Local filtering ──
   const filteredRecipes = useMemo(() => {
     let result: Recipe[];
-
-    // Category filter
     if (activeCategory === 'Semua') {
       result = [...recipes];
     } else {
       result = getRecipesByCategory(activeCategory);
     }
-
-    // Search filter
     if (debouncedQuery.trim()) {
       const searched = searchRecipes(debouncedQuery.trim());
       const searchIds = new Set(searched.map((r) => r.id));
       result = result.filter((r) => searchIds.has(r.id));
     }
-
-    // Cook time filter
     if (maxCookTime < 180) {
-      result = result.filter(
-        (r) => r.cookTime + r.prepTime <= maxCookTime
-      );
+      result = result.filter((r) => r.cookTime + r.prepTime <= maxCookTime);
     }
-
-    // Difficulty filter
     if (selectedDifficulty) {
       result = result.filter((r) => r.difficulty === selectedDifficulty);
     }
-
     return result;
   }, [activeCategory, debouncedQuery, maxCookTime, selectedDifficulty]);
 
-  // Handle recipe click
+  // ── API search effect ──
+  useEffect(() => {
+    if (mode !== 'api') return;
+
+    let cancelled = false;
+    async function fetchApi() {
+      setApiLoading(true);
+      setApiError(false);
+
+      try {
+        let result;
+        if (debouncedQuery.trim()) {
+          result = await searchApiRecipes(debouncedQuery.trim());
+        } else if (apiCategory !== 'Semua') {
+          result = await searchByCategory(apiCategory);
+        } else {
+          // Load random recipes as default
+          result = await getRandomRecipes();
+        }
+
+        if (!cancelled) {
+          setApiMeals((result.meals || []) as ApiMeal[]);
+        }
+      } catch {
+        if (!cancelled) {
+          setApiError(true);
+          setApiMeals([]);
+        }
+      } finally {
+        if (!cancelled) setApiLoading(false);
+      }
+    }
+
+    fetchApi();
+    return () => { cancelled = true; };
+  }, [mode, debouncedQuery, apiCategory]);
+
+  // ── Handle recipe click ──
   const handleRecipeClick = useCallback(
     (recipe: Recipe) => {
       setSelectedRecipe(recipe);
@@ -156,7 +193,21 @@ export function RecipeBrowser() {
     [setSelectedRecipe, setScreen]
   );
 
-  // Handle favorite toggle
+  // ── Handle API recipe click (fetch full detail first) ──
+  const handleApiRecipeClick = useCallback(
+    async (meal: ApiMeal) => {
+      // Show a loading state
+      const id = meal.id.replace(/^api-/, '');
+      const detail = await getApiRecipeDetail(id);
+      if (detail) {
+        setSelectedRecipe(detail);
+        setScreen('recipe-detail');
+      }
+    },
+    [setSelectedRecipe, setScreen]
+  );
+
+  // ── Handle favorite toggle ──
   const handleToggleFavorite = useCallback(
     (e: React.MouseEvent, recipeId: string) => {
       e.stopPropagation();
@@ -165,17 +216,22 @@ export function RecipeBrowser() {
     [toggleFavorite]
   );
 
-  // Handle featured tag click
+  // ── Handle featured tag click ──
   const handleFeaturedTagClick = useCallback((tag: string) => {
-    const name = tag.replace(/\s*[^\w\s]\s*$/, '').trim();
-    setSearchQuery(name);
+    setSearchQuery(tag);
   }, []);
 
-  // Clear filters
+  // ── Clear filters ──
   const clearFilters = useCallback(() => {
     setMaxCookTime(180);
     setSelectedDifficulty(null);
     setShowFilter(false);
+  }, []);
+
+  // ── Refresh API ──
+  const refreshApi = useCallback(() => {
+    setSearchQuery('');
+    setApiCategory('Semua');
   }, []);
 
   const hasActiveFilters = maxCookTime < 180 || selectedDifficulty !== null;
@@ -186,34 +242,77 @@ export function RecipeBrowser() {
         {/* ── Header ───────────────────────────────────── */}
         <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
           <div className="space-y-3 px-4 pb-3 pt-4">
-            {/* Title row */}
+            {/* Title row with mode toggle */}
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold tracking-tight text-foreground">
                 <GlowingText color="amber" intensity={1}>
                   Resep
                 </GlowingText>{' '}
-                Nusantara
+                {mode === 'api' ? 'Global' : 'Nusantara'}
               </h1>
-              <Button
-                variant={showFilter ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowFilter(!showFilter)}
-                className={`rounded-full text-xs ${
-                  showFilter
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : hasActiveFilters
-                      ? 'border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400'
-                      : ''
-                }`}
-              >
-                <Sparkles className="mr-1 h-3.5 w-3.5" />
-                Filter
-                {hasActiveFilters && (
-                  <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                    !
-                  </span>
+              <div className="flex items-center gap-1.5">
+                {/* Mode Toggle */}
+                <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-0.5">
+                  <button
+                    onClick={() => setMode('local')}
+                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
+                      mode === 'local'
+                        ? 'bg-emerald-500 text-white shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Wifi className="h-2.5 w-2.5" />
+                    Lokal
+                  </button>
+                  <button
+                    onClick={() => setMode('api')}
+                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
+                      mode === 'api'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Globe2 className="h-2.5 w-2.5" />
+                    Global
+                  </button>
+                </div>
+
+                {/* Filter button (local mode only) */}
+                {mode === 'local' && (
+                  <Button
+                    variant={showFilter ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowFilter(!showFilter)}
+                    className={`rounded-full text-xs ${
+                      showFilter
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : hasActiveFilters
+                          ? 'border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400'
+                          : ''
+                    }`}
+                  >
+                    <Sparkles className="mr-1 h-3.5 w-3.5" />
+                    Filter
+                    {hasActiveFilters && (
+                      <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                        !
+                      </span>
+                    )}
+                  </Button>
                 )}
-              </Button>
+
+                {/* Refresh button (API mode) */}
+                {mode === 'api' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshApi}
+                    className="rounded-full text-xs"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Search */}
@@ -222,7 +321,7 @@ export function RecipeBrowser() {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari resep favoritmu..."
+                placeholder={mode === 'api' ? 'Cari resep dari seluruh dunia...' : 'Cari resep favoritmu...'}
                 className="h-10 rounded-xl border-border/50 bg-muted/40 pl-9 pr-9 text-sm placeholder:text-muted-foreground/50 focus-visible:ring-emerald-400/40"
               />
               {searchQuery && (
@@ -236,86 +335,101 @@ export function RecipeBrowser() {
             </div>
           </div>
 
-          {/* Filter Panel */}
-          <AnimatePresence>
-            {showFilter && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="overflow-hidden border-t border-border/30"
-              >
-                <div className="space-y-4 px-4 py-3">
-                  {/* Max Cook Time */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
+          {/* Filter Panel (local mode only) */}
+          {mode === 'local' && (
+            <AnimatePresence>
+              {showFilter && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden border-t border-border/30"
+                >
+                  <div className="space-y-4 px-4 py-3">
+                    {/* Max Cook Time */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          <Clock className="mr-1 inline h-3 w-3" />
+                          Waktu Masak Maks.
+                        </label>
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          {maxCookTime} menit
+                        </span>
+                      </div>
+                      <Slider
+                        value={[maxCookTime]}
+                        onValueChange={(v) => setMaxCookTime(v[0])}
+                        min={5}
+                        max={180}
+                        step={5}
+                        className="[&_[role=slider]]:bg-emerald-500 [&_[role=slider]]:border-emerald-500 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&>span:first-child]:bg-emerald-200 dark:[&>span:first-child]:bg-emerald-800"
+                      />
+                      <div className="flex justify-between text-[10px] text-muted-foreground/60">
+                        <span>5 mnt</span>
+                        <span>3 jam</span>
+                      </div>
+                    </div>
+
+                    {/* Difficulty Filter */}
+                    <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground">
-                        <Clock className="mr-1 inline h-3 w-3" />
-                        Waktu Masak Maks.
+                        <ChefHat className="mr-1 inline h-3 w-3" />
+                        Tingkat Kesulitan
                       </label>
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                        {maxCookTime} menit
-                      </span>
+                      <div className="flex gap-2">
+                        {['Mudah', 'Sedang', 'Susah'].map((d) => (
+                          <button
+                            key={d}
+                            onClick={() =>
+                              setSelectedDifficulty(selectedDifficulty === d ? null : d)
+                            }
+                            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                              selectedDifficulty === d
+                                ? DIFFICULTY_COLORS[d]
+                                : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+                            }`}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <Slider
-                      value={[maxCookTime]}
-                      onValueChange={(v) => setMaxCookTime(v[0])}
-                      min={5}
-                      max={180}
-                      step={5}
-                      className="[&_[role=slider]]:bg-emerald-500 [&_[role=slider]]:border-emerald-500 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&>span:first-child]:bg-emerald-200 dark:[&>span:first-child]:bg-emerald-800"
-                    />
-                    <div className="flex justify-between text-[10px] text-muted-foreground/60">
-                      <span>5 mnt</span>
-                      <span>3 jam</span>
-                    </div>
-                  </div>
 
-                  {/* Difficulty Filter */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      <ChefHat className="mr-1 inline h-3 w-3" />
-                      Tingkat Kesulitan
-                    </label>
-                    <div className="flex gap-2">
-                      {['Mudah', 'Sedang', 'Susah'].map((d) => (
-                        <button
-                          key={d}
-                          onClick={() =>
-                            setSelectedDifficulty(selectedDifficulty === d ? null : d)
-                          }
-                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                            selectedDifficulty === d
-                              ? DIFFICULTY_COLORS[d]
-                              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
-                          }`}
-                        >
-                          {d}
-                        </button>
-                      ))}
-                    </div>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="w-full text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="mr-1 h-3 w-3" />
+                        Hapus semua filter
+                      </Button>
+                    )}
                   </div>
-
-                  {/* Clear filters */}
-                  {hasActiveFilters && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="w-full text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="mr-1 h-3 w-3" />
-                      Hapus semua filter
-                    </Button>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
         </header>
 
-        {/* ── Featured Marquee ─────────────────────────── */}
+        {/* ── API Mode Banner ── */}
+        {mode === 'api' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mt-3 flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2.5 dark:from-blue-900/20 dark:to-indigo-900/20"
+          >
+            <Globe2 className="h-4 w-4 text-blue-500" />
+            <p className="text-[11px] text-blue-700 dark:text-blue-300">
+              Resep dari <b>TheMealDB</b> — 300+ resep internasional, gratis selamanya!
+            </p>
+          </motion.div>
+        )}
+
+        {/* ── Featured Marquee ── */}
         <section className="py-3">
           <Marquee speed={35} pauseOnHover gap={12}>
             {FEATURED_TAGS.map((tag, i) => (
@@ -332,26 +446,42 @@ export function RecipeBrowser() {
           </Marquee>
         </section>
 
-        {/* ── Category Tabs ────────────────────────────── */}
+        {/* ── Category Tabs ── */}
         <section className="px-4">
           <div ref={scrollRef} className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory === cat.value;
+            {(mode === 'api' ? API_CATEGORIES : CATEGORIES).map((cat) => {
+              const catLabel = typeof cat === 'string' ? cat : cat.label;
+              const catValue = typeof cat === 'string' ? cat : cat.value;
+              const isActive = mode === 'api'
+                ? apiCategory === catLabel
+                : activeCategory === catValue;
+
               return (
                 <button
-                  key={cat.value}
-                  onClick={() => setActiveCategory(cat.value)}
+                  key={catLabel}
+                  onClick={() => {
+                    if (mode === 'api') {
+                      setApiCategory(catLabel);
+                      setSearchQuery('');
+                    } else {
+                      setActiveCategory(catValue as RecipeCategory | 'Semua');
+                    }
+                  }}
                   className={`relative shrink-0 rounded-lg px-3.5 py-2 text-xs font-medium transition-all ${
                     isActive
-                      ? 'text-emerald-700 dark:text-emerald-300'
+                      ? mode === 'api'
+                        ? 'text-blue-700 dark:text-blue-300'
+                        : 'text-emerald-700 dark:text-emerald-300'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {cat.label}
+                  {catLabel}
                   {isActive && (
                     <motion.div
                       layoutId="category-indicator"
-                      className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full bg-emerald-500"
+                      className={`absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full ${
+                        mode === 'api' ? 'bg-blue-500' : 'bg-emerald-500'
+                      }`}
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -361,76 +491,125 @@ export function RecipeBrowser() {
           </div>
         </section>
 
-        {/* ── Recipe Grid ──────────────────────────────── */}
+        {/* ── Recipe Grid ── */}
         <section className="px-4 pt-3">
-          {filteredRecipes.length > 0 ? (
-            <motion.div
-              className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.06 } },
-              }}
-            >
-              {filteredRecipes.map((recipe) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  isFavorite={favoriteRecipes.includes(recipe.id)}
-                  onClick={() => handleRecipeClick(recipe)}
-                  onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
-                />
-              ))}
-            </motion.div>
-          ) : (
-            /* Empty state */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center gap-4 py-16 text-center"
-            >
-              <Bounce intensity={2} repeat>
-                <div className="text-6xl">🔍</div>
-              </Bounce>
-              <div>
-                <h3 className="text-base font-semibold text-foreground">
-                  Resep tidak ditemukan
-                </h3>
-                <p className="mt-1 max-w-[240px] text-xs text-muted-foreground">
-                  Coba ubah kata kunci pencarian atau pilih kategori lain
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
+          {mode === 'local' && (
+            /* Local recipes */
+            filteredRecipes.length > 0 ? (
+              <motion.div
+                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.06 } },
+                }}
+              >
+                {filteredRecipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    isFavorite={favoriteRecipes.includes(recipe.id)}
+                    onClick={() => handleRecipeClick(recipe)}
+                    onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <EmptyState
+                onReset={() => {
                   setSearchQuery('');
                   setActiveCategory('Semua');
                   clearFilters();
                 }}
-                className="mt-2 rounded-full text-xs"
+              />
+            )
+          )}
+
+          {mode === 'api' && (
+            /* API recipes */
+            apiLoading ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center gap-3 py-16"
               >
-                Reset Pencarian
-              </Button>
-            </motion.div>
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <p className="text-sm text-muted-foreground">Mencari resep...</p>
+              </motion.div>
+            ) : apiError ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center gap-4 py-16 text-center"
+              >
+                <div className="text-5xl">📡</div>
+                <div>
+                  <h3 className="text-base font-semibold text-foreground">
+                    Gagal mengambil data
+                  </h3>
+                  <p className="mt-1 max-w-[260px] text-xs text-muted-foreground">
+                    Periksa koneksi internet Anda, atau coba lagi nanti
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshApi}
+                  className="mt-2 rounded-full text-xs"
+                >
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  Coba Lagi
+                </Button>
+              </motion.div>
+            ) : apiMeals.length > 0 ? (
+              <motion.div
+                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.06 } },
+                }}
+              >
+                {apiMeals.map((meal) => (
+                  <ApiRecipeCard
+                    key={meal.id}
+                    meal={meal}
+                    isFavorite={favoriteRecipes.includes(meal.id)}
+                    onClick={() => handleApiRecipeClick(meal)}
+                    onToggleFavorite={(e) => handleToggleFavorite(e, meal.id)}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <EmptyState
+                onReset={() => {
+                  setSearchQuery('');
+                  setApiCategory('Semua');
+                }}
+              />
+            )
           )}
         </section>
 
         {/* Results count */}
-        {filteredRecipes.length > 0 && (
-          <div className="px-4 pt-4 pb-2 text-center">
-            <p className="text-[11px] text-muted-foreground/60">
-              Menampilkan {filteredRecipes.length} dari {recipes.length} resep
-            </p>
-          </div>
-        )}
+        <div className="px-4 pt-4 pb-2 text-center">
+          <p className="text-[11px] text-muted-foreground/60">
+            {mode === 'local'
+              ? `Menampilkan ${filteredRecipes.length} dari ${recipes.length} resep lokal`
+              : apiMeals.length > 0
+                ? `Ditemukan ${apiMeals.length} resep global`
+                : ''
+            }
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ── Recipe Card ────────────────────────────────────────────── */
+/* ── Local Recipe Card ────────────────────────────────────── */
 
 function RecipeCard({
   recipe,
@@ -444,6 +623,7 @@ function RecipeCard({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   const bgColor = EMOJI_BG_COLORS[recipe.image] || 'from-gray-100 to-gray-50 dark:from-gray-800/40 dark:to-gray-900/30';
+  const isApi = recipe.id.startsWith('api-');
 
   return (
     <motion.div
@@ -463,15 +643,31 @@ function RecipeCard({
           whileTap={{ scale: 0.97 }}
           className="group cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/8"
         >
-          {/* Emoji Image */}
-          <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor}`}>
-            <motion.span
-              className="text-5xl"
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {recipe.image}
-            </motion.span>
+          {/* Image */}
+          <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
+            {isApi && recipe.image && !recipe.image.startsWith('data:') ? (
+              <img
+                src={recipe.image}
+                alt={recipe.name}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <motion.span
+                className="text-5xl"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {recipe.image}
+              </motion.span>
+            )}
+
+            {/* API badge */}
+            {isApi && (
+              <span className="absolute left-2 top-2 rounded-md bg-blue-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white">
+                GLOBAL
+              </span>
+            )}
 
             {/* Favorite button */}
             <motion.button
@@ -482,16 +678,12 @@ function RecipeCard({
             >
               <motion.div
                 initial={false}
-                animate={{
-                  scale: isFavorite ? [1, 1.3, 1] : 1,
-                }}
+                animate={{ scale: isFavorite ? [1, 1.3, 1] : 1 }}
                 transition={{ duration: 0.3 }}
               >
                 <Heart
                   className={`h-3.5 w-3.5 transition-colors ${
-                    isFavorite
-                      ? 'fill-rose-500 text-rose-500'
-                      : 'text-gray-500 dark:text-gray-400'
+                    isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-500 dark:text-gray-400'
                   }`}
                 />
               </motion.div>
@@ -507,12 +699,9 @@ function RecipeCard({
 
           {/* Info */}
           <div className="space-y-1.5 p-2.5">
-            {/* Recipe name */}
             <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
               {recipe.name}
             </h3>
-
-            {/* Time & Rating */}
             <div className="flex items-center justify-between gap-1">
               <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Clock className="h-2.5 w-2.5" />
@@ -525,8 +714,6 @@ function RecipeCard({
                 </span>
               </span>
             </div>
-
-            {/* Category tag */}
             <div className="pt-0.5">
               <span className="inline-flex items-center rounded-md bg-muted/60 px-1.5 py-0.5 text-[9px] text-muted-foreground">
                 {recipe.category}
@@ -539,20 +726,132 @@ function RecipeCard({
   );
 }
 
-/* ── ChefHat icon inline (needed for filter label) ──────────── */
+/* ── API Recipe Card (with real images) ───────────────────── */
+
+function ApiRecipeCard({
+  meal,
+  isFavorite,
+  onClick,
+  onToggleFavorite,
+}: {
+  meal: ApiMeal;
+  isFavorite: boolean;
+  onClick: () => void;
+  onToggleFavorite: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 24, filter: 'blur(3px)' },
+        visible: {
+          opacity: 1,
+          y: 0,
+          filter: 'blur(0px)',
+          transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
+        },
+      }}
+    >
+      <motion.div
+        onClick={onClick}
+        whileTap={{ scale: 0.97 }}
+        className="group cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8"
+      >
+        {/* Real image from API */}
+        <div className="relative h-28 overflow-hidden bg-muted/30">
+          {meal.image ? (
+            <img
+              src={meal.image}
+              alt={meal.name}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <span className="text-4xl">🍽️</span>
+            </div>
+          )}
+
+          {/* Global badge */}
+          <span className="absolute left-2 top-2 rounded-md bg-blue-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm">
+            GLOBAL
+          </span>
+
+          {/* Video badge */}
+          {meal.hasVideo && (
+            <span className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm">
+              <Play className="h-2 w-2" />
+              VIDEO
+            </span>
+          )}
+
+          {/* Favorite */}
+          <motion.button
+            onClick={onToggleFavorite}
+            whileTap={{ scale: 0.7 }}
+            className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-colors hover:bg-white dark:bg-black/40 dark:hover:bg-black/60"
+          >
+            <Heart
+              className={`h-3.5 w-3.5 transition-colors ${
+                isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-500 dark:text-gray-400'
+              }`}
+            />
+          </motion.button>
+        </div>
+
+        {/* Info */}
+        <div className="space-y-1.5 p-2.5">
+          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300">
+            {meal.name}
+          </h3>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] text-muted-foreground">{meal.area}</span>
+            <Badge variant="secondary" className="h-4 px-1.5 text-[9px]">
+              {meal.category}
+            </Badge>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ── Empty State ──────────────────────────────────────────── */
+
+function EmptyState({ onReset }: { onReset: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center gap-4 py-16 text-center"
+    >
+      <Bounce intensity={2} repeat>
+        <div className="text-6xl">🔍</div>
+      </Bounce>
+      <div>
+        <h3 className="text-base font-semibold text-foreground">
+          Resep tidak ditemukan
+        </h3>
+        <p className="mt-1 max-w-[240px] text-xs text-muted-foreground">
+          Coba ubah kata kunci pencarian atau pilih kategori lain
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onReset}
+        className="mt-2 rounded-full text-xs"
+      >
+        Reset Pencarian
+      </Button>
+    </motion.div>
+  );
+}
+
+/* ── ChefHat SVG ──────────────────────────────────────────── */
 
 function ChefHat({ className }: { className?: string }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
       <line x1="6" x2="18" y1="17" y2="17" />
     </svg>

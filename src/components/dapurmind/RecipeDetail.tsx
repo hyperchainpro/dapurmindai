@@ -17,6 +17,8 @@ import {
   Star,
   Sparkles,
   ExternalLink,
+  Play,
+  Globe2,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { Ingredient } from '@/types';
@@ -197,6 +199,7 @@ export function RecipeDetail() {
   }, [recipe, portionScale, shoppingItems, setShoppingItems, setScreen]);
 
   const isFavorite = recipe ? favoriteRecipes.includes(recipe.id) : false;
+  const isApiRecipe = recipe ? recipe.id.startsWith('api-') || (recipe.tags && recipe.tags.includes('api-recipe')) : false;
 
   /* ── No recipe fallback ──────────────────────────── */
   if (!recipe) {
@@ -256,50 +259,88 @@ export function RecipeDetail() {
             </motion.div>
           </motion.button>
 
-          {/* Gradient background with emoji */}
-          <div className={`relative flex h-56 items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
-            {/* Floating decorative elements */}
-            <motion.div
-              className="absolute inset-0 overflow-hidden"
-              aria-hidden="true"
-            >
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
-                  style={{
-                    left: `${15 + i * 14}%`,
-                    top: `${20 + (i % 3) * 25}%`,
-                  }}
-                  animate={{
-                    y: [0, -12, 0],
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    duration: 4 + i * 0.5,
-                    repeat: Infinity,
-                    delay: i * 0.5,
-                    ease: 'easeInOut',
-                  }}
+          {/* Hero: API recipe with real image or local recipe with emoji */}
+          {isApiRecipe ? (
+            <div className="relative h-56 overflow-hidden">
+              {recipe.image && !recipe.image.startsWith('data:') && recipe.image.length > 20 ? (
+                <img
+                  src={recipe.image}
+                  alt={recipe.name}
+                  className="h-full w-full object-cover"
                 />
-              ))}
-            </motion.div>
+              ) : (
+                <div className={`flex h-full items-center justify-center bg-gradient-to-br ${getGradient(recipe.image || '🍽️')}`}>
+                  <span className="text-[100px] leading-none drop-shadow-lg">{recipe.image || '🍽️'}</span>
+                </div>
+              )}
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              {/* API badge */}
+              <div className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 rounded-full bg-blue-500/90 px-2.5 py-1 text-[10px] font-bold text-white">
+                <Globe2 className="h-3 w-3" />
+                Resep Global - TheMealDB
+              </div>
+              {/* YouTube button if available */}
+              {(recipe as any).youtubeUrl && (
+                <motion.a
+                  href={(recipe as any).youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileTap={{ scale: 0.9 }}
+                  className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
+                >
+                  <Play className="h-3 w-3" />
+                  Lihat Video
+                </motion.a>
+              )}
+              {/* Fade overlay at bottom */}
+              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
+            </div>
+          ) : (
+            <div className={`relative flex h-56 items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
+              {/* Floating decorative elements */}
+              <motion.div
+                className="absolute inset-0 overflow-hidden"
+                aria-hidden="true"
+              >
+                {[...Array(6)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
+                    style={{
+                      left: `${15 + i * 14}%`,
+                      top: `${20 + (i % 3) * 25}%`,
+                    }}
+                    animate={{
+                      y: [0, -12, 0],
+                      opacity: [0.3, 0.6, 0.3],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 4 + i * 0.5,
+                      repeat: Infinity,
+                      delay: i * 0.5,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                ))}
+              </motion.div>
 
-            {/* Main emoji */}
-            <motion.div
-              className="relative z-10"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <span className="text-[100px] leading-none drop-shadow-lg sm:text-[120px]">
-                {recipe.image}
-              </span>
-            </motion.div>
+              {/* Main emoji */}
+              <motion.div
+                className="relative z-10"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <span className="text-[100px] leading-none drop-shadow-lg sm:text-[120px]">
+                  {recipe.image}
+                </span>
+              </motion.div>
 
-            {/* Fade overlay at bottom */}
-            <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
-          </div>
+              {/* Fade overlay at bottom */}
+              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
+            </div>
+          )}
 
           {/* Recipe info */}
           <div className="relative z-10 -mt-4 px-5">
@@ -689,7 +730,9 @@ export function RecipeDetail() {
         {recipe.tags.length > 0 && (
           <motion.section variants={fadeUp} className="px-4 pt-4">
             <div className="flex flex-wrap gap-1.5">
-              {recipe.tags.map((tag) => (
+              {recipe.tags
+                .filter((t) => t !== 'api-recipe')
+                .map((tag) => (
                 <Badge
                   key={tag}
                   variant="secondary"
@@ -699,6 +742,21 @@ export function RecipeDetail() {
                 </Badge>
               ))}
             </div>
+          </motion.section>
+        )}
+
+        {/* ── Source Link (API recipes) ──────────────── */}
+        {isApiRecipe && (recipe as any).source && (
+          <motion.section variants={fadeUp} className="px-4 pt-3">
+            <a
+              href={(recipe as any).source}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-xl border border-border/30 bg-card px-4 py-3 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span>Lihat sumber resep asli</span>
+            </a>
           </motion.section>
         )}
       </motion.div>

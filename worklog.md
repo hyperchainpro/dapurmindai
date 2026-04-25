@@ -1,30 +1,20 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Implement Affiliate Marketplace Hub module for DapurMind AI
+Task: Integrasikan TheMealDB API gratis ke DapurMind AI
 
 Work Log:
-- Explored full codebase structure: src/types, src/hooks/useAppState, src/lib/affiliate, src/app/page.tsx, all screen components
-- Updated prisma/schema.prisma with 3 new models: AffiliateAccount, ProductLink, ClickLog
-- Updated src/types/index.ts with new types: AffiliateAccount, ProductLink, ClickLog, AffiliateAnalytics + 3 new AppScreen values
-- Updated src/hooks/useAppState.ts with affiliate state: accounts, product links, generation state
-- Created 4 API routes: /api/affiliate/accounts (CRUD), /api/affiliate/generate-link (AI-powered), /api/affiliate/click-log (POST/GET), /api/affiliate/analytics (GET with period filter)
-- Created MarketplaceHub.tsx screen (~580 lines) - full marketplace hub with search, category tabs, featured marketplaces, product grid, AI link generation, multi-platform buy
-- Created AdminAffiliate.tsx screen (~1000 lines) - admin page with AnimatedList, swipe-to-delete, add/edit/delete dialogs, quick setup section
-- Created AdminAnalytics.tsx screen (~905 lines) - analytics dashboard with BentoGrid stats, horizontal bar chart, daily trend bars, top products table, performance tips
-- Updated src/app/page.tsx to register 3 new screens with Framer Motion transitions
-- Updated Dashboard.tsx: added Marketplace quick action + affiliate banner with Marquee scrolling deals
-- Updated ProfilePage.tsx: added "Kelola Afiliasi" admin menu item in Settings section
-- Updated ShoppingList.tsx: added click logging, multi-platform buy handler, AI link generation
-- Updated ChatInterface.tsx: added "Belanja Cepat" section with 3 quick marketplace buttons after meal plan generation
-- Updated ZeroWasteRecipe.tsx: added "Beli Bahan Tambahan" affiliate buttons per recipe result
-- Updated RecipeDetail.tsx: added ExternalLink buy icon per ingredient with hover effect
-- Fixed all compilation errors (prisma → db import, proper closing tags)
-- Verified successful build with all routes compiling
+- Checked existing project state: western.ts (371 recipes) exists and imported in recipes.ts
+- Created 4 API routes: /api/recipes/search, /api/recipes/detail, /api/recipes/random, /api/recipes/categories
+- All routes proxy TheMealDB API (100% free, no API key, no rate limits)
+- Created /src/lib/api-recipes.ts as API service helper with search, detail, random, categories functions
+- Updated RecipeBrowser.tsx with mode toggle (Lokal vs Global), API search, real image cards, loading states, error handling
+- Updated RecipeDetail.tsx to support API recipes: real images from TheMealDB, YouTube video button, source link, GLOBAL badge
+- Build verified successfully - all 4 new API routes registered
 
 Stage Summary:
-- Full Affiliate Marketplace Hub implemented with 6 sub-features
-- 4 new API routes, 3 new screens, 6 existing screens enhanced
-- All animations use MagicUI (ShineBorder, AnimatedList, BorderBeam, BentoGrid, NumberTicker, Marquee, Particles) and ReactBits (GlowingText, ClickSpark, Bounce, CountUp, StarBorder)
-- Click tracking and analytics fully functional with Prisma/SQLite backend
-- Build passes cleanly with all routes compiled
+- TheMealDB API integrated: 300+ international recipes available for free, forever
+- RecipeBrowser now has dual mode: "Resep Lokal" (800+ local recipes) and "Resep Global" (TheMealDB API)
+- API recipes show real food images from TheMealDB
+- RecipeDetail supports YouTube video links and source URLs for API recipes
+- Graceful fallback when offline or API errors
