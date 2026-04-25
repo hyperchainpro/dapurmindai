@@ -1,4 +1,5 @@
 import type { Recipe } from '@/types';
+import { westernRecipes } from './recipes/western';
 
 export const recipes: Recipe[] = [
   {
@@ -984,6 +985,7 @@ export const recipes: Recipe[] = [
     tags: ['opor', 'ayam', 'santan', 'Lebaran', 'kuning'],
     rating: 4.8,
   },
+  ...westernRecipes,
 ];
 
 /**

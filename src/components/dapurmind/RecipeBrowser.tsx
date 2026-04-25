@@ -68,7 +68,6 @@ const EMOJI_BG_COLORS: Record<string, string> = {
   '🟢': 'from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/30',
   '🍌': 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/30',
   '🥞': 'from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/30',
-,
   '🍕': 'from-red-100 to-amber-100 dark:from-red-900/40 dark:to-amber-900/30',
   '🍝': 'from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/30',
   '🍔': 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/30',
