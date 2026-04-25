@@ -4524,9 +4524,9 @@ export const westernRecipes: Recipe[] = [
   },
 
   {
-    id: 'w-nachos-supreme',
-    name: 'Nachos Supreme',
-    description: 'Nachos dengan semua topping: keju, salsa, guac, sour cream.',
+    id: 'w-nachos-loaded',
+    name: 'Nachos Loaded',
+    description: 'Nachos dengan double cheese, jalapeño, dan loaded beans.',
     image: '🧀',
     category: 'Western',
     difficulty: 'Sedang',

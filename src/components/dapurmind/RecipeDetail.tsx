@@ -297,48 +297,61 @@ export function RecipeDetail() {
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
             </div>
           ) : (
-            <div className={`relative flex h-56 items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
-              {/* Floating decorative elements */}
-              <motion.div
-                className="absolute inset-0 overflow-hidden"
-                aria-hidden="true"
-              >
-                {[...Array(6)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
-                    style={{
-                      left: `${15 + i * 14}%`,
-                      top: `${20 + (i % 3) * 25}%`,
-                    }}
-                    animate={{
-                      y: [0, -12, 0],
-                      opacity: [0.3, 0.6, 0.3],
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                      duration: 4 + i * 0.5,
-                      repeat: Infinity,
-                      delay: i * 0.5,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                ))}
-              </motion.div>
+            <div className="relative flex h-56 items-center justify-center overflow-hidden">
+              {/* Check for western recipe with real image */}
+              {true && (
+                <img
+                  src={`/recipes/${recipe.id}.jpg`}
+                  alt={recipe.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              )}
+              <div className={`relative z-10 flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
+                {/* Floating decorative elements */}
+                <motion.div
+                  className="absolute inset-0 overflow-hidden"
+                  aria-hidden="true"
+                >
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
+                      style={{
+                        left: `${15 + i * 14}%`,
+                        top: `${20 + (i % 3) * 25}%`,
+                      }}
+                      animate={{
+                        y: [0, -12, 0],
+                        opacity: [0.3, 0.6, 0.3],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 4 + i * 0.5,
+                        repeat: Infinity,
+                        delay: i * 0.5,
+                        ease: 'easeInOut',
+                      }}
+                    />
+                  ))}
+                </motion.div>
 
-              {/* Main emoji */}
-              <motion.div
-                className="relative z-10"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <span className="text-[100px] leading-none drop-shadow-lg sm:text-[120px]">
-                  {recipe.image}
-                </span>
-              </motion.div>
+                {/* Main emoji */}
+                <motion.div
+                  className="relative z-10"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <span className="text-[100px] leading-none drop-shadow-lg sm:text-[120px]">
+                    {recipe.image}
+                  </span>
+                </motion.div>
+              </div>
 
               {/* Fade overlay at bottom */}
-              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
+              <div className="absolute bottom-0 inset-x-0 z-20 h-16 bg-gradient-to-t from-white dark:from-background" />
             </div>
           )}
 
@@ -499,11 +512,19 @@ export function RecipeDetail() {
                           const isChecked = checkedIngredients.has(index);
 
                           return (
-                            <motion.button
+                            <motion.div
                               key={index}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => handleToggleIngredient(index)}
-                              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleToggleIngredient(index);
+                                }
+                              }}
+                              className={`group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
                                 isChecked
                                   ? 'bg-muted/30'
                                   : 'hover:bg-muted/20'
@@ -576,7 +597,7 @@ export function RecipeDetail() {
                                   <ExternalLink className="h-3 w-3" />
                                 </motion.button>
                               )}
-                            </motion.button>
+                            </motion.div>
                           );
                         })}
                       </div>

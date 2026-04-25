@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play } from 'lucide-react';
+import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play, ChevronDown } from 'lucide-react';
 import type { Recipe, RecipeCategory } from '@/types';
 
 /* ── Constants ──────────────────────────────────────────────── */
@@ -106,6 +106,7 @@ export function RecipeBrowser() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilter, setShowFilter] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(50);
 
   // Local mode state
   const [activeCategory, setActiveCategory] = useState<RecipeCategory | 'Semua'>('Semua');
@@ -146,6 +147,13 @@ export function RecipeBrowser() {
     }
     return result;
   }, [activeCategory, debouncedQuery, maxCookTime, selectedDifficulty]);
+
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [activeCategory, debouncedQuery, maxCookTime, selectedDifficulty]);
+
+  const paginatedRecipes = filteredRecipes.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredRecipes.length;
 
   // ── API search effect ──
   useEffect(() => {
@@ -278,29 +286,63 @@ export function RecipeBrowser() {
                 </div>
 
                 {/* Filter button (local mode only) */}
-                {mode === 'local' && (
+                {mode === 'local' && filteredRecipes.length > 0 && (
+            <div>
+              <motion.div
+                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.06 } },
+                }}
+              >
+                {paginatedRecipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    isFavorite={favoriteRecipes.includes(recipe.id)}
+                    onClick={() => handleRecipeClick(recipe)}
+                    onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
+                  />
+                ))}
+              </motion.div>
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-5 flex flex-col items-center gap-2"
+                >
+                  <p className="text-xs text-muted-foreground">
+                    Menampilkan {paginatedRecipes.length} dari {filteredRecipes.length} resep
+                  </p>
                   <Button
-                    variant={showFilter ? 'default' : 'outline'}
+                    variant="outline"
                     size="sm"
-                    onClick={() => setShowFilter(!showFilter)}
-                    className={`rounded-full text-xs ${
-                      showFilter
-                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                        : hasActiveFilters
-                          ? 'border-emerald-300 text-emerald-600 dark:border-emerald-700 dark:text-emerald-400'
-                          : ''
-                    }`}
+                    onClick={() => setVisibleCount(prev => prev + 50)}
+                    className="rounded-full border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
                   >
-                    <Sparkles className="mr-1 h-3.5 w-3.5" />
-                    Filter
-                    {hasActiveFilters && (
-                      <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                        !
-                      </span>
-                    )}
+                    <ChevronDown className="mr-1 h-4 w-4" />
+                    Muat 50 Resep Berikutnya
                   </Button>
-                )}
-
+                </motion.div>
+              )}
+              {!hasMore && filteredRecipes.length > 50 && (
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                  Semua {filteredRecipes.length} resep ditampilkan
+                </p>
+              )}
+            </div>
+          )}
+          {mode === 'local' && filteredRecipes.length === 0 && (
+            <EmptyState
+              onReset={() => {
+                setSearchQuery('');
+                setActiveCategory('Semua');
+                clearFilters();
+              }}
+            />
+          )}
                 {/* Refresh button (API mode) */}
                 {mode === 'api' && (
                   <Button
@@ -597,7 +639,9 @@ export function RecipeBrowser() {
         <div className="px-4 pt-4 pb-2 text-center">
           <p className="text-[11px] text-muted-foreground/60">
             {mode === 'local'
-              ? `Menampilkan ${filteredRecipes.length} dari ${recipes.length} resep lokal`
+              ? filteredRecipes.length > 50
+                ? `Menampilkan ${paginatedRecipes.length} dari ${filteredRecipes.length} resep lokal`
+                : `${filteredRecipes.length} resep lokal`
               : apiMeals.length > 0
                 ? `Ditemukan ${apiMeals.length} resep global`
                 : ''
@@ -624,6 +668,9 @@ function RecipeCard({
 }) {
   const bgColor = EMOJI_BG_COLORS[recipe.image] || 'from-gray-100 to-gray-50 dark:from-gray-800/40 dark:to-gray-900/30';
   const isApi = recipe.id.startsWith('api-');
+  const isWestern = recipe.category === 'Western';
+  const hasRealImage = isApi && recipe.image && !recipe.image.startsWith('data:');
+  const localImagePath = (isWestern ? `/recipes/western/${recipe.id}.jpg` : `/recipes/${recipe.id}.jpg`);
 
   return (
     <motion.div
@@ -645,11 +692,18 @@ function RecipeCard({
         >
           {/* Image */}
           <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
-            {isApi && recipe.image && !recipe.image.startsWith('data:') ? (
+            {hasRealImage ? (
               <img
                 src={recipe.image}
                 alt={recipe.name}
                 className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            ) : localImagePath ? (
+              <img
+                src={localImagePath}
+                alt={recipe.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               />
             ) : (
