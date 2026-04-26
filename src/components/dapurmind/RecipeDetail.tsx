@@ -21,15 +21,169 @@ import {
   Globe2,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
-import type { Ingredient } from '@/types';
+import type { Ingredient, Recipe } from '@/types';
 import { NumberTicker } from '@/components/dapurmind/MagicUI';
 import { ShineBorder } from '@/components/dapurmind/MagicUI';
 import { Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AFFILIATE_MARKETPLACES, buildAffiliateUrl } from '@/lib/affiliate';
-
 /* ── Helpers ──────────────────────────────────────────────────── */
+
+/* Fallback food images from Unsplash (free, no API key needed) */
+const FOOD_IMAGE_MAP: Record<string, string> = {
+  // Indonesian savory
+  'nasi-goreng': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=400&fit=crop',
+  'mie-goreng': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&h=400&fit=crop',
+  'ayam-goreng': 'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=600&h=400&fit=crop',
+  'soto-ayam': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&h=400&fit=crop',
+  'rendang': 'https://images.unsplash.com/photo-1606491956689-2ea866880049?w=600&h=400&fit=crop',
+  'gado-gado': 'https://images.unsplash.com/photo-1512058533999-30b0e4408760?w=600&h=400&fit=crop',
+  'nasi-padang': 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&h=400&fit=crop',
+  'bakso': 'https://images.unsplash.com/photo-1583032015879-e5022cb87c3b?w=600&h=400&fit=crop',
+  'sate-ayam': 'https://images.unsplash.com/photo-1529563021893-cc83c992d75d?w=600&h=400&fit=crop',
+  'nasi-uduk': 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=600&h=400&fit=crop',
+  'bubur-ayam': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop',
+  'perkedel': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&h=400&fit=crop',
+  'tempe-orek': 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&h=400&fit=crop',
+  'sayur-asem': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=400&fit=crop',
+  'plecing-kangkung': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop',
+  'rawon': 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop',
+  'pempek': 'https://images.unsplash.com/photo-1569058242567-93de6f36f8e6?w=600&h=400&fit=crop',
+  'tahu-gejrot': 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=600&h=400&fit=crop',
+  'opor-ayam': 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=600&h=400&fit=crop',
+  'martabak-telur': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop',
+  'kolak': 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&h=400&fit=crop',
+  // Indonesian desserts & drinks
+  'es-teh-manis': 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=400&fit=crop',
+  'es-campur': 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&h=400&fit=crop',
+  'klepon': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&h=400&fit=crop',
+  'pisang-goreng': 'https://images.unsplash.com/photo-1600326145552-327f74b9c189?w=600&h=400&fit=crop',
+  'martabak-manis': 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=400&fit=crop',
+  // Western - Breakfast
+  'w-classic-pancakes': 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop',
+  'w-french-toast': 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&h=400&fit=crop',
+  'w-eggs-benedict': 'https://images.unsplash.com/photo-1608039829572-9b0189bbe57f?w=600&h=400&fit=crop',
+  'w-avocado-toast': 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=600&h=400&fit=crop',
+  'w-omelette': 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop',
+  'w-smoothie-bowl': 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&h=400&fit=crop',
+  'w-overnight-oats': 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=600&h=400&fit=crop',
+  'w-belgian-waffles': 'https://images.unsplash.com/photo-1568051243851-f9b136146e97?w=600&h=400&fit=crop',
+  'w-breakfast-burrito': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=600&h=400&fit=crop',
+  'w-bircher-muesli': 'https://images.unsplash.com/photo-1571748982800-fa51082c2224?w=600&h=400&fit=crop',
+  'w-bagel-with-cream-cheese': 'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=600&h=400&fit=crop',
+  'w-bacon-eggs': 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=600&h=400&fit=crop',
+  'w-banana-bread': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=600&h=400&fit=crop',
+  'w-blueberry-muffins': 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&h=400&fit=crop',
+  'w-breakfast-casserole': 'https://images.unsplash.com/photo-1534938665245-537ded2b5e3f?w=600&h=400&fit=crop',
+  'w-acai-bowl': 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&h=400&fit=crop',
+  'w-granola-yogurt': 'https://images.unsplash.com/photo-1571748982800-fa51082c2224?w=600&h=400&fit=crop',
+  // Western - Mains
+  'w-beef-burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop',
+  'w-margherita-pizza': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&h=400&fit=crop',
+  'w-alfredo-pasta': 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&h=400&fit=crop',
+  'w-grilled-salmon': 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop',
+  'w-chicken-parmesan': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600&h=400&fit=crop',
+  'w-steak-frites': 'https://images.unsplash.com/photo-1600891964092-4316c288032e?w=600&h=400&fit=crop',
+  'w-fish-tacos': 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=600&h=400&fit=crop',
+  'w-beef-stew': 'https://images.unsplash.com/photo-1534938665245-537ded2b5e3f?w=600&h=400&fit=crop',
+  'w-chicken-stir-fry': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&h=400&fit=crop',
+  'w-shepherds-pie': 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=600&h=400&fit=crop',
+  'w-bbribs': 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&h=400&fit=crop',
+  'w-caesar-salad': 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=600&h=400&fit=crop',
+  'w-blt-sandwich': 'https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=600&h=400&fit=crop',
+  'w-beef-tacos': 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=600&h=400&fit=crop',
+  'w-chicken-curry': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop',
+  'w-lasagna': 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=600&h=400&fit=crop',
+  'w-chicken-wings': 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&h=400&fit=crop',
+  'w-shrimp-scampi': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop',
+  'w-pork-chops': 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=600&h=400&fit=crop',
+  'w-mushroom-risotto': 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=400&fit=crop',
+  // Western - Sides & Soups
+  'w-garlic-bread': 'https://images.unsplash.com/photo-1619535860434-ba1d8fa12536?w=600&h=400&fit=crop',
+  'w-garden-salad': 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop',
+  'w-french-onion-soup': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop',
+  'w-baked-potato': 'https://images.unsplash.com/photo-1518977676601-b53f82ber633?w=600&h=400&fit=crop',
+  'w-bruschetta': 'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=600&h=400&fit=crop',
+  'w-mac-and-cheese': 'https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?w=600&h=400&fit=crop',
+  'w-coleslaw': 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop',
+  'w-mashed-potatoes': 'https://images.unsplash.com/photo-1518977676601-b53f82ber633?w=600&h=400&fit=crop',
+  'w-tomato-soup': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop',
+  // Western - Desserts
+  'w-chocolate-cake': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=400&fit=crop',
+  'w-tiramisu': 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&h=400&fit=crop',
+  'w-cheesecake-bites': 'https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=600&h=400&fit=crop',
+  'w-apple-pie': 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=600&h=400&fit=crop',
+  'w-brownies': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&h=400&fit=crop',
+  'w-creme-brulee': 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=600&h=400&fit=crop',
+  'w-banana-split': 'https://images.unsplash.com/photo-1432457990754-c8b5f21448de?w=600&h=400&fit=crop',
+  'w-carrot-cake': 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?w=600&h=400&fit=crop',
+  'w-strawberry-shortcake': 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=400&fit=crop',
+  'w-ice-cream-sundae': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&h=400&fit=crop',
+};
+
+/* Category-based fallback images for recipes without specific mapping */
+const CATEGORY_FALLBACKS: Record<string, string[]> = {
+  'Sarapan': [
+    'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=600&h=400&fit=crop',
+  ],
+  'Makan Siang': [
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&h=400&fit=crop',
+  ],
+  'Makan Malam': [
+    'https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+  ],
+  'Snack': [
+    'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1600326145552-327f74b9c189?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=600&h=400&fit=crop',
+  ],
+  'Minuman': [
+    'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop',
+  ],
+  'Dessert': [
+    'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=400&fit=crop',
+  ],
+  'Western': [
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop',
+  ],
+};
+
+function getFallbackImageUrl(recipe: Recipe): string | null {
+  // Check specific recipe ID mapping first
+  if (FOOD_IMAGE_MAP[recipe.id]) {
+    return FOOD_IMAGE_MAP[recipe.id];
+  }
+
+  // Fall back to category-based images using recipe ID hash for consistency
+  const fallbacks = CATEGORY_FALLBACKS[recipe.category] || CATEGORY_FALLBACKS['Western'];
+  if (!fallbacks || fallbacks.length === 0) return null;
+
+  // Use recipe ID to deterministically pick an image
+  let hash = 0;
+  for (let i = 0; i < recipe.id.length; i++) {
+    hash = ((hash << 5) - hash + recipe.id.charCodeAt(i)) | 0;
+  }
+  const index = Math.abs(hash) % fallbacks.length;
+  return fallbacks[index];
+}
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   Mudah: 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
@@ -116,6 +270,8 @@ export function RecipeDetail() {
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
   const [ingredientsExpanded, setIngredientsExpanded] = useState(true);
   const [stepsExpanded, setStepsExpanded] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const prevRecipeIdRef = useRef<string | null>(null);
 
   const recipe = selectedRecipe;
@@ -128,6 +284,8 @@ export function RecipeDetail() {
       setPortionScale(1);
       setCheckedIngredients(new Set());
       setCheckedSteps(new Set());
+      setImageLoaded(false);
+      setImageFailed(false);
     }
   }, [recipe?.id]);
 
@@ -300,8 +458,8 @@ export function RecipeDetail() {
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
             </div>
           ) : (
-            <div className="relative flex h-56 items-center justify-center overflow-hidden">
-              {/* Real image - try local file first, then fall back to API generation */}
+            <div className="relative h-56 overflow-hidden bg-muted">
+              {/* Real food image - show when loaded */}
               <img
                 src={
                   recipe.category === 'Western'
@@ -309,62 +467,63 @@ export function RecipeDetail() {
                     : `/recipes/${recipe.id}.jpg`
                 }
                 alt={recipe.name}
-                className="absolute inset-0 h-full w-full object-cover"
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setImageLoaded(true)}
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
-                  if (!img.dataset.triedApi) {
-                    img.dataset.triedApi = '1';
-                    const params = new URLSearchParams({
-                      id: recipe.id,
-                      name: recipe.name,
-                      western: String(recipe.category === 'Western'),
-                    });
-                    img.src = `/api/recipe-image?${params.toString()}`;
+                  if (!img.dataset.triedFallback) {
+                    img.dataset.triedFallback = '1';
+                    // Try the fallback image
+                    const fallbackUrl = getFallbackImageUrl(recipe);
+                    if (fallbackUrl) {
+                      img.src = fallbackUrl;
+                    } else {
+                      setImageFailed(true);
+                    }
                   } else {
-                    img.style.display = 'none';
+                    setImageFailed(true);
                   }
                 }}
               />
-              <div className={`relative z-10 flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
-                {/* Floating decorative elements */}
-                <motion.div
-                  className="absolute inset-0 overflow-hidden"
-                  aria-hidden="true"
-                >
-                  {[...Array(6)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
-                      style={{
-                        left: `${15 + i * 14}%`,
-                        top: `${20 + (i % 3) * 25}%`,
-                      }}
-                      animate={{
-                        y: [0, -12, 0],
-                        opacity: [0.3, 0.6, 0.3],
-                        scale: [1, 1.1, 1],
-                      }}
-                      transition={{
-                        duration: 4 + i * 0.5,
-                        repeat: Infinity,
-                        delay: i * 0.5,
-                        ease: 'easeInOut',
-                      }}
-                    />
-                  ))}
-                </motion.div>
 
-                {/* Main emoji */}
-                <motion.div
-                  className="relative z-10"
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <span className="text-[100px] leading-none drop-shadow-lg sm:text-[120px]">
+              {/* Emoji fallback - only show when image hasn't loaded or failed */}
+              {!imageLoaded && (
+                <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
+                  <motion.div
+                    className="absolute inset-0 overflow-hidden"
+                    aria-hidden="true"
+                  >
+                    {[...Array(4)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute h-16 w-16 rounded-full bg-white/20 dark:bg-white/10 blur-xl"
+                        style={{
+                          left: `${15 + i * 18}%`,
+                          top: `${20 + (i % 3) * 25}%`,
+                        }}
+                        animate={{
+                          y: [0, -12, 0],
+                          opacity: [0.3, 0.6, 0.3],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 4 + i * 0.5,
+                          repeat: Infinity,
+                          delay: i * 0.5,
+                          ease: 'easeInOut',
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                  <motion.span
+                    className="relative z-10 text-[100px] leading-none drop-shadow-lg sm:text-[120px]"
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  >
                     {recipe.image}
-                  </span>
-                </motion.div>
-              </div>
+                  </motion.span>
+                </div>
+              )}
 
               {/* Fade overlay at bottom */}
               <div className="absolute bottom-0 inset-x-0 z-20 h-16 bg-gradient-to-t from-white dark:from-background" />

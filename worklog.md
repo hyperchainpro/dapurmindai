@@ -142,3 +142,24 @@ Stage Summary:
 - Fallback chain: local file → API generation → emoji fallback
 - 115 western + 26 local = 141 recipes now have real images (out of 397 total)
 - Remaining ~256 western recipes will be generated via background script or on-demand as users browse
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix recipe detail images + remove admin button from settings + simplify admin login
+
+Work Log:
+- Analyzed RecipeDetail.tsx and found root cause of image issue: emoji overlay div with z-10 always rendered on top of <img> tag (default z-index 0), making real images invisible
+- Confirmed 28 Indonesian + 121 western local images exist in /public/recipes/
+- Fixed RecipeDetail.tsx: Added imageLoaded/imageFailed state, removed z-10 overlay, now shows real image with opacity transition when loaded, emoji fallback only when image unavailable
+- Created comprehensive Unsplash fallback image mapping (70+ specific recipe URLs + category-based fallbacks with deterministic hash selection)
+- Removed Admin Marketplace Hub button from ProfilePage settings section
+- Simplified AdminLogin.tsx to match standard login page design: removed ShieldCheck, Lock icons, security badges, "Akses terbatas" text; replaced with clean DapurMind branding, User icon, simple "Masuk" button
+- Fixed duplicate type imports in RecipeDetail.tsx
+- Build verified successfully
+
+Stage Summary:
+- Recipe detail images now properly display real food photos from /public/recipes/ with Unsplash fallback
+- Admin login button removed from user profile settings
+- Admin login page redesigned to clean, standard login appearance
+- Files modified: RecipeDetail.tsx, ProfilePage.tsx, AdminLogin.tsx

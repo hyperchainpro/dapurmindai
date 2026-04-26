@@ -6,12 +6,10 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-  ShieldCheck,
   AlertCircle,
-  Lock,
+  User,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
-import { Bounce } from '@/components/dapurmind/ReactBits';
 
 /* ── Admin credentials (client-side only) ─────────────────── */
 
@@ -72,7 +70,7 @@ export function AdminLogin() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/60 via-white to-amber-50/30 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+    <div className="min-h-screen bg-white dark:bg-background">
       <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen">
         {/* Back button */}
         <motion.button
@@ -91,17 +89,15 @@ export function AdminLogin() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-center text-center"
         >
-          <Bounce intensity={2} delay={0.1}>
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-              <Lock className="h-10 w-10 text-white" />
-            </div>
-          </Bounce>
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
+            <span className="text-3xl">🍳</span>
+          </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Admin Login
+            DapurMind AI
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground max-w-[280px]">
-            Masuk ke panel admin Marketplace Hub untuk mengelola afiliasi dan analitik
+          <p className="mt-1 text-sm text-muted-foreground">
+            Masuk ke akun Anda
           </p>
         </motion.div>
 
@@ -112,28 +108,23 @@ export function AdminLogin() {
           animate="visible"
           className="w-full max-w-sm space-y-4"
         >
-          {/* Security badge */}
-          <div className="mb-2 flex items-center justify-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 dark:bg-emerald-500/10">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-              Akses terbatas - hanya admin
-            </span>
-          </div>
-
           {/* Username */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
               Username
             </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Masukkan username"
-              onKeyDown={handleKeyDown}
-              autoComplete="username"
-              className="h-11 w-full rounded-xl border border-border/60 bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-            />
+            <div className="relative">
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Masukkan username"
+                onKeyDown={handleKeyDown}
+                autoComplete="username"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
           </div>
 
           {/* Password */}
@@ -194,17 +185,9 @@ export function AdminLogin() {
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
-              <>
-                <ShieldCheck className="h-4.5 w-4.5" />
-                Masuk sebagai Admin
-              </>
+              'Masuk'
             )}
           </motion.button>
-
-          {/* Hint */}
-          <p className="pt-2 text-center text-[11px] text-muted-foreground/60">
-            Hubungi developer jika Anda memerlukan akses admin
-          </p>
         </motion.div>
       </div>
     </div>
