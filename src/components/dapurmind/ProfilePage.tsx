@@ -16,6 +16,7 @@ import {
   Trash2,
   Plus,
   X,
+  LogOut,
   ChevronRight,
   ChefHat,
   Sparkles,
@@ -145,6 +146,13 @@ export function ProfilePage() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('dapurmind-store');
       window.location.reload();
+    }
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dapurmind-store');
+      window.location.href = '/';
     }
   }, []);
 
@@ -435,6 +443,24 @@ export function ProfilePage() {
                 ID
               </Badge>
             </div>
+
+            {/* Logout / Keluar */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleLogout}
+              className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-card p-3.5 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10">
+                  <LogOut className="h-4.5 w-4.5 text-rose-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-rose-600 dark:text-rose-400">Keluar</p>
+                  <p className="text-xs text-muted-foreground">Logout dari akun</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </motion.button>
 
             {/* About */}
             <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5">

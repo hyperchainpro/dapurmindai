@@ -270,13 +270,25 @@ export function RecipeDetail() {
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
   const [ingredientsExpanded, setIngredientsExpanded] = useState(true);
   const [stepsExpanded, setStepsExpanded] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
+  const [heroImgSrc, setHeroImgSrc] = useState<string | null>(null);
+  const [showEmoji, setShowEmoji] = useState(true);
   const prevRecipeIdRef = useRef<string | null>(null);
 
   const recipe = selectedRecipe;
 
-  // Reset state when recipe changes via useEffect (not during render)
+  // Compute image URL: prefer local file, fallback to Unsplash
+  const recipeImageUrl = useMemo(() => {
+    if (!recipe) return null;
+    if (recipe.category === 'Western') return `/recipes/western/${recipe.id}.jpg`;
+    return `/recipes/${recipe.id}.jpg`;
+  }, [recipe]);
+
+  const fallbackImageUrl = useMemo(() => {
+    if (!recipe) return null;
+    return getFallbackImageUrl(recipe);
+  }, [recipe]);
+
+  // Preload image and determine which source works
   useEffect(() => {
     const recipeId = recipe?.id ?? null;
     if (recipeId !== prevRecipeIdRef.current) {
@@ -284,10 +296,40 @@ export function RecipeDetail() {
       setPortionScale(1);
       setCheckedIngredients(new Set());
       setCheckedSteps(new Set());
-      setImageLoaded(false);
-      setImageFailed(false);
+      setHeroImgSrc(null);
+      setShowEmoji(true);
     }
   }, [recipe?.id]);
+
+  // Try loading local image, then fallback
+  useEffect(() => {
+    if (!recipeImageUrl) return;
+    setShowEmoji(true);
+    setHeroImgSrc(null);
+
+    const img = new Image();
+    img.onload = () => {
+      setHeroImgSrc(recipeImageUrl);
+      setShowEmoji(false);
+    };
+    img.onerror = () => {
+      // Local failed, try Unsplash fallback
+      if (fallbackImageUrl) {
+        const img2 = new Image();
+        img2.onload = () => {
+          setHeroImgSrc(fallbackImageUrl);
+          setShowEmoji(false);
+        };
+        img2.onerror = () => {
+          setShowEmoji(true);
+        };
+        img2.src = fallbackImageUrl;
+      } else {
+        setShowEmoji(true);
+      }
+    };
+    img.src = recipeImageUrl;
+  }, [recipeImageUrl, fallbackImageUrl]);
 
   /* ── Compute scaled values ───────────────────────── */
   const scaledServings = useMemo(
@@ -459,35 +501,17 @@ export function RecipeDetail() {
             </div>
           ) : (
             <div className="relative h-56 overflow-hidden bg-muted">
-              {/* Real food image - show when loaded */}
-              <img
-                src={
-                  recipe.category === 'Western'
-                    ? `/recipes/western/${recipe.id}.jpg`
-                    : `/recipes/${recipe.id}.jpg`
-                }
-                alt={recipe.name}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                onLoad={() => setImageLoaded(true)}
-                onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  if (!img.dataset.triedFallback) {
-                    img.dataset.triedFallback = '1';
-                    // Try the fallback image
-                    const fallbackUrl = getFallbackImageUrl(recipe);
-                    if (fallbackUrl) {
-                      img.src = fallbackUrl;
-                    } else {
-                      setImageFailed(true);
-                    }
-                  } else {
-                    setImageFailed(true);
-                  }
-                }}
-              />
+              {/* Real food image */}
+              {heroImgSrc && !showEmoji && (
+                <img
+                  src={heroImgSrc}
+                  alt={recipe.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              )}
 
-              {/* Emoji fallback - only show when image hasn't loaded or failed */}
-              {!imageLoaded && (
+              {/* Emoji fallback - only show when no real image available */}
+              {showEmoji && (
                 <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>
                   <motion.div
                     className="absolute inset-0 overflow-hidden"
@@ -523,6 +547,11 @@ export function RecipeDetail() {
                     {recipe.image}
                   </motion.span>
                 </div>
+              )}
+
+              {/* Gradient overlay for readability */}
+              {!showEmoji && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               )}
 
               {/* Fade overlay at bottom */}
