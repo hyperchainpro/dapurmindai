@@ -38,10 +38,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ShineBorder } from '@/components/dapurmind/MagicUI';
 import { BentoGrid, BentoGridItem } from '@/components/dapurmind/MagicUI';
 import { NumberTicker } from '@/components/dapurmind/MagicUI';
-import { Particles } from '@/components/dapurmind/MagicUI';
-import { GlowingText } from '@/components/dapurmind/ReactBits';
+
 import { StarBorder } from '@/components/dapurmind/ReactBits';
-import { ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
 /* ── Animation Variants ─────────────────────────────────── */
@@ -370,7 +368,6 @@ function TipCard({
   description: string;
 }) {
   return (
-    <ClickSpark color="emerald" count={6}>
       <motion.div
         variants={fadeUp}
         className="bg-card border border-border/50 rounded-xl p-4 cursor-pointer hover:border-emerald-500/40 transition-colors"
@@ -383,7 +380,6 @@ function TipCard({
           </div>
         </div>
       </motion.div>
-    </ClickSpark>
   );
 }
 
@@ -519,9 +515,9 @@ export function AdminAnalytics() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <GlowingText color="emerald" intensity={2} className="text-xl">
+          <span className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">
             Analitik Afiliasi
-          </GlowingText>
+          </span>
         </div>
         <EmptyState />
       </div>
@@ -548,9 +544,9 @@ export function AdminAnalytics() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <GlowingText color="emerald" intensity={2} className="text-xl">
+          <span className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">
             Analitik Afiliasi
-          </GlowingText>
+          </span>
         </div>
 
         <motion.div
@@ -605,7 +601,8 @@ export function AdminAnalytics() {
             className="rounded-xl"
           >
             <BentoGridItem className="relative bg-emerald-50/50 dark:bg-emerald-950/30">
-              <Particles count={8} sizeRange={[2, 4]} colors={['#10b981', '#34d399', '#6ee7b7']} />
+              <div className="absolute top-2 right-3 w-8 h-8 rounded-full bg-emerald-400/20 blur-md pointer-events-none" />
+              <div className="absolute bottom-3 left-4 w-5 h-5 rounded-full bg-emerald-300/15 blur-sm pointer-events-none" />
               <div className="relative z-10">
                 <div className="flex items-center gap-1.5 mb-2">
                   <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -624,7 +621,8 @@ export function AdminAnalytics() {
 
           {/* Akun Aktif */}
           <BentoGridItem className="relative bg-blue-50/50 dark:bg-blue-950/30">
-            <Particles count={5} sizeRange={[2, 4]} colors={['#3b82f6', '#60a5fa']} />
+            <div className="absolute top-2 right-3 w-7 h-7 rounded-full bg-blue-400/20 blur-md pointer-events-none" />
+            <div className="absolute bottom-3 left-4 w-5 h-5 rounded-full bg-blue-300/15 blur-sm pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center gap-1.5 mb-2">
                 <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -642,7 +640,8 @@ export function AdminAnalytics() {
 
           {/* Produk Terlink */}
           <BentoGridItem className="relative bg-amber-50/50 dark:bg-amber-950/30">
-            <Particles count={5} sizeRange={[2, 4]} colors={['#f59e0b', '#fbbf24']} />
+            <div className="absolute top-2 right-3 w-7 h-7 rounded-full bg-amber-400/20 blur-md pointer-events-none" />
+            <div className="absolute bottom-3 left-4 w-5 h-5 rounded-full bg-amber-300/15 blur-sm pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center gap-1.5 mb-2">
                 <ShoppingBag className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -660,7 +659,8 @@ export function AdminAnalytics() {
 
           {/* Platform Aktif */}
           <BentoGridItem className="relative bg-violet-50/50 dark:bg-violet-950/30">
-            <Particles count={5} sizeRange={[2, 4]} colors={['#8b5cf6', '#a78bfa']} />
+            <div className="absolute top-2 right-3 w-7 h-7 rounded-full bg-violet-400/20 blur-md pointer-events-none" />
+            <div className="absolute bottom-3 left-4 w-5 h-5 rounded-full bg-violet-300/15 blur-sm pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center gap-1.5 mb-2">
                 <Zap className="h-4 w-4 text-violet-600 dark:text-violet-400" />
@@ -869,9 +869,9 @@ export function AdminAnalytics() {
       {tips.length > 0 && (
         <motion.div variants={fadeUp} className="space-y-3">
           <div className="flex items-center gap-2 mb-1">
-            <GlowingText color="amber" intensity={1} className="text-sm">
+            <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
               💡 Tips Performa
-            </GlowingText>
+            </span>
           </div>
           <motion.div
             variants={stagger}

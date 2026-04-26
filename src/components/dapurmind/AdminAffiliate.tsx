@@ -20,6 +20,7 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  LogOut,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { AffiliateAccount } from '@/types';
@@ -41,8 +42,8 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Particles, AnimatedList, NumberTicker } from '@/components/dapurmind/MagicUI';
-import { GlowingText, ClickSpark, Bounce } from '@/components/dapurmind/ReactBits';
+import { AnimatedList } from '@/components/dapurmind/MagicUI';
+import { Bounce } from '@/components/dapurmind/ReactBits';
 
 /* ── Animation variants ───────────────────────────────────────── */
 
@@ -155,9 +156,7 @@ function SwipeableAccountCard({ account, onEdit, onDelete }: SwipeableAccountCar
                 </p>
                 <div className="mt-1">
                   {isActive ? (
-                    <GlowingText color="emerald" intensity={1} className="text-[11px]">
-                      Aktif
-                    </GlowingText>
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Aktif</span>
                   ) : (
                     <span className="text-[11px] text-muted-foreground">Nonaktif</span>
                   )}
@@ -165,8 +164,7 @@ function SwipeableAccountCard({ account, onEdit, onDelete }: SwipeableAccountCar
               </div>
 
               {/* Edit button */}
-              <ClickSpark color="emerald" count={4}>
-                <motion.button
+              <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -177,7 +175,6 @@ function SwipeableAccountCard({ account, onEdit, onDelete }: SwipeableAccountCar
                 >
                   <Edit3 className="h-4 w-4 text-muted-foreground" />
                 </motion.button>
-              </ClickSpark>
             </div>
           </CardContent>
         </Card>
@@ -211,7 +208,6 @@ function QuickSetupCard({ marketplace, isConnected, onAdd }: QuickSetupCardProps
           </div>
         </div>
       ) : (
-        <ClickSpark color="amber" count={5}>
           <button
             onClick={() => onAdd(marketplace)}
             className="w-full rounded-xl border border-dashed border-border/60 bg-muted/30 p-3 transition-colors hover:bg-muted/50 text-left"
@@ -227,7 +223,6 @@ function QuickSetupCard({ marketplace, isConnected, onAdd }: QuickSetupCardProps
               <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
             </div>
           </button>
-        </ClickSpark>
       )}
     </motion.div>
   );
@@ -460,9 +455,7 @@ export function AdminAffiliate() {
   /* ── Render ────────────────────────────────────────────────── */
 
   return (
-    <div className="relative min-h-screen pb-28">
-      {/* Subtle particles background */}
-      <Particles count={15} sizeRange={[2, 5]} className="opacity-40" />
+    <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
 
       <motion.div
         variants={stagger}
@@ -473,8 +466,7 @@ export function AdminAffiliate() {
         {/* ── Header ──────────────────────────────────────────── */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
-            <ClickSpark color="emerald" count={4}>
-              <motion.button
+            <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={goBack}
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
@@ -482,20 +474,17 @@ export function AdminAffiliate() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </motion.button>
-            </ClickSpark>
 
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold leading-tight">
-                <GlowingText color="emerald" intensity={2}>
-                  Akun Afiliasi Saya
-                </GlowingText>
+              <h1 className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 leading-tight">
+                Akun Afiliasi Saya
               </h1>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Kelola koneksi marketplace
               </p>
             </div>
 
-            <ClickSpark color="amber" count={4}>
+            <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setScreen('admin-analytics')}
@@ -504,7 +493,18 @@ export function AdminAffiliate() {
               >
                 <Settings className="h-5 w-5 text-muted-foreground" />
               </motion.button>
-            </ClickSpark>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  useAppStore.getState().setAdminLoggedIn(false);
+                  useAppStore.getState().setScreen('dashboard');
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                aria-label="Logout admin"
+              >
+                <LogOut className="h-5 w-5 text-red-500" />
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
@@ -556,13 +556,9 @@ export function AdminAffiliate() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold">
-                  <GlowingText
-                    color={hasActiveAccounts ? 'emerald' : 'amber'}
-                    intensity={2}
-                    className="text-base"
-                  >
+                  <span className={`text-base font-bold tracking-tight ${hasActiveAccounts ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                     {connectedCount}
-                  </GlowingText>
+                  </span>
                   <span className="text-sm text-muted-foreground font-normal">
                     {' '}dari {totalAvailable} marketplace terhubung
                   </span>
@@ -635,15 +631,13 @@ export function AdminAffiliate() {
                 <p className="mt-1 text-sm text-muted-foreground max-w-xs">
                   Hubungkan marketplace favoritmu untuk mulai mendapatkan komisi dari setiap pembelian bahan masakan.
                 </p>
-                <ClickSpark color="emerald" count={8}>
-                  <Button
+                <Button
                     onClick={() => openAddDialog()}
                     className="mt-5 gap-2 rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/25 hover:bg-emerald-600"
                   >
                     <Plus className="h-4 w-4" />
                     Tambah Akun Pertama
                   </Button>
-                </ClickSpark>
               </div>
             </Bounce>
           </motion.div>
@@ -701,9 +695,9 @@ export function AdminAffiliate() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-amber-500 text-white">
                   <Plus className="h-4 w-4" />
                 </div>
-                <GlowingText color="emerald" intensity={1}>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   Tambah Akun Afiliasi
-                </GlowingText>
+                </span>
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm">
                 Hubungkan marketplace untuk mulai monetisasi
@@ -810,7 +804,6 @@ export function AdminAffiliate() {
           </div>
 
           <div className="border-t border-border/40 bg-muted/30 px-5 py-4">
-            <ClickSpark color="emerald" count={10}>
               <Button
                 onClick={handleAddSubmit}
                 disabled={!addPlatform || !addAffiliateId.trim() || !addBaseUrlTemplate.trim() || saving}
@@ -823,7 +816,6 @@ export function AdminAffiliate() {
                 )}
                 Simpan
               </Button>
-            </ClickSpark>
           </div>
         </DialogContent>
       </Dialog>
@@ -839,9 +831,9 @@ export function AdminAffiliate() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
                   <Edit3 className="h-4 w-4" />
                 </div>
-                <GlowingText color="amber" intensity={1}>
+                <span className="font-bold text-amber-600 dark:text-amber-400">
                   Edit Akun Afiliasi
-                </GlowingText>
+                </span>
               </DialogTitle>
               <DialogDescription className="mt-1 text-sm">
                 {editingAccount ? getMarketplace(editingAccount.platform)?.name ?? editingAccount.platform : ''}
@@ -925,7 +917,6 @@ export function AdminAffiliate() {
           </div>
 
           <div className="border-t border-border/40 bg-muted/30 px-5 py-4">
-            <ClickSpark color="amber" count={10}>
               <Button
                 onClick={handleEditSubmit}
                 disabled={!editAffiliateId.trim() || !editBaseUrlTemplate.trim() || saving}
@@ -938,7 +929,6 @@ export function AdminAffiliate() {
                 )}
                 Simpan Perubahan
               </Button>
-            </ClickSpark>
           </div>
         </DialogContent>
       </Dialog>
@@ -978,7 +968,6 @@ export function AdminAffiliate() {
             >
               Batal
             </Button>
-            <ClickSpark color="rose" count={8}>
               <Button
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
@@ -991,7 +980,6 @@ export function AdminAffiliate() {
                 )}
                 Hapus
               </Button>
-            </ClickSpark>
           </div>
         </DialogContent>
       </Dialog>

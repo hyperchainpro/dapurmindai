@@ -91,3 +91,33 @@ Stage Summary:
 - RecipeBrowser layout structure fixed (no more duplicate rendering)
 - Pagination working (50 per page)
 - Chat has delete/edit/copy functionality like DeepSeek style
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Separate Admin Marketplace Hub login + Performance optimization
+
+Work Log:
+- Created dedicated AdminLogin screen component at src/components/dapurmind/AdminLogin.tsx
+  - Login form matching app's design language (emerald gradient, rounded-xl inputs)
+  - Predetermined credentials: admin / dapurmind2025
+  - Show/hide password toggle, error messages, loading state
+- Added 'admin-login' to AppScreen type
+- Added isAdminLoggedIn state to useAppState store
+- Added auth guard in ScreenRouter: redirects to admin-login if not authenticated
+- Hid bottom nav on admin screens (admin-login, admin-affiliate, admin-analytics)
+- Replaced "Kelola Afiliasi" button in ProfilePage with "Admin Marketplace Hub" that navigates to admin-login
+- Added logout button (red) in AdminAffiliate header
+- Performance optimizations:
+  - Removed Particles components from AdminAffiliate (replaced with CSS gradient)
+  - Removed GlowingText from AdminAffiliate (replaced with plain styled elements)
+  - Removed ClickSpark wrappers from AdminAffiliate buttons
+  - Removed BorderBeam from MarketplaceHub bottom bar (replaced with CSS gradient border)
+  - Removed ClickSpark wrappers from MarketplaceHub (kept 1 key CTA)
+  - Replaced ShineBorder in ChatInterface AI messages with simple border div
+
+Stage Summary:
+- Admin login is now separate from user settings with its own screen
+- Admin credentials: username "admin", password "dapurmind2025"
+- Auth guard prevents direct URL access to admin screens
+- Performance improved by removing heavy particle effects, reducing ClickSpark usage, simplifying chat message rendering

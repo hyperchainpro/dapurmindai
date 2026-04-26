@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/hooks/useAppState';
@@ -48,6 +49,10 @@ const MealPlanDetail = dynamic(
   () => import('@/components/dapurmind/MealPlanDetail').then(m => ({ default: m.MealPlanDetail })),
   { ssr: false }
 );
+const AdminLogin = dynamic(
+  () => import('@/components/dapurmind/AdminLogin').then(m => ({ default: m.AdminLogin })),
+  { ssr: false }
+);
 const MarketplaceHub = dynamic(
   () => import('@/components/dapurmind/MarketplaceHub').then(m => ({ default: m.MarketplaceHub })),
   { ssr: false }
@@ -65,6 +70,15 @@ const AdminAnalytics = dynamic(
 
 function ScreenRouter() {
   const currentScreen = useAppStore((s) => s.currentScreen);
+  const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
+  const setScreen = useAppStore((s) => s.setScreen);
+
+  // Auth guard: redirect to admin-login if not authenticated
+  React.useEffect(() => {
+    if ((currentScreen === 'admin-affiliate' || currentScreen === 'admin-analytics') && !isAdminLoggedIn) {
+      setScreen('admin-login');
+    }
+  }, [currentScreen, isAdminLoggedIn, setScreen]);
 
   return (
     <AnimatePresence mode="wait">
@@ -123,6 +137,11 @@ function ScreenRouter() {
           <MarketplaceHub />
         </motion.div>
       )}
+      {currentScreen === 'admin-login' && (
+        <motion.div key="admin-login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <AdminLogin />
+        </motion.div>
+      )}
       {currentScreen === 'admin-affiliate' && (
         <motion.div key="admin-affiliate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <AdminAffiliate />
@@ -141,7 +160,9 @@ function ScreenRouter() {
 
 export default function Home() {
   const currentScreen = useAppStore((s) => s.currentScreen);
-  const showNav = currentScreen !== 'splash' && currentScreen !== 'onboarding';
+  const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
+  const hideNavScreens = ['splash', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
+  const showNav = !hideNavScreens.includes(currentScreen);
 
   return (
     <main className="relative">

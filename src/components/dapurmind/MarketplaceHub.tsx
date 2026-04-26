@@ -39,7 +39,6 @@ import {
 } from '@/components/ui/dialog';
 import {
   ShineBorder,
-  BorderBeam,
   BentoGrid,
   BentoGridItem,
   NumberTicker,
@@ -200,19 +199,13 @@ function MarketplaceHCard({
 
   if (isTopPick) {
     return (
-      <ClickSpark color="#10b981" count={8}>
         <ShineBorder borderWidth={2} borderRadius={16} duration={4} color={['#10b981', '#f59e0b', '#10b981']}>
           {cardContent}
         </ShineBorder>
-      </ClickSpark>
     );
   }
 
-  return (
-    <ClickSpark color="#f59e0b" count={5}>
-      {cardContent}
-    </ClickSpark>
-  );
+  return cardContent;
 }
 
 /* ── Product Recommendation Card ──────────────────────────────── */
@@ -249,7 +242,6 @@ function ProductCard({
               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 {item.estimatedPrice ? formatRupiah(item.estimatedPrice) : 'Est. ~Rp 15.000'}
               </span>
-              <ClickSpark color="#10b981" count={4}>
                 <motion.button
                   whileTap={{ scale: 0.92 }}
                   onClick={() => onBuy(item)}
@@ -258,7 +250,6 @@ function ProductCard({
                   <ShoppingBag className="h-2.5 w-2.5" />
                   Beli
                 </motion.button>
-              </ClickSpark>
             </div>
           </div>
         </div>
@@ -282,7 +273,6 @@ function AILinkResultCard({ result, index }: { result: AILinkResult; index: numb
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
     >
-      <ClickSpark color="#10b981" count={4}>
         <button
           onClick={() => window.open(result.affiliateUrl, '_blank', 'noopener,noreferrer')}
           className="flex w-full items-center gap-3 rounded-xl border border-border/40 bg-card p-3 text-left transition-all hover:bg-muted/30 hover:shadow-sm"
@@ -303,7 +293,6 @@ function AILinkResultCard({ result, index }: { result: AILinkResult; index: numb
             <ChevronRight className="h-3.5 w-3.5" />
           </div>
         </button>
-      </ClickSpark>
     </motion.div>
   );
 }
@@ -771,7 +760,6 @@ export function MarketplaceHub() {
           <motion.div variants={stagger} className="space-y-2">
             {/* Tokopedia Now */}
             <motion.div variants={fadeUp}>
-              <ClickSpark color="#22c55e" count={6}>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllTokopedia}
@@ -789,12 +777,10 @@ export function MarketplaceHub() {
                   </div>
                   <ExternalLink className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
                 </motion.button>
-              </ClickSpark>
             </motion.div>
 
             {/* Shopee Segar */}
             <motion.div variants={fadeUp}>
-              <ClickSpark color="#f97316" count={6}>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllShopee}
@@ -812,12 +798,10 @@ export function MarketplaceHub() {
                   </div>
                   <ExternalLink className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
                 </motion.button>
-              </ClickSpark>
             </motion.div>
 
             {/* Multi-Platform */}
             <motion.div variants={fadeUp}>
-              <ClickSpark color="#10b981" count={8}>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllMulti}
@@ -844,7 +828,6 @@ export function MarketplaceHub() {
                     ))}
                   </div>
                 </motion.button>
-              </ClickSpark>
             </motion.div>
           </motion.div>
         </motion.section>
@@ -888,7 +871,6 @@ export function MarketplaceHub() {
                   }}
                   id="ai-product-input"
                 />
-                <ClickSpark color="#f59e0b" count={6}>
                   <Button
                     size="sm"
                     onClick={() => {
@@ -911,7 +893,6 @@ export function MarketplaceHub() {
                     )}
                     Cari
                   </Button>
-                </ClickSpark>
               </div>
             </div>
           </motion.div>
@@ -920,14 +901,19 @@ export function MarketplaceHub() {
 
       {/* ── Fixed Bottom Bar ──────────────────────────────── */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
-        <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 shadow-lg backdrop-blur-xl">
-          <BorderBeam
-            duration={6}
-            size={120}
-            color={['#10b981', '#f59e0b', '#10b981']}
-            borderWidth={1.5}
-            borderRadius={16}
-          />
+        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-card p-4 shadow-lg backdrop-blur-xl">
+          {/* Animated gradient border replacement */}
+          <div className="pointer-events-none absolute inset-0 rounded-2xl">
+            <div className="absolute inset-0 rounded-2xl border-2 border-transparent"
+              style={{
+                background: 'linear-gradient(var(--tw-gradient-from, #10b981), #f59e0b, var(--tw-gradient-to, #10b981)) border-box',
+                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+                opacity: 0.4,
+              }}
+            />
+          </div>
 
           <div className="relative z-10 space-y-2">
             {/* Price summary */}

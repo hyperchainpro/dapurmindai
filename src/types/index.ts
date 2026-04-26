@@ -115,6 +115,7 @@ export type AppScreen =
   | 'recipe-detail'
   | 'meal-plan-detail'
   | 'marketplace'
+  | 'admin-login'
   | 'admin-affiliate'
   | 'admin-analytics';
 

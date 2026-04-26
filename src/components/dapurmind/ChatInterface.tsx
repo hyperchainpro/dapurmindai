@@ -235,14 +235,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
       </div>
 
       <div className="max-w-[82%]">
-        <ShineBorder
-          borderRadius={16}
-          borderWidth={1.5}
-          duration={8}
-          color={['#10b981', '#34d399', '#6ee7b7']}
-          className="mb-1"
-        >
-          <div className="rounded-2xl bg-card px-4 py-3 shadow-sm">
+        <div className="mb-1 rounded-2xl border border-emerald-200/50 dark:border-emerald-500/20 bg-card px-4 py-3 shadow-sm">
             {/* Chef name badge */}
             <div className="mb-1.5 flex items-center gap-1.5">
               <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -279,7 +272,6 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
               </motion.div>
             </div>
           </div>
-        </ShineBorder>
 
         {/* Action buttons if meal plan is present */}
         {containsMealPlan && (

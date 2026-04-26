@@ -437,19 +437,19 @@ export function ProfilePage() {
               </Badge>
             </div>
 
-            {/* Admin Affiliate */}
+            {/* Admin Login */}
             <motion.button
               whileTap={{ scale: 0.98 }}
-              onClick={() => setScreen('admin-affiliate' as AppScreen)}
+              onClick={() => setScreen('admin-login' as AppScreen)}
               className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-card p-3.5 text-left"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
-                  <ShoppingBag className="h-4.5 w-4.5 text-emerald-500" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10">
+                  <ShoppingBag className="h-4.5 w-4.5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Kelola Afiliasi</p>
-                  <p className="text-xs text-muted-foreground">Admin marketplace hub</p>
+                  <p className="text-sm font-medium">Admin Marketplace Hub</p>
+                  <p className="text-xs text-muted-foreground">Login untuk mengelola afiliasi</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />

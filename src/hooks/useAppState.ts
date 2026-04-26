@@ -63,6 +63,10 @@ interface AppState {
   isAILoading: boolean;
   setAILoading: (loading: boolean) => void;
 
+  // Admin auth
+  isAdminLoggedIn: boolean;
+  setAdminLoggedIn: (val: boolean) => void;
+
   // Affiliate
   affiliateAccounts: AffiliateAccount[];
   setAffiliateAccounts: (accounts: AffiliateAccount[]) => void;
@@ -188,6 +192,10 @@ export const useAppStore = create<AppState>()(
       // Loading
       isAILoading: false,
       setAILoading: (loading) => set({ isAILoading: loading }),
+
+      // Admin auth
+      isAdminLoggedIn: false,
+      setAdminLoggedIn: (val) => set({ isAdminLoggedIn: val }),
 
       // Affiliate
       affiliateAccounts: [],
