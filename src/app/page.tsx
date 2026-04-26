@@ -10,7 +10,7 @@ import type { AppScreen } from '@/types';
 /* ── Lazy-loaded screen components ──────────────────────────── */
 
 const SplashScreen = dynamic(
-  () => import('@/components/dapurmind/SplashScreen').then(m => ({ default: m.SplashScreen })),
+  () => import('@/components/dapurmind/SplashScreen'),
   { ssr: false }
 );
 const OnboardingFlow = dynamic(
