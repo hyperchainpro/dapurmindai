@@ -695,21 +695,34 @@ function RecipeCard({
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
-            ) : localImagePath ? (
+            ) : (
               <img
                 src={localImagePath}
                 alt={recipe.name}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
+                onError={(e) => {
+                  const img = e.target as HTMLImageElement;
+                  if (!img.dataset.triedApi) {
+                    img.dataset.triedApi = '1';
+                    const params = new URLSearchParams({
+                      id: recipe.id,
+                      name: recipe.name,
+                      western: String(isWestern),
+                    });
+                    img.src = `/api/recipe-image?${params.toString()}`;
+                  } else {
+                    img.style.display = 'none';
+                    const parent = img.parentElement;
+                    if (parent && !parent.querySelector('.emoji-fallback')) {
+                      const span = document.createElement('span');
+                      span.className = 'emoji-fallback text-5xl';
+                      span.textContent = recipe.image;
+                      parent.appendChild(span);
+                    }
+                  }
+                }}
               />
-            ) : (
-              <motion.span
-                className="text-5xl"
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                {recipe.image}
-              </motion.span>
             )}
 
             {/* API badge */}

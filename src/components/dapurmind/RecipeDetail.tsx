@@ -301,13 +301,28 @@ export function RecipeDetail() {
             </div>
           ) : (
             <div className="relative flex h-56 items-center justify-center overflow-hidden">
-              {/* Real image attempt for local recipes */}
+              {/* Real image - try local file first, then fall back to API generation */}
               <img
-                src={recipe.category === 'Western' ? `/recipes/western/${recipe.id}.jpg` : `/recipes/${recipe.id}.jpg`}
+                src={
+                  recipe.category === 'Western'
+                    ? `/recipes/western/${recipe.id}.jpg`
+                    : `/recipes/${recipe.id}.jpg`
+                }
                 alt={recipe.name}
                 className="absolute inset-0 h-full w-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
+                  const img = e.target as HTMLImageElement;
+                  if (!img.dataset.triedApi) {
+                    img.dataset.triedApi = '1';
+                    const params = new URLSearchParams({
+                      id: recipe.id,
+                      name: recipe.name,
+                      western: String(recipe.category === 'Western'),
+                    });
+                    img.src = `/api/recipe-image?${params.toString()}`;
+                  } else {
+                    img.style.display = 'none';
+                  }
                 }}
               />
               <div className={`relative z-10 flex h-full w-full items-center justify-center bg-gradient-to-br ${getGradient(recipe.image)}`}>

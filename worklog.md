@@ -121,3 +121,24 @@ Stage Summary:
 - Admin credentials: username "admin", password "dapurmind2025"
 - Auth guard prevents direct URL access to admin screens
 - Performance improved by removing heavy particle effects, reducing ClickSpark usage, simplifying chat message rendering
+
+---
+Task ID: 5
+Agent: Main Agent
+Task: Integrate real images for recipe detail and browser pages
+
+Work Log:
+- Created /api/recipe-image API endpoint that generates food images on-demand using z-ai-generate CLI
+- Images are cached to public/recipes/western/ after first generation (immutable cache headers)
+- Updated RecipeDetail.tsx: img src falls back to /api/recipe-image?... when local image 404s
+- Updated RecipeBrowser.tsx: same fallback pattern, plus emoji fallback if API also fails
+- Fixed RecipeBrowser.tsx syntax error (orphaned ternary branch after removing emoji-only path)
+- API route fixed: changed from require('child_process') to static import { execSync }
+- Generated 115+ western recipe images so far (was 96 at start), 26 local recipes already had images
+- Background generation script running to continue generating remaining ~270 western recipe images
+
+Stage Summary:
+- On-demand image generation via API: /api/recipe-image?id=xxx&name=xxx&western=true
+- Fallback chain: local file → API generation → emoji fallback
+- 115 western + 26 local = 141 recipes now have real images (out of 397 total)
+- Remaining ~256 western recipes will be generated via background script or on-demand as users browse
