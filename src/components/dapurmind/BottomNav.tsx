@@ -25,8 +25,9 @@ function BottomNavInner() {
   const currentScreen = useAppStore((s) => s.currentScreen);
   const setScreen = useAppStore((s) => s.setScreen);
 
-  // Hide on splash and onboarding
-  if (currentScreen === 'splash' || currentScreen === 'onboarding') {
+  // Hide on splash, auth screens and onboarding
+  const hiddenScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
+  if (hiddenScreens.includes(currentScreen)) {
     return null;
   }
 

@@ -142,6 +142,8 @@ export function ProfilePage() {
     [user, setUser]
   );
 
+  const logout = useAppStore((s) => s.logout);
+
   const handleResetData = useCallback(() => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('dapurmind-store');
@@ -150,11 +152,8 @@ export function ProfilePage() {
   }, []);
 
   const handleLogout = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('dapurmind-store');
-      window.location.href = '/';
-    }
-  }, []);
+    logout();
+  }, [logout]);
 
   const handleMealPlanTap = useCallback(
     (index: number) => {

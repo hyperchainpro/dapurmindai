@@ -1,5 +1,7 @@
 export interface UserProfile {
   id: string;
+  username?: string;
+  email?: string;
   name: string;
   familySize: number;
   allergies: string[];
@@ -105,6 +107,9 @@ export interface Achievement {
 
 export type AppScreen =
   | 'splash'
+  | 'login'
+  | 'register'
+  | 'forgot-password'
   | 'onboarding'
   | 'dashboard'
   | 'chat'
@@ -118,6 +123,18 @@ export type AppScreen =
   | 'admin-login'
   | 'admin-affiliate'
   | 'admin-analytics';
+
+/* ── Auth Types ────────────────────────────────────── */
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  password: string;
+  createdAt: string;
+  isOnboarded: boolean;
+}
 
 /* ── Affiliate Types ──────────────────────────────────── */
 

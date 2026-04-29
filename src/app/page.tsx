@@ -13,6 +13,18 @@ const SplashScreen = dynamic(
   () => import('@/components/dapurmind/SplashScreen'),
   { ssr: false }
 );
+const LoginPage = dynamic(
+  () => import('@/components/dapurmind/LoginPage').then(m => ({ default: m.default })),
+  { ssr: false }
+);
+const RegisterPage = dynamic(
+  () => import('@/components/dapurmind/RegisterPage').then(m => ({ default: m.default })),
+  { ssr: false }
+);
+const ForgotPasswordPage = dynamic(
+  () => import('@/components/dapurmind/ForgotPasswordPage').then(m => ({ default: m.default })),
+  { ssr: false }
+);
 const OnboardingFlow = dynamic(
   () => import('@/components/dapurmind/OnboardingFlow').then(m => ({ default: m.default })),
   { ssr: false }
@@ -71,6 +83,7 @@ const AdminAnalytics = dynamic(
 function ScreenRouter() {
   const currentScreen = useAppStore((s) => s.currentScreen);
   const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
+  const isLoggedIn = useAppStore((s) => s.isLoggedIn);
   const setScreen = useAppStore((s) => s.setScreen);
 
   // Auth guard: redirect to admin-login if not authenticated
@@ -80,11 +93,35 @@ function ScreenRouter() {
     }
   }, [currentScreen, isAdminLoggedIn, setScreen]);
 
+  // User auth guard: redirect to login if not authenticated (skip auth screens & splash)
+  React.useEffect(() => {
+    const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding'];
+    const isAuthScreen = authScreens.includes(currentScreen);
+    if (!isLoggedIn && !isAuthScreen) {
+      setScreen('login');
+    }
+  }, [currentScreen, isLoggedIn, setScreen]);
+
   return (
     <AnimatePresence mode="wait">
       {currentScreen === 'splash' && (
         <motion.div key="splash" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
           <SplashScreen />
+        </motion.div>
+      )}
+      {currentScreen === 'login' && (
+        <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+          <LoginPage />
+        </motion.div>
+      )}
+      {currentScreen === 'register' && (
+        <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+          <RegisterPage />
+        </motion.div>
+      )}
+      {currentScreen === 'forgot-password' && (
+        <motion.div key="forgot-password" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+          <ForgotPasswordPage />
         </motion.div>
       )}
       {currentScreen === 'onboarding' && (
@@ -160,8 +197,7 @@ function ScreenRouter() {
 
 export default function Home() {
   const currentScreen = useAppStore((s) => s.currentScreen);
-  const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
-  const hideNavScreens = ['splash', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
+  const hideNavScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
   const showNav = !hideNavScreens.includes(currentScreen);
 
   return (

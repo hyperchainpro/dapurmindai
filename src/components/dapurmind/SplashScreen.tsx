@@ -37,6 +37,7 @@ const FLOATING_EMOJIS: FloatingEmoji[] = [
 export default function SplashScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
   const isDark = useAppStore((s) => s.isDark);
+  const firstLaunch = useAppStore((s) => s.firstLaunch);
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const emojis = FLOATING_EMOJIS;
@@ -64,7 +65,8 @@ export default function SplashScreen() {
 
   const handleExitComplete = () => {
     if (!isVisible) {
-      setScreen('onboarding');
+      // First launch: go to register; returning user: go to login
+      setScreen(firstLaunch ? 'register' : 'login');
     }
   };
 

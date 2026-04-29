@@ -10,6 +10,7 @@ import type {
   Recipe,
   AffiliateAccount,
   ProductLink,
+  AuthUser,
 } from '@/types';
 
 interface AppState {
@@ -66,6 +67,15 @@ interface AppState {
   // Admin auth
   isAdminLoggedIn: boolean;
   setAdminLoggedIn: (val: boolean) => void;
+
+  // User auth
+  authUser: AuthUser | null;
+  isLoggedIn: boolean;
+  firstLaunch: boolean;
+  setAuthUser: (user: AuthUser | null) => void;
+  setLoggedIn: (val: boolean) => void;
+  setFirstLaunch: (val: boolean) => void;
+  logout: () => void;
 
   // Affiliate
   affiliateAccounts: AffiliateAccount[];
@@ -197,6 +207,15 @@ export const useAppStore = create<AppState>()(
       isAdminLoggedIn: false,
       setAdminLoggedIn: (val) => set({ isAdminLoggedIn: val }),
 
+      // User auth
+      authUser: null,
+      isLoggedIn: false,
+      firstLaunch: true,
+      setAuthUser: (user) => set({ authUser: user }),
+      setLoggedIn: (val) => set({ isLoggedIn: val }),
+      setFirstLaunch: (val) => set({ firstLaunch: val }),
+      logout: () => set({ authUser: null, isLoggedIn: false, currentScreen: 'login' }),
+
       // Affiliate
       affiliateAccounts: [],
       setAffiliateAccounts: (accounts) => set({ affiliateAccounts: accounts }),
@@ -227,7 +246,12 @@ export const useAppStore = create<AppState>()(
         favoriteRecipes: state.favoriteRecipes,
         achievements: state.achievements,
         isDark: state.isDark,
-        currentScreen: state.currentScreen === 'splash' ? 'onboarding' : state.currentScreen,
+        authUser: state.authUser,
+        isLoggedIn: state.isLoggedIn,
+        firstLaunch: state.firstLaunch,
+        currentScreen: state.currentScreen === 'splash'
+          ? (state.firstLaunch ? 'register' : 'login')
+          : state.currentScreen,
       }),
     }
   )
