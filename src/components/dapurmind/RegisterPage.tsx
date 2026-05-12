@@ -46,7 +46,7 @@ export function RegisterPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [resetTrigger, setResetTrigger] = useState(0);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const handleRegister = useCallback(async () => {
     setError('');
@@ -90,7 +90,7 @@ export function RegisterPage() {
     }
     if (!captchaValid) {
       setError('Jawaban captcha salah atau belum diisi');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
       return;
     }
 
@@ -112,7 +112,7 @@ export function RegisterPage() {
 
       if (!res.ok) {
         setError(data.error || 'Registrasi gagal');
-        setResetTrigger((t) => t + 1);
+        setCaptchaKey((k) => k + 1);
         setIsLoading(false);
         return;
       }
@@ -130,7 +130,7 @@ export function RegisterPage() {
       return;
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
     }
 
     setIsLoading(false);
@@ -299,8 +299,8 @@ export function RegisterPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
+              key={captchaKey}
               onVerify={setCaptchaValid}
-              resetTrigger={resetTrigger}
             />
           </motion.div>
 

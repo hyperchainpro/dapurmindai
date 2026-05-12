@@ -253,93 +253,86 @@ const fadeUp = {
   },
 };
 
-/* ── RecipeDetail component ───────────────────────────────────── */
+/* ── RecipeDetailContent (inner component, keyed per-recipe) ── */
 
-export function RecipeDetail() {
-  const selectedRecipe = useAppStore((s) => s.selectedRecipe);
-  const setSelectedRecipe = useAppStore((s) => s.setSelectedRecipe);
-  const goBack = useAppStore((s) => s.goBack);
-  const favoriteRecipes = useAppStore((s) => s.favoriteRecipes);
-  const toggleFavorite = useAppStore((s) => s.toggleFavorite);
-  const shoppingItems = useAppStore((s) => s.shoppingItems);
-  const setShoppingItems = useAppStore((s) => s.setShoppingItems);
-  const setScreen = useAppStore((s) => s.setScreen);
+interface RecipeDetailContentProps {
+  recipe: Recipe;
+  goBack: () => void;
+  setSelectedRecipe: (r: Recipe | null) => void;
+  favoriteRecipes: string[];
+  toggleFavorite: (id: string) => void;
+  shoppingItems: ShoppingItem[];
+  setShoppingItems: (items: ShoppingItem[]) => void;
+  setScreen: (screen: AppScreen) => void;
+}
 
+function RecipeDetailContent({
+  recipe,
+  goBack,
+  setSelectedRecipe,
+  favoriteRecipes,
+  toggleFavorite,
+  shoppingItems,
+  setShoppingItems,
+  setScreen,
+}: RecipeDetailContentProps) {
   const [portionScale, setPortionScale] = useState(1);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(new Set());
   const [ingredientsExpanded, setIngredientsExpanded] = useState(true);
   const [stepsExpanded, setStepsExpanded] = useState(true);
-  const [heroImgSrc, setHeroImgSrc] = useState<string | null>(null);
-  const [showEmoji, setShowEmoji] = useState(true);
-  const prevRecipeIdRef = useRef<string | null>(null);
 
-  const recipe = selectedRecipe;
+  // Image loading: track loaded URL with recipeId for computed gating
+  const [heroImgData, setHeroImgData] = useState<{ url: string; recipeId: string } | null>(null);
 
-  // Compute image URL: prefer local file, fallback to Unsplash
-  const recipeImageUrl = useMemo(() => {
-    if (!recipe) return null;
-    if (recipe.category === 'Western') return `/recipes/western/${recipe.id}.jpg`;
-    return `/recipes/${recipe.id}.jpg`;
-  }, [recipe]);
+  const recipeImageUrl = recipe.category === 'Western'
+    ? `/recipes/western/${recipe.id}.jpg`
+    : `/recipes/${recipe.id}.jpg`;
+  const fallbackImageUrl = getFallbackImageUrl(recipe);
 
-  const fallbackImageUrl = useMemo(() => {
-    if (!recipe) return null;
-    return getFallbackImageUrl(recipe);
-  }, [recipe]);
+  // Only show the loaded image if it belongs to the current recipe (key-based reset handles the rest)
+  const heroImgSrc = heroImgData?.recipeId === recipe.id ? heroImgData.url : null;
+  const showEmoji = heroImgSrc === null;
 
-  // Preload image and determine which source works
-  useEffect(() => {
-    const recipeId = recipe?.id ?? null;
-    if (recipeId !== prevRecipeIdRef.current) {
-      prevRecipeIdRef.current = recipeId;
-      setPortionScale(1);
-      setCheckedIngredients(new Set());
-      setCheckedSteps(new Set());
-      setHeroImgSrc(null);
-      setShowEmoji(true);
-    }
-  }, [recipe?.id]);
-
-  // Try loading local image, then fallback
+  // Subscribe to image loading (setState only in callbacks from external Image API)
   useEffect(() => {
     if (!recipeImageUrl) return;
-    setShowEmoji(true);
-    setHeroImgSrc(null);
 
     const img = new Image();
     img.onload = () => {
-      setHeroImgSrc(recipeImageUrl);
-      setShowEmoji(false);
+      setHeroImgData({ url: recipeImageUrl, recipeId: recipe.id });
     };
     img.onerror = () => {
-      // Local failed, try Unsplash fallback
       if (fallbackImageUrl) {
         const img2 = new Image();
         img2.onload = () => {
-          setHeroImgSrc(fallbackImageUrl);
-          setShowEmoji(false);
+          setHeroImgData({ url: fallbackImageUrl, recipeId: recipe.id });
         };
         img2.onerror = () => {
-          setShowEmoji(true);
+          setHeroImgData(null);
         };
         img2.src = fallbackImageUrl;
       } else {
-        setShowEmoji(true);
+        setHeroImgData(null);
       }
     };
     img.src = recipeImageUrl;
-  }, [recipeImageUrl, fallbackImageUrl]);
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [recipeImageUrl, fallbackImageUrl, recipe.id]);
 
   /* ── Compute scaled values ───────────────────────── */
   const scaledServings = useMemo(
-    () => Math.round((recipe?.servings ?? 1) * portionScale),
-    [recipe?.servings, portionScale]
+    () => Math.round((recipe.servings ?? 1) * portionScale),
+    [recipe.servings, portionScale]
   );
 
   const scaledCalories = useMemo(
-    () => Math.round((recipe?.calories ?? 0) * portionScale),
-    [recipe?.calories, portionScale]
+    () => Math.round((recipe.calories ?? 0) * portionScale),
+    [recipe.calories, portionScale]
   );
 
   /* ── Group ingredients by category ───────────────── */
@@ -1035,6 +1028,50 @@ export function RecipeDetail() {
   );
 }
 
+/* ── RecipeDetail (outer component with key-based reset) ── */
+
+export function RecipeDetail() {
+  const selectedRecipe = useAppStore((s) => s.selectedRecipe);
+  const setSelectedRecipe = useAppStore((s) => s.setSelectedRecipe);
+  const goBack = useAppStore((s) => s.goBack);
+  const favoriteRecipes = useAppStore((s) => s.favoriteRecipes);
+  const toggleFavorite = useAppStore((s) => s.toggleFavorite);
+  const shoppingItems = useAppStore((s) => s.shoppingItems);
+  const setShoppingItems = useAppStore((s) => s.setShoppingItems);
+  const setScreen = useAppStore((s) => s.setScreen);
+
+  if (!selectedRecipe) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+        <Bounce intensity={3}>
+          <span className="text-6xl">🍽️</span>
+        </Bounce>
+        <p className="text-sm text-muted-foreground">Resep tidak ditemukan</p>
+        <Button onClick={goBack} className="rounded-full">
+          Kembali
+        </Button>
+      </div>
+    );
+  }
+
+  // Key changes when recipe changes → inner component remounts with fresh state
+  return (
+    <RecipeDetailContent
+      key={selectedRecipe.id}
+      recipe={selectedRecipe}
+      goBack={goBack}
+      setSelectedRecipe={setSelectedRecipe}
+      favoriteRecipes={favoriteRecipes}
+      toggleFavorite={toggleFavorite}
+      shoppingItems={shoppingItems}
+      setShoppingItems={setShoppingItems}
+      setScreen={setScreen}
+    />
+  );
+}
+
+export default RecipeDetail;
+
 /* ── Stat Chip ────────────────────────────────────────────────── */
 
 function StatChip({
@@ -1056,5 +1093,3 @@ function StatChip({
     </div>
   );
 }
-
-export default RecipeDetail;

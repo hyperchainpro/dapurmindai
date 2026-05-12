@@ -62,29 +62,28 @@ export function CaptchaInput({
   placeholder = 'Masukkan jawaban',
 }: CaptchaInputProps) {
   const [captcha, setCaptcha] = useState<CaptchaQuestion>(generateCaptcha);
-  const [verified, setVerified] = useState<boolean | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Derived: verification is computed from value + captcha answer
+  const verified: boolean | null = value.trim() === ''
+    ? null
+    : parseInt(value.trim(), 10) === captcha.answer;
 
   const refresh = useCallback(() => {
     setCaptcha(generateCaptcha());
     onChange('');
-    setVerified(null);
     onVerify(false);
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [onChange, onVerify]);
 
-  /* Auto-verify when value changes */
+  /* Notify parent when verification result changes */
   useEffect(() => {
-    if (value.trim() === '') {
-      setVerified(null);
+    if (verified === null) {
       onVerify(false);
-      return;
+    } else {
+      onVerify(verified);
     }
-    const num = parseInt(value.trim(), 10);
-    const valid = num === captcha.answer;
-    setVerified(valid);
-    onVerify(valid);
-  }, [value, captcha.answer, onVerify]);
+  }, [verified, onVerify]);
 
   return (
     <div className="space-y-2">

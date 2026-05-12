@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, ShieldCheck } from 'lucide-react';
 
 interface MathCaptchaProps {
   onVerify: (isCorrect: boolean) => void;
   onCaptchaChange?: (value: string) => void;
-  resetTrigger?: number;
 }
 
 const OPERATIONS = ['+', '-', '\u00d7'] as const;
@@ -38,25 +37,11 @@ function generateCaptcha(): { question: string; answer: number } {
   return { question: `${a} ${op} ${b} = ?`, answer };
 }
 
-export function MathCaptcha({ onVerify, onCaptchaChange, resetTrigger }: MathCaptchaProps) {
+export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
   const [captcha, setCaptcha] = useState(() => generateCaptcha());
   const [input, setInput] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isFirstRender = useRef(true);
-
-  // Regenerate when resetTrigger changes (skip first render)
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    setCaptcha(generateCaptcha());
-    setInput('');
-    setIsVerified(false);
-    onCaptchaChange?.('');
-    onVerify(false);
-  }, [resetTrigger, onCaptchaChange, onVerify]);
 
   const regenerate = useCallback(() => {
     const newCaptcha = generateCaptcha();

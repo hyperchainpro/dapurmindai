@@ -38,7 +38,6 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [resetTrigger, setResetTrigger] = useState(0);
 
   const handleLogin = useCallback(async () => {
     setError('');
@@ -208,7 +207,6 @@ export function LoginPage() {
           <motion.div variants={fadeUp}>
             <MathCaptcha
               onVerify={setCaptchaValid}
-              resetTrigger={resetTrigger}
             />
           </motion.div>
 

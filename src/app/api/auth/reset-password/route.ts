@@ -13,7 +13,6 @@ interface StoredUser {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __dapurmind_users: StoredUser[] | undefined;
 }
 

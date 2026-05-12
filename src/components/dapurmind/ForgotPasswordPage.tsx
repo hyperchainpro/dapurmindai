@@ -41,7 +41,7 @@ export function ForgotPasswordPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [resetTrigger, setResetTrigger] = useState(0);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   // Step 1: Verify email with captcha
   const handleVerifyEmail = useCallback(async () => {
@@ -58,7 +58,7 @@ export function ForgotPasswordPage() {
     }
     if (!captchaValid) {
       setError('Jawaban captcha salah atau belum diisi');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
       return;
     }
 
@@ -78,7 +78,7 @@ export function ForgotPasswordPage() {
 
       if (!res.ok) {
         setError(data.error || 'Email tidak ditemukan');
-        setResetTrigger((t) => t + 1);
+        setCaptchaKey((k) => k + 1);
         setIsLoading(false);
         return;
       }
@@ -86,10 +86,10 @@ export function ForgotPasswordPage() {
       // Email found, move to step 2 and reset captcha
       setStep('reset');
       setCaptchaValid(false);
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
     }
 
     setIsLoading(false);
@@ -114,7 +114,7 @@ export function ForgotPasswordPage() {
     }
     if (!captchaValid) {
       setError('Jawaban captcha salah atau belum diisi');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
       return;
     }
 
@@ -135,7 +135,7 @@ export function ForgotPasswordPage() {
 
       if (!res.ok) {
         setError(data.error || 'Gagal mengubah password');
-        setResetTrigger((t) => t + 1);
+        setCaptchaKey((k) => k + 1);
         setIsLoading(false);
         return;
       }
@@ -147,7 +147,7 @@ export function ForgotPasswordPage() {
       }, 1500);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
     }
 
     setIsLoading(false);
@@ -231,7 +231,7 @@ export function ForgotPasswordPage() {
               <motion.div variants={fadeUp}>
                 <MathCaptcha
                   onVerify={setCaptchaValid}
-                  resetTrigger={resetTrigger}
+                  key={captchaKey}
                 />
               </motion.div>
 
@@ -343,7 +343,7 @@ export function ForgotPasswordPage() {
               <motion.div variants={fadeUp}>
                 <MathCaptcha
                   onVerify={setCaptchaValid}
-                  resetTrigger={resetTrigger}
+                  key={captchaKey}
                 />
               </motion.div>
 
