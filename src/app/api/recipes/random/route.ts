@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const THEMEALDB_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
@@ -7,8 +7,12 @@ export async function GET() {
     // Get 6 random meals at once
     const promises = Array.from({ length: 6 }, () =>
       fetch(`${THEMEALDB_BASE}/random.php`, {
-        next: { revalidate: 300 }, // Cache 5 menit
-      }).then((r) => r.json())
+        signal: AbortSignal.timeout(15000),
+      })
+        .then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
     );
 
     const results = await Promise.allSettled(promises);

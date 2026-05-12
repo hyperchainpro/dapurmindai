@@ -31,14 +31,12 @@ export function LoginPage() {
   const setAuthUser = useAppStore((s) => s.setAuthUser);
   const setLoggedIn = useAppStore((s) => s.setLoggedIn);
   const updateOnboarding = useAppStore((s) => s.updateOnboarding);
-  const isLoggedIn = useAppStore((s) => s.isLoggedIn);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
 
@@ -49,8 +47,9 @@ export function LoginPage() {
       setError('Username dan password wajib diisi');
       return;
     }
-    if (!captchaValue || captchaValue.length === 0) {
-      setError('Silakan jawab captcha terlebih dahulu');
+    if (!captchaValid) {
+      setError('Jawaban captcha salah atau belum diisi');
+      setResetTrigger((t) => t + 1);
       return;
     }
 
@@ -75,16 +74,17 @@ export function LoginPage() {
         return;
       }
 
-      // Success - set auth state
+      // Success
       const loggedInUser = data.user;
       setAuthUser(loggedInUser);
       setLoggedIn(true);
 
-      // If user hasn't completed onboarding, go to onboarding
       if (!loggedInUser.isOnboarded) {
         updateOnboarding({
           id: loggedInUser.id,
           name: loggedInUser.name,
+          username: loggedInUser.username,
+          email: loggedInUser.email,
           isOnboarded: false,
           createdAt: loggedInUser.createdAt,
         });
@@ -95,6 +95,8 @@ export function LoginPage() {
           name: loggedInUser.name,
           username: loggedInUser.username,
           email: loggedInUser.email,
+          isOnboarded: true,
+          createdAt: loggedInUser.createdAt,
         });
         setScreen('dashboard');
       }
@@ -104,7 +106,7 @@ export function LoginPage() {
     }
 
     setIsLoading(false);
-  }, [username, password, captchaValue, setAuthUser, setLoggedIn, setScreen, updateOnboarding]);
+  }, [username, password, captchaValid, setAuthUser, setLoggedIn, setScreen, updateOnboarding]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -205,10 +207,6 @@ export function LoginPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
-              onCaptchaChange={(val) => {
-                setCaptchaValue(val);
-                setCaptchaValid(val.length > 0);
-              }}
               onVerify={setCaptchaValid}
               resetTrigger={resetTrigger}
             />

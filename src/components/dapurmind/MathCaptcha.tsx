@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw, ShieldCheck } from 'lucide-react';
 
 interface MathCaptchaProps {
-  onVerify: (isValid: boolean) => void;
+  onVerify: (isCorrect: boolean) => void;
   onCaptchaChange?: (value: string) => void;
   resetTrigger?: number;
 }
@@ -38,27 +38,35 @@ function generateCaptcha(): { question: string; answer: number } {
   return { question: `${a} ${op} ${b} = ?`, answer };
 }
 
-export function MathCaptcha({ onCaptchaChange, resetTrigger }: MathCaptchaProps) {
+export function MathCaptcha({ onVerify, onCaptchaChange, resetTrigger }: MathCaptchaProps) {
   const [captcha, setCaptcha] = useState(() => generateCaptcha());
   const [input, setInput] = useState('');
   const [isVerified, setIsVerified] = useState(false);
-  const [isError, setIsError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isFirstRender = useRef(true);
 
-  const regenerate = useCallback(() => {
+  // Regenerate when resetTrigger changes (skip first render)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     setCaptcha(generateCaptcha());
     setInput('');
     setIsVerified(false);
-    setIsError(false);
     onCaptchaChange?.('');
-    inputRef.current?.focus();
-  }, [onCaptchaChange]);
+    onVerify(false);
+  }, [resetTrigger, onCaptchaChange, onVerify]);
 
-  useEffect(() => {
-    if (resetTrigger !== undefined) {
-      regenerate();
-    }
-  }, [resetTrigger, regenerate]);
+  const regenerate = useCallback(() => {
+    const newCaptcha = generateCaptcha();
+    setCaptcha(newCaptcha);
+    setInput('');
+    setIsVerified(false);
+    onCaptchaChange?.('');
+    onVerify(false);
+    inputRef.current?.focus();
+  }, [onCaptchaChange, onVerify]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,15 +74,18 @@ export function MathCaptcha({ onCaptchaChange, resetTrigger }: MathCaptchaProps)
       setInput(val);
       onCaptchaChange?.(val);
 
-      if (val === String(captcha.answer)) {
-        setIsVerified(true);
-        setIsError(false);
-      } else if (val.length > 0) {
+      if (val === '') {
         setIsVerified(false);
-        setIsError(false);
+        onVerify(false);
+      } else if (val === String(captcha.answer)) {
+        setIsVerified(true);
+        onVerify(true);
+      } else {
+        setIsVerified(false);
+        onVerify(false);
       }
     },
-    [captcha.answer, onCaptchaChange]
+    [captcha.answer, onCaptchaChange, onVerify]
   );
 
   return (
@@ -105,13 +116,11 @@ export function MathCaptcha({ onCaptchaChange, resetTrigger }: MathCaptchaProps)
             className={`h-11 w-full rounded-xl border bg-card pl-3 pr-9 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:outline-none focus:ring-2 ${
               isVerified
                 ? 'border-green-400 dark:border-green-500/50 focus:ring-green-500/20'
-                : isError
-                  ? 'border-red-400 dark:border-red-500/50 focus:ring-red-500/20'
-                  : 'border-border/60 focus:border-emerald-400 focus:ring-emerald-500/20'
+                : 'border-border/60 focus:border-emerald-400 focus:ring-emerald-500/20'
             }`}
           />
           {isVerified && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm font-bold">
               &#10003;
             </span>
           )}
@@ -129,11 +138,13 @@ export function MathCaptcha({ onCaptchaChange, resetTrigger }: MathCaptchaProps)
         </motion.button>
       </div>
 
-      {isVerified && (
+      {isVerified ? (
         <p className="text-[11px] font-medium text-green-600 dark:text-green-400">
           Captcha terverifikasi
         </p>
-      )}
+      ) : input.length > 0 ? (
+        <p className="text-[11px] text-transparent">placeholder</p>
+      ) : null}
     </div>
   );
 }

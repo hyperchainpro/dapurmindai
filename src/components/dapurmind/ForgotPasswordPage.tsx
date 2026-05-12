@@ -38,14 +38,15 @@ export function ForgotPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
 
   // Step 1: Verify email with captcha
   const handleVerifyEmail = useCallback(async () => {
     setError('');
+    setSuccessMsg('');
 
     if (!email.trim()) {
       setError('Email wajib diisi');
@@ -55,8 +56,9 @@ export function ForgotPasswordPage() {
       setError('Format email tidak valid');
       return;
     }
-    if (!captchaValue || captchaValue.length === 0) {
-      setError('Silakan jawab captcha terlebih dahulu');
+    if (!captchaValid) {
+      setError('Jawaban captcha salah atau belum diisi');
+      setResetTrigger((t) => t + 1);
       return;
     }
 
@@ -81,8 +83,9 @@ export function ForgotPasswordPage() {
         return;
       }
 
-      // Email found, proceed to reset step
+      // Email found, move to step 2 and reset captcha
       setStep('reset');
+      setCaptchaValid(false);
       setResetTrigger((t) => t + 1);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
@@ -90,11 +93,12 @@ export function ForgotPasswordPage() {
     }
 
     setIsLoading(false);
-  }, [email, captchaValue]);
+  }, [email, captchaValid]);
 
   // Step 2: Set new password with captcha
   const handleResetPassword = useCallback(async () => {
     setError('');
+    setSuccessMsg('');
 
     if (!newPassword) {
       setError('Password baru wajib diisi');
@@ -108,8 +112,9 @@ export function ForgotPasswordPage() {
       setError('Konfirmasi password tidak cocok');
       return;
     }
-    if (!captchaValue || captchaValue.length === 0) {
-      setError('Silakan jawab captcha terlebih dahulu');
+    if (!captchaValid) {
+      setError('Jawaban captcha salah atau belum diisi');
+      setResetTrigger((t) => t + 1);
       return;
     }
 
@@ -135,15 +140,18 @@ export function ForgotPasswordPage() {
         return;
       }
 
-      // Success - go back to login
-      setScreen('login');
+      // Show success then redirect
+      setSuccessMsg('Password berhasil diubah! Mengarahkan ke halaman login...');
+      setTimeout(() => {
+        setScreen('login');
+      }, 1500);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
       setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [email, newPassword, confirmPassword, captchaValue, setScreen]);
+  }, [email, newPassword, confirmPassword, captchaValid, setScreen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -222,14 +230,26 @@ export function ForgotPasswordPage() {
               {/* Captcha */}
               <motion.div variants={fadeUp}>
                 <MathCaptcha
-                  onCaptchaChange={(val) => {
-                    setCaptchaValue(val);
-                    setCaptchaValid(val.length > 0);
-                  }}
                   onVerify={setCaptchaValid}
                   resetTrigger={resetTrigger}
                 />
               </motion.div>
+
+              {/* Error message */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
+                  >
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Verify button */}
               <motion.button
@@ -322,20 +342,47 @@ export function ForgotPasswordPage() {
               {/* Captcha */}
               <motion.div variants={fadeUp}>
                 <MathCaptcha
-                  onCaptchaChange={(val) => {
-                    setCaptchaValue(val);
-                    setCaptchaValid(val.length > 0);
-                  }}
                   onVerify={setCaptchaValid}
                   resetTrigger={resetTrigger}
                 />
               </motion.div>
 
+              {/* Error / Success messages */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
+                  >
+                    <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {successMsg && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2 rounded-xl bg-green-50 px-3.5 py-2.5 dark:bg-green-500/10"
+                  >
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+                    <p className="text-xs font-medium text-green-600 dark:text-green-400">{successMsg}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Reset button */}
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleResetPassword}
-                disabled={isLoading}
+                disabled={isLoading || !!successMsg}
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
@@ -346,22 +393,6 @@ export function ForgotPasswordPage() {
               </motion.button>
             </>
           )}
-
-          {/* Error message */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
-              >
-                <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
-                <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Back to login */}
           <motion.p

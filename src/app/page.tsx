@@ -85,22 +85,30 @@ function ScreenRouter() {
   const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
   const setScreen = useAppStore((s) => s.setScreen);
+  const [hydrated, setHydrated] = React.useState(false);
+
+  // Wait for Zustand hydration before applying guards
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   // Auth guard: redirect to admin-login if not authenticated
   React.useEffect(() => {
+    if (!hydrated) return;
     if ((currentScreen === 'admin-affiliate' || currentScreen === 'admin-analytics') && !isAdminLoggedIn) {
       setScreen('admin-login');
     }
-  }, [currentScreen, isAdminLoggedIn, setScreen]);
+  }, [currentScreen, isAdminLoggedIn, hydrated, setScreen]);
 
   // User auth guard: redirect to login if not authenticated (skip auth screens & splash)
   React.useEffect(() => {
+    if (!hydrated) return;
     const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding'];
     const isAuthScreen = authScreens.includes(currentScreen);
     if (!isLoggedIn && !isAuthScreen) {
       setScreen('login');
     }
-  }, [currentScreen, isLoggedIn, setScreen]);
+  }, [currentScreen, isLoggedIn, hydrated, setScreen]);
 
   return (
     <AnimatePresence mode="wait">

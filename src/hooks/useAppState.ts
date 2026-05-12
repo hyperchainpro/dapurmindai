@@ -214,7 +214,14 @@ export const useAppStore = create<AppState>()(
       setAuthUser: (user) => set({ authUser: user }),
       setLoggedIn: (val) => set({ isLoggedIn: val }),
       setFirstLaunch: (val) => set({ firstLaunch: val }),
-      logout: () => set({ authUser: null, isLoggedIn: false, currentScreen: 'login' }),
+      logout: () => {
+        set({
+          authUser: null,
+          isLoggedIn: false,
+          currentScreen: 'login',
+          previousScreen: null,
+        });
+      },
 
       // Affiliate
       affiliateAccounts: [],
@@ -250,7 +257,7 @@ export const useAppStore = create<AppState>()(
         isLoggedIn: state.isLoggedIn,
         firstLaunch: state.firstLaunch,
         currentScreen: state.currentScreen === 'splash'
-          ? (state.firstLaunch ? 'register' : 'login')
+          ? 'login'
           : state.currentScreen,
       }),
     }

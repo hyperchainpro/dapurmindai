@@ -5,7 +5,7 @@ const THEMEALDB_BASE = 'https://www.themealdb.com/api/json/v1/1';
 export async function GET() {
   try {
     const res = await fetch(`${THEMEALDB_BASE}/categories.php`, {
-      next: { revalidate: 86400 }, // Cache 24 jam
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {

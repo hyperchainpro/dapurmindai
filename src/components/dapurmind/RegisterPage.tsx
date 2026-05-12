@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Eye,
   EyeOff,
   AlertCircle,
+  CheckCircle2,
   User,
   Mail,
   Lock,
@@ -42,22 +43,15 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const formRef = useRef<HTMLDivElement>(null);
-
-  const handleCaptchaChange = useCallback((val: string) => {
-    setCaptchaValue(val);
-    // Check if the captcha answer matches by extracting numbers from the current captcha display
-    // The MathCaptcha component handles validation internally, we just need to know if it's valid
-  }, []);
 
   const handleRegister = useCallback(async () => {
     setError('');
+    setSuccessMsg('');
 
-    // Validations
     if (!name.trim()) {
       setError('Nama lengkap wajib diisi');
       return;
@@ -94,8 +88,9 @@ export function RegisterPage() {
       setError('Konfirmasi password tidak cocok');
       return;
     }
-    if (!captchaValue || captchaValue.length === 0) {
-      setError('Silakan jawab captcha terlebih dahulu');
+    if (!captchaValid) {
+      setError('Jawaban captcha salah atau belum diisi');
+      setResetTrigger((t) => t + 1);
       return;
     }
 
@@ -122,19 +117,24 @@ export function RegisterPage() {
         return;
       }
 
-      // Success
+      // Success - show message then redirect
       const newUser = data.user;
-      setAuthUser(newUser);
-      setLoggedIn(true);
-      setFirstLaunch(false);
-      setScreen('onboarding');
+      setSuccessMsg('Registrasi berhasil! Mengarahkan ke onboarding...');
+      // Small delay for user to see success message
+      setTimeout(() => {
+        setAuthUser(newUser);
+        setLoggedIn(true);
+        setFirstLaunch(false);
+        setScreen('onboarding');
+      }, 800);
+      return;
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
       setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [name, username, email, password, confirmPassword, captchaValue, setAuthUser, setLoggedIn, setFirstLaunch, setScreen]);
+  }, [name, username, email, password, confirmPassword, captchaValid, setAuthUser, setLoggedIn, setFirstLaunch, setScreen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -180,7 +180,6 @@ export function RegisterPage() {
 
         {/* Register Form */}
         <motion.div
-          ref={formRef}
           variants={stagger}
           initial="hidden"
           animate="visible"
@@ -300,10 +299,6 @@ export function RegisterPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
-              onCaptchaChange={(val) => {
-                setCaptchaValue(val);
-                setCaptchaValid(val.length > 0);
-              }}
               onVerify={setCaptchaValid}
               resetTrigger={resetTrigger}
             />
@@ -321,6 +316,22 @@ export function RegisterPage() {
               >
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                 <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Success message */}
+          <AnimatePresence>
+            {successMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="flex items-center gap-2 rounded-xl bg-green-50 px-3.5 py-2.5 dark:bg-green-500/10"
+              >
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+                <p className="text-xs font-medium text-green-600 dark:text-green-400">{successMsg}</p>
               </motion.div>
             )}
           </AnimatePresence>

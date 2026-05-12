@@ -38,11 +38,19 @@ export default function SplashScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
   const isDark = useAppStore((s) => s.isDark);
   const firstLaunch = useAppStore((s) => s.firstLaunch);
+  const isLoggedIn = useAppStore((s) => s.isLoggedIn);
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const hasRedirected = React.useRef(false);
   const emojis = FLOATING_EMOJIS;
 
   useEffect(() => {
+    // If already logged in, skip splash entirely
+    if (isLoggedIn) {
+      setScreen('dashboard');
+      return;
+    }
+
     // Progress bar animation
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -54,8 +62,8 @@ export default function SplashScreen() {
       });
     }, 50);
 
-    // After 3s, trigger exit
-    const timeout = setTimeout(() => setIsVisible(false), 3000);
+    // After 2s, trigger exit (shorter duration)
+    const timeout = setTimeout(() => setIsVisible(false), 2000);
 
     return () => {
       clearInterval(interval);
@@ -64,7 +72,8 @@ export default function SplashScreen() {
   }, []);
 
   const handleExitComplete = () => {
-    if (!isVisible) {
+    if (!isVisible && !hasRedirected.current) {
+      hasRedirected.current = true;
       // First launch: go to register; returning user: go to login
       setScreen(firstLaunch ? 'register' : 'login');
     }

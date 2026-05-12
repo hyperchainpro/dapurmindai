@@ -28,8 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     const res = await fetch(url, {
-      next: { revalidate: 3600 }, // Cache 1 jam
-      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
@@ -38,7 +37,6 @@ export async function GET(request: NextRequest) {
 
     const data = await res.json();
 
-    // For filter endpoints, we get limited data - need to fetch full details
     let meals = data.meals || [];
 
     // If search returned full meals, return them
@@ -62,7 +60,7 @@ export async function GET(request: NextRequest) {
         })),
         source: 'TheMealDB',
         total: meals.length,
-        summary: true, // Indicates this is summary data without full instructions
+        summary: true,
       });
     }
 
@@ -88,12 +86,6 @@ function convertMealToRecipe(meal: Record<string, string>) {
     unit: string;
     category: string;
   }> = [];
-  const measureFields = Object.keys(meal).filter((k) =>
-    k.startsWith('strMeasure')
-  );
-  const ingredientFields = Object.keys(meal).filter((k) =>
-    k.startsWith('strIngredient')
-  );
 
   for (let i = 0; i < 20; i++) {
     const ing = meal[`strIngredient${i + 1}`];
@@ -115,20 +107,13 @@ function convertMealToRecipe(meal: Record<string, string>) {
     .map((s) => s.replace(/^[\d.)\s]+/, '').trim())
     .filter((s) => s.length > 10);
 
-  // Fallback if no clear steps found
   if (steps.length === 0 && instructions.length > 0) {
     steps.push(instructions.trim());
   }
 
-  // Map category to our format
   const category = mapCategory(meal.strCategory || 'Miscellaneous');
   const difficulty = mapDifficulty(meal.strCategory || '');
-
-  // Extract YouTube ID for video
-  let youtubeUrl = '';
-  if (meal.strYoutube) {
-    youtubeUrl = meal.strYoutube;
-  }
+  const youtubeUrl = meal.strYoutube || '';
 
   return {
     id: `api-${meal.idMeal}`,
@@ -137,10 +122,10 @@ function convertMealToRecipe(meal: Record<string, string>) {
     image: meal.strMealThumb || '',
     category,
     difficulty,
-    cookTime: 30, // TheMealDB doesn't provide this
+    cookTime: 30,
     prepTime: 15,
     servings: 2,
-    calories: 0, // Not provided
+    calories: 0,
     ingredients,
     steps,
     tags: [
@@ -148,11 +133,19 @@ function convertMealToRecipe(meal: Record<string, string>) {
       meal.strCategory?.toLowerCase() || 'misc',
       'api-recipe',
     ].filter(Boolean),
-    rating: 4.0 + Math.random() * 0.9, // Random 4.0-4.9
+    rating: deterministicRating(meal.idMeal || '0'),
     youtubeUrl,
     source: meal.strSource || '',
     sourceName: 'TheMealDB',
   };
+}
+
+function deterministicRating(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  }
+  return 4.0 + (Math.abs(hash) % 10) / 10;
 }
 
 function parseAmount(measure: string): number {
@@ -179,7 +172,7 @@ function guessCategory(ingredient: string): string {
   const proteinWords = [
     'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp', 'lamb',
     'turkey', 'bacon', 'sausage', 'egg', 'prawn', 'tuna', 'tofu',
-    'tempeh', 'chicken', 'meat', 'mince',
+    'tempeh', 'meat', 'mince',
   ];
   const vegWords = [
     'onion', 'garlic', 'tomato', 'carrot', 'potato', 'pepper', 'lettuce',
@@ -199,8 +192,8 @@ function guessCategory(ingredient: string): string {
   ];
   const spiceWords = [
     'salt', 'pepper', 'cumin', 'paprika', 'cinnamon', 'oregano',
-    'basil', 'thyme', 'rosemary', 'turmeric', 'coriander', 'ginger',
-    'nutmeg', 'bay', 'parsley', 'mint', 'chili powder', 'curry',
+    'basil', 'thyme', 'rosemary', 'turmeric', 'coriander', 'nutmeg',
+    'bay', 'parsley', 'mint', 'chili powder', 'curry',
   ];
 
   if (proteinWords.some((w) => lower.includes(w))) return 'Protein';
@@ -223,7 +216,6 @@ function mapCategory(cat: string): string {
     Lunch: 'Makan Siang',
     Dinner: 'Makan Malam',
   };
-  // Check if it's a Western category
   const westernCats = [
     'Beef', 'Chicken', 'Goat', 'Lamb', 'Miscellaneous',
     'Pasta', 'Pork', 'Seafood', 'Vegetarian', 'Vegan',

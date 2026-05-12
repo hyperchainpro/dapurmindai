@@ -131,7 +131,6 @@ export interface AuthUser {
   username: string;
   email: string;
   name: string;
-  password: string;
   createdAt: string;
   isOnboarded: boolean;
 }

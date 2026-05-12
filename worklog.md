@@ -163,3 +163,105 @@ Stage Summary:
 - Admin login button removed from user profile settings
 - Admin login page redesigned to clean, standard login appearance
 - Files modified: RecipeDetail.tsx, ProfilePage.tsx, AdminLogin.tsx
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix bugs on auth pages (Login, Register, Forgot Password) and test web preview
+
+Work Log:
+- Read all auth-related files: LoginPage.tsx, RegisterPage.tsx, ForgotPasswordPage.tsx, MathCaptcha.tsx, useAppState.ts, page.tsx, SplashScreen.tsx, API routes, types
+- Built project successfully (no compilation errors)
+- Identified and fixed multiple bugs:
+  1. AuthUser type had `password` field but API strips it → removed `password` from AuthUser interface
+  2. LoginPage `updateOnboarding` didn't include all fields (missing isOnboarded, username, email) when user is already onboarded → fixed
+  3. RegisterPage had no success feedback before redirect → added successMsg state and green success banner
+  4. RegisterPage missing CheckCircle2 import for success banner → added import
+  5. SplashScreen showed even when user was already logged in → added isLoggedIn check to skip splash
+  6. SplashScreen had no double-redirect prevention → added hasRedirected ref
+  7. Zustand store partialize had race condition with firstLaunch check → simplified to always persist 'login' when on splash
+  8. Auth guards in page.tsx fired before Zustand hydration → added hydrated state to wait for hydration
+  9. Logout action didn't reset previousScreen → fixed
+- Rebuilt project - compiled successfully
+- Tested all API endpoints: Register ✅, Login ✅, Wrong password ✅, Duplicate register ✅, Reset verify ✅, Reset not found ✅, Reset password ✅, Login with new password ✅
+- Server runs and responds correctly
+
+Stage Summary:
+- All auth pages (Login, Register, Forgot Password) are fixed
+- All API endpoints work correctly with proper error handling
+- Auth flow is smooth: splash → login/register → dashboard
+- Splash screen skips if user is already logged in
+- Success/error feedback is properly displayed
+- Production build compiles without errors
+---
+Task ID: 2
+Agent: Main Agent
+Task: Fix production mode errors - make app run without errors
+
+Work Log:
+- Discovered server crash caused by `next: { revalidate }` fetch option in standalone mode
+- Fixed 4 recipe API routes: categories, detail, search, random - replaced `next: { revalidate }` with `AbortSignal.timeout(15000)` and added proper `res.ok` checks
+- Fixed recipe-image route: replaced `execSync` (blocking, command injection risk) with `execFile` (async, safe), added input sanitization, returns placeholder PNG instead of 404
+- Fixed `Math.random()` rating issue - replaced with deterministic hash-based rating using `deterministicRating()` function
+- Disabled Prisma query logging in production mode (db.ts)
+- Removed dead code in search route (unused measureFields, ingredientFields, duplicate youtubeUrl assignment, duplicate 'chicken' in proteinWords)
+- Fixed Content-Type header on GET request in search route
+- Full production build - compiles successfully with 0 errors
+- Comprehensive production test suite: 16/16 API endpoints pass
+- Server remains alive after all tests
+
+Stage Summary:
+- All 16 API endpoints tested and working in production mode:
+  1. GET / → 200 (page renders)
+  2. GET /api → 200 (health check)
+  3. POST /api/auth/register → 201 (user created)
+  4. POST /api/auth/login → 200 (login success)
+  5. POST /api/auth/login (wrong) → 401 (error)
+  6. POST /api/auth/register (dup) → 409 (conflict)
+  7. POST /api/auth/reset-password (verify) → 200
+  8. POST /api/auth/reset-password (reset) → 200
+  9. POST /api/auth/login (new pass) → 200
+  10. GET /api/recipes/categories → 200
+  11. GET /api/recipes/random → 200
+  12. GET /api/recipes/search?q=chicken → 200
+  13. GET /api/recipes/detail?id=52772 → 200
+  14. GET /api/recipe-image → 200 (placeholder)
+  15. GET /api/affiliate/accounts → 200
+  16. GET /api/affiliate/analytics → 200
+- Production build: `npx next build` compiles clean with 0 errors
+- Standalone server: stable, no crashes, no silent errors
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Production build and web preview testing
+
+Work Log:
+- Killed existing servers
+- Ran `npx next build` → compiled successfully with 0 errors (18/18 static pages generated in 309ms)
+- Started standalone production server (`node .next/standalone/server.js`) on port 3000
+- Created keepalive script to maintain server persistence between tool calls
+- Comprehensive endpoint testing - ALL PASS:
+  1. GET / → 200 (12,603 bytes HTML, valid DOCTYPE, __NEXT_DATA__, PWA meta tags)
+  2. GET /api → 200
+  3. GET /api/recipes/categories → 200
+  4. GET /api/recipes/random → 200
+  5. GET /api/recipes/search?q=chicken → 200
+  6. GET /api/recipes/detail?id=52772 → 200
+  7. GET /api/recipe-image?id=test → 200
+  8. GET /api/affiliate/accounts → 200
+  9. GET /api/affiliate/analytics → 200
+  10. POST /api/auth/register → 201 (user created successfully)
+  11. POST /api/auth/login → 200 (login successful, returns user data without password)
+  12. POST /api/auth/login (wrong pass) → 401 (error: "Username atau password salah")
+  13. POST /api/auth/register (duplicate) → 409 (error: "Username sudah digunakan")
+  14. POST /api/auth/reset-password (verify) → 200 (email verified)
+  15. POST /api/auth/reset-password (reset) → 200 (password changed)
+  16. POST /api/auth/login (new password) → 200 (login with new password works)
+- Server remains stable after all tests
+- HTML output verified: proper DOCTYPE, meta tags, PWA manifest, Open Graph tags, __NEXT_DATA__ hydration
+
+Stage Summary:
+- Production build: 0 errors, 0 warnings
+- All 16 API endpoints tested and passing
+- Server running stably on port 3000
+- Full auth flow verified: register → login → wrong password → duplicate → reset → new login

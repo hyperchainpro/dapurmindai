@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const url = `${THEMEALDB_BASE}/lookup.php?i=${encodeURIComponent(id)}`;
 
     const res = await fetch(url, {
-      next: { revalidate: 86400 }, // Cache 24 jam
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
@@ -66,6 +66,9 @@ export async function GET(request: NextRequest) {
       steps.push(instructions.trim());
     }
 
+    // Deterministic rating based on meal id
+    const rating = deterministicRating(meal.idMeal || '0');
+
     const recipe = {
       id: `api-${meal.idMeal}`,
       name: meal.strMeal,
@@ -84,7 +87,7 @@ export async function GET(request: NextRequest) {
         meal.strCategory?.toLowerCase() || 'misc',
         'api-recipe',
       ].filter(Boolean),
-      rating: 4.0 + Math.random() * 0.9,
+      rating,
       youtubeUrl: meal.strYoutube || '',
       source: meal.strSource || '',
       sourceName: 'TheMealDB',
@@ -99,6 +102,15 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function deterministicRating(id: string): number {
+  // Simple hash-based deterministic rating between 4.0 and 4.9
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  }
+  return 4.0 + (Math.abs(hash) % 10) / 10;
 }
 
 function parseAmount(measure: string): number {
