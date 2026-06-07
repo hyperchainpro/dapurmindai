@@ -47,39 +47,59 @@
   --color-rose: var(--rose);
 }
 
+/* ══════════════════════════════════════════════════════════════
+   NEUMORPHISM DESIGN SYSTEM
+   Inspired by https://neumorphism.io/
+   ══════════════════════════════════════════════════════════════ */
+
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 90);
-  --foreground: oklch(0.18 0.02 50);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 50);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 50);
-  --primary: oklch(0.55 0.18 145);
-  --primary-foreground: oklch(0.98 0.005 145);
-  --secondary: oklch(0.96 0.01 85);
-  --secondary-foreground: oklch(0.30 0.05 50);
-  --muted: oklch(0.96 0.008 85);
-  --muted-foreground: oklch(0.50 0.02 50);
-  --accent: oklch(0.95 0.02 75);
-  --accent-foreground: oklch(0.25 0.05 50);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.01 85);
-  --input: oklch(0.92 0.01 85);
-  --ring: oklch(0.55 0.18 145);
+  --radius: 1rem;
+
+  /* Neumorphism base background — soft blue-gray */
+  --nm-bg: #e0e5ec;
+  --nm-shadow-dark: #a3b1c6;
+  --nm-shadow-light: #ffffff;
+  --nm-text: #4a5568;
+  --nm-text-muted: #718096;
+  --nm-text-light: #a0aec0;
+
+  /* Accent color — emerald for primary actions */
+  --nm-accent: #10b981;
+  --nm-accent-soft: rgba(16, 185, 129, 0.12);
+  --nm-accent-glow: rgba(16, 185, 129, 0.25);
+
+  /* Semantic tokens mapped to neumorphism */
+  --background: var(--nm-bg);
+  --foreground: var(--nm-text);
+  --card: var(--nm-bg);
+  --card-foreground: var(--nm-text);
+  --popover: var(--nm-bg);
+  --popover-foreground: var(--nm-text);
+  --primary: var(--nm-accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--nm-bg);
+  --secondary-foreground: var(--nm-text);
+  --muted: var(--nm-bg);
+  --muted-foreground: var(--nm-text-muted);
+  --accent: var(--nm-accent-soft);
+  --accent-foreground: var(--nm-text);
+  --destructive: #ef4444;
+  --border: transparent;
+  --input: transparent;
+  --ring: var(--nm-accent);
   --chart-1: oklch(0.55 0.18 145);
   --chart-2: oklch(0.65 0.20 55);
   --chart-3: oklch(0.70 0.15 85);
   --chart-4: oklch(0.60 0.22 25);
   --chart-5: oklch(0.65 0.18 160);
-  --sidebar: oklch(0.98 0.005 90);
-  --sidebar-foreground: oklch(0.18 0.02 50);
-  --sidebar-primary: oklch(0.55 0.18 145);
-  --sidebar-primary-foreground: oklch(0.98 0.005 145);
-  --sidebar-accent: oklch(0.95 0.02 75);
-  --sidebar-accent-foreground: oklch(0.25 0.05 50);
-  --sidebar-border: oklch(0.92 0.01 85);
-  --sidebar-ring: oklch(0.55 0.18 145);
+  --sidebar: var(--nm-bg);
+  --sidebar-foreground: var(--nm-text);
+  --sidebar-primary: var(--nm-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--nm-accent-soft);
+  --sidebar-accent-foreground: var(--nm-text);
+  --sidebar-border: transparent;
+  --sidebar-ring: var(--nm-accent);
   --emerald: oklch(0.55 0.18 145);
   --orange: oklch(0.65 0.20 55);
   --amber: oklch(0.70 0.15 85);
@@ -87,37 +107,48 @@
 }
 
 .dark {
-  --background: oklch(0.13 0.01 50);
-  --foreground: oklch(0.95 0.008 85);
-  --card: oklch(0.18 0.015 50);
-  --card-foreground: oklch(0.95 0.008 85);
-  --popover: oklch(0.18 0.015 50);
-  --popover-foreground: oklch(0.95 0.008 85);
-  --primary: oklch(0.65 0.20 145);
-  --primary-foreground: oklch(0.13 0.01 50);
-  --secondary: oklch(0.22 0.015 50);
-  --secondary-foreground: oklch(0.95 0.008 85);
-  --muted: oklch(0.22 0.015 50);
-  --muted-foreground: oklch(0.65 0.02 50);
-  --accent: oklch(0.25 0.02 50);
-  --accent-foreground: oklch(0.95 0.008 85);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.28 0.015 50);
-  --input: oklch(0.28 0.015 50);
-  --ring: oklch(0.65 0.20 145);
+  /* Dark neumorphism palette */
+  --nm-bg: #2d2d3a;
+  --nm-shadow-dark: #1e1e28;
+  --nm-shadow-light: #3c3c4e;
+  --nm-text: #e2e8f0;
+  --nm-text-muted: #94a3b8;
+  --nm-text-light: #64748b;
+  --nm-accent: #34d399;
+  --nm-accent-soft: rgba(52, 211, 153, 0.12);
+  --nm-accent-glow: rgba(52, 211, 153, 0.30);
+
+  --background: var(--nm-bg);
+  --foreground: var(--nm-text);
+  --card: var(--nm-bg);
+  --card-foreground: var(--nm-text);
+  --popover: var(--nm-bg);
+  --popover-foreground: var(--nm-text);
+  --primary: var(--nm-accent);
+  --primary-foreground: #1a1a24;
+  --secondary: var(--nm-bg);
+  --secondary-foreground: var(--nm-text);
+  --muted: var(--nm-bg);
+  --muted-foreground: var(--nm-text-muted);
+  --accent: var(--nm-accent-soft);
+  --accent-foreground: var(--nm-text);
+  --destructive: #f87171;
+  --border: transparent;
+  --input: transparent;
+  --ring: var(--nm-accent);
   --chart-1: oklch(0.65 0.20 145);
   --chart-2: oklch(0.70 0.18 55);
   --chart-3: oklch(0.72 0.13 85);
   --chart-4: oklch(0.65 0.20 25);
   --chart-5: oklch(0.68 0.18 160);
-  --sidebar: oklch(0.16 0.015 50);
-  --sidebar-foreground: oklch(0.95 0.008 85);
-  --sidebar-primary: oklch(0.65 0.20 145);
-  --sidebar-primary-foreground: oklch(0.13 0.01 50);
-  --sidebar-accent: oklch(0.25 0.02 50);
-  --sidebar-accent-foreground: oklch(0.95 0.008 85);
-  --sidebar-border: oklch(0.28 0.015 50);
-  --sidebar-ring: oklch(0.65 0.20 145);
+  --sidebar: var(--nm-bg);
+  --sidebar-foreground: var(--nm-text);
+  --sidebar-primary: var(--nm-accent);
+  --sidebar-primary-foreground: #1a1a24;
+  --sidebar-accent: var(--nm-accent-soft);
+  --sidebar-accent-foreground: var(--nm-text);
+  --sidebar-border: transparent;
+  --sidebar-ring: var(--nm-accent);
   --emerald: oklch(0.65 0.20 145);
   --orange: oklch(0.70 0.18 55);
   --amber: oklch(0.72 0.13 85);
@@ -126,12 +157,15 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
+    border-color: transparent;
   }
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--nm-bg);
+    color: var(--nm-text);
   }
   html {
     scroll-behavior: smooth;
@@ -139,22 +173,164 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   NEUMORPHISM UTILITY CLASSES
+   ══════════════════════════════════════════════════════════════ */
+
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  /* ── Neumorphism Shadows ── */
+
+  /* Raised / Convex — the default neumorphic "card" look */
+  .nm-raised {
+    box-shadow:
+      6px 6px 12px var(--nm-shadow-dark),
+      -6px -6px 12px var(--nm-shadow-light);
+    background: var(--nm-bg);
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+
+  /* Subtle raised — lighter shadow for less-prominent elements */
+  .nm-raised-sm {
+    box-shadow:
+      3px 3px 6px var(--nm-shadow-dark),
+      -3px -3px 6px var(--nm-shadow-light);
+    background: var(--nm-bg);
   }
+
+  /* Flat / pressed in — inset shadow for active/pressed state */
+  .nm-pressed {
+    box-shadow:
+      inset 4px 4px 8px var(--nm-shadow-dark),
+      inset -4px -4px 8px var(--nm-shadow-light);
+    background: var(--nm-bg);
+  }
+
+  /* Deep pressed — stronger inset for input fields */
+  .nm-pressed-deep {
+    box-shadow:
+      inset 6px 6px 12px var(--nm-shadow-dark),
+      inset -6px -6px 12px var(--nm-shadow-light);
+    background: var(--nm-bg);
+  }
+
+  /* Accent raised — emerald-tinted glow for primary elements */
+  .nm-accent {
+    box-shadow:
+      6px 6px 12px var(--nm-shadow-dark),
+      -6px -6px 12px var(--nm-shadow-light),
+      0 0 20px var(--nm-accent-glow);
+    background: var(--nm-accent);
+    color: #ffffff;
+  }
+
+  .dark .nm-accent {
+    color: #1a1a24;
+  }
+
+  /* Accent pressed — pressed-in primary button */
+  .nm-accent-pressed {
+    box-shadow:
+      inset 4px 4px 8px rgba(0, 0, 0, 0.15),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+    background: var(--nm-accent);
+    color: #ffffff;
+  }
+
+  .dark .nm-accent-pressed {
+    color: #1a1a24;
+  }
+
+  /* Flat (no shadow) — blends with background */
+  .nm-flat {
+    box-shadow: none;
+    background: var(--nm-bg);
+  }
+
+  /* ── Neumorphism Input Fields ── */
+  .nm-input {
+    box-shadow:
+      inset 3px 3px 6px var(--nm-shadow-dark),
+      inset -3px -3px 6px var(--nm-shadow-light);
+    background: var(--nm-bg);
+    border: none;
+    outline: none;
+    color: var(--nm-text);
+  }
+
+  .nm-input:focus {
+    box-shadow:
+      inset 3px 3px 6px var(--nm-shadow-dark),
+      inset -3px -3px 6px var(--nm-shadow-light),
+      0 0 0 2px var(--nm-accent-glow);
+  }
+
+  .nm-input::placeholder {
+    color: var(--nm-text-light);
+  }
+
+  /* ── Neumorphism Buttons ── */
+  .nm-btn {
+    box-shadow:
+      5px 5px 10px var(--nm-shadow-dark),
+      -5px -5px 10px var(--nm-shadow-light);
+    background: var(--nm-bg);
+    color: var(--nm-text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+  }
+
+  .nm-btn:hover {
+    box-shadow:
+      7px 7px 14px var(--nm-shadow-dark),
+      -7px -7px 14px var(--nm-shadow-light);
+  }
+
+  .nm-btn:active {
+    box-shadow:
+      inset 3px 3px 6px var(--nm-shadow-dark),
+      inset -3px -3px 6px var(--nm-shadow-light);
+  }
+
+  .nm-btn-primary {
+    box-shadow:
+      5px 5px 10px var(--nm-shadow-dark),
+      -5px -5px 10px var(--nm-shadow-light),
+      0 0 15px var(--nm-accent-glow);
+    background: var(--nm-accent);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+  }
+
+  .dark .nm-btn-primary {
+    color: #1a1a24;
+  }
+
+  .nm-btn-primary:hover {
+    box-shadow:
+      7px 7px 14px var(--nm-shadow-dark),
+      -7px -7px 14px var(--nm-shadow-light),
+      0 0 25px var(--nm-accent-glow);
+  }
+
+  .nm-btn-primary:active {
+    box-shadow:
+      inset 3px 3px 6px rgba(0, 0, 0, 0.2),
+      inset -3px -3px 6px rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── Glass overlay (still needed for chat header etc.) ── */
   .glass {
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(224, 229, 236, 0.80);
   }
   .dark .glass {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(45, 45, 58, 0.80);
   }
+
+  /* ── Gradient utilities (kept for primary buttons) ── */
   .gradient-emerald {
     background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
   }
@@ -170,13 +346,45 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ── Neumorphic scrollbar hide ── */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* ── Safe area insets ── */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .safe-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
+
+  /* ── Neumorphic separator line ── */
+  .nm-divider {
+    height: 2px;
+    box-shadow:
+      inset 1px 1px 2px var(--nm-shadow-dark),
+      inset -1px -1px 2px var(--nm-shadow-light);
+    background: var(--nm-bg);
+  }
+
+  /* ── Neumorphic badge/pill ── */
+  .nm-badge {
+    box-shadow:
+      2px 2px 4px var(--nm-shadow-dark),
+      -2px -2px 4px var(--nm-shadow-light);
+    background: var(--nm-bg);
+  }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMATIONS (kept from original)
+   ══════════════════════════════════════════════════════════════ */
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -184,8 +392,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.6); }
+  0%, 100% { box-shadow: 0 0 20px var(--nm-accent-glow); }
+  50% { box-shadow: 0 0 40px var(--nm-accent-glow); }
 }
 
 @keyframes shimmer {

@@ -152,7 +152,7 @@ function MarketplaceHCard({
     <motion.div
       whileTap={{ scale: 0.97 }}
       onClick={handleOpen}
-      className={`relative w-[200px] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-card p-4 text-left transition-shadow hover:shadow-lg ${marketplace.bgColor}`}
+      className={`relative w-[200px] shrink-0 cursor-pointer overflow-hidden rounded-2xl nm-raised p-4 text-left transition-shadow hover:shadow-lg ${marketplace.bgColor}`}
     >
       {/* Top pick badge */}
       {isTopPick && (
@@ -223,7 +223,7 @@ function ProductCard({
 
   return (
     <motion.div variants={fadeUp} className="group">
-      <div className="rounded-xl border border-border/40 bg-card p-3 transition-all hover:border-border hover:shadow-sm">
+      <div className="rounded-xl nm-raised p-3 transition-all hover:border-border hover:shadow-sm">
         <div className="flex items-start gap-3">
           {/* Icon */}
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-sm`}>
@@ -275,7 +275,7 @@ function AILinkResultCard({ result, index }: { result: AILinkResult; index: numb
     >
         <button
           onClick={() => window.open(result.affiliateUrl, '_blank', 'noopener,noreferrer')}
-          className="flex w-full items-center gap-3 rounded-xl border border-border/40 bg-card p-3 text-left transition-all hover:bg-muted/30 hover:shadow-sm"
+          className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-all hover:bg-muted/30 hover:shadow-sm"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/10">
             <Globe className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -452,15 +452,15 @@ export function MarketplaceHub() {
   /* ── Empty state ───────────────────────────────────── */
   if (shoppingItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white via-stone-50/50 to-white dark:from-background dark:via-stone-950/20 dark:to-background">
+      <div className="min-h-screen bg-[var(--nm-bg)]">
         <div className="flex flex-col pb-28">
           {/* Header */}
-          <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
+          <header className="sticky top-0 z-20 glass">
             <div className="flex items-center gap-3 px-4 py-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={goBack}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+                className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
                 aria-label="Kembali"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -510,7 +510,7 @@ export function MarketplaceHub() {
             <motion.div variants={fadeUp}>
               <Button
                 onClick={() => setScreen('chat')}
-                className="gap-2 rounded-full bg-emerald-500 px-6 shadow-lg shadow-emerald-500/25 hover:bg-emerald-600"
+                className="gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
               >
                 <Sparkles className="h-4 w-4" />
                 Buat Rencana Menu
@@ -524,15 +524,15 @@ export function MarketplaceHub() {
 
   /* ── Main render ───────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-stone-50/50 to-white dark:from-background dark:via-stone-950/20 dark:to-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-40">
         {/* ── Header ─────────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
+        <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={goBack}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+              className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
               aria-label="Kembali"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -941,7 +941,7 @@ export function MarketplaceHub() {
                   }
                 }}
                 disabled={filteredItems.length === 0}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingBag className="h-4 w-4" />
                 Beli Semua Bahan
@@ -1054,7 +1054,7 @@ export function MarketplaceHub() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-border/40 bg-muted/30 px-5 py-3">
+          <div className=" bg-muted/30 px-5 py-3">
             <p className="text-center text-[10px] text-muted-foreground">
               Tautan dihasilkan oleh AI dan mungkin perlu verifikasi. DapurMind AI mendapat komisi dari pembelian yang berhasil.
             </p>

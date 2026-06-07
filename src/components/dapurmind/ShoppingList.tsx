@@ -253,7 +253,7 @@ export function ShoppingList() {
           <motion.div variants={fadeUp}>
             <Button
               onClick={() => setScreen('chat')}
-              className="gap-2 rounded-full bg-emerald-500 px-6 shadow-lg shadow-emerald-500/25 hover:bg-emerald-600"
+              className="gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
             >
               <Sparkles className="h-4 w-4" />
               Buat Rencana Menu
@@ -266,15 +266,15 @@ export function ShoppingList() {
 
   /* ── Main render ───────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-stone-50/50 to-white dark:from-background dark:via-stone-950/20 dark:to-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-40">
         {/* ── Header ─────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
+        <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={goBack}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+              className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
               aria-label="Kembali"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -360,7 +360,7 @@ export function ShoppingList() {
                 <motion.div key={category} variants={fadeUp}>
                   <AccordionItem
                     value={category}
-                    className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden"
+                    className="rounded-xl nm-raised overflow-hidden"
                   >
                     <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
                       <div className="flex items-center gap-3 text-left">
@@ -405,7 +405,7 @@ export function ShoppingList() {
 
       {/* ── Summary Bar (fixed bottom) ──────────────── */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
-        <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 shadow-lg backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl nm-raised p-4 shadow-lg backdrop-blur-xl">
           <BorderBeam
             duration={6}
             size={120}
@@ -451,7 +451,7 @@ export function ShoppingList() {
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowBuyAllDialog(true)}
               disabled={uncheckedItems.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ShoppingBag className="h-4 w-4" />
               Beli Semua Bahan

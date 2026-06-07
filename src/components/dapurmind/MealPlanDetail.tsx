@@ -256,7 +256,7 @@ export function MealPlanDetail() {
         <ClickSpark color="#f59e0b" count={10}>
           <button
             onClick={handleGenerateShopping}
-            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all active:scale-[0.98]"
+            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 font-semibold text-white shadow-nm-accent transition-all active:scale-[0.98]"
           >
             <span className="flex items-center justify-center gap-2">
               <ShoppingCart className="h-5 w-5" />

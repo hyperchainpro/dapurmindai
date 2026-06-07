@@ -140,9 +140,9 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
       onClick={onClick}
       className="min-w-[160px] max-w-[180px] cursor-pointer snap-start"
     >
-      <div className="overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-shadow hover:shadow-md">
+      <div className="overflow-hidden rounded-2xl nm-raised">
         {/* Emoji image area */}
-        <div className="flex h-28 items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50 dark:from-emerald-500/10 dark:to-amber-500/10">
+        <div className="flex h-28 items-center justify-center bg-[var(--nm-bg)]">
           <span className="text-5xl">{recipe.image}</span>
         </div>
         <div className="p-3">
@@ -196,7 +196,7 @@ function DashboardInner() {
       unlockedAchievements.map((a) => ({
         id: a.id,
         content: (
-          <div className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-3">
+          <div className="flex items-center gap-3 rounded-xl nm-raised-sm px-4 py-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-500/15">
               {a.icon}
             </span>
@@ -248,7 +248,7 @@ function DashboardInner() {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+            className="flex h-10 w-10 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-accent"
             aria-label={isDark ? 'Light mode' : 'Dark mode'}
           >
             <motion.div
@@ -272,11 +272,11 @@ function DashboardInner() {
           {quickActions.map((action) => (
             <BentoGridItem
               key={action.screen}
-              className={`cursor-pointer bg-gradient-to-br ${action.gradient}`}
+              className="cursor-pointer nm-raised"
               onClick={() => handleNavigate(action.screen)}
             >
               <motion.div whileTap={{ scale: 0.96 }} className="flex flex-col gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-background/80 shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl nm-raised-sm">
                   <action.icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
@@ -411,7 +411,7 @@ function DashboardInner() {
               </div>
               <button
                 onClick={() => handleNavigate('meal-plan-detail')}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 text-sm font-medium text-white shadow-sm shadow-emerald-500/25 transition-colors hover:bg-emerald-600"
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl nm-btn-primary py-2.5 text-sm font-medium text-white transition-colors"
               >
                 Lihat Detail
                 <ArrowRight className="h-3.5 w-3.5" />

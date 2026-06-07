@@ -655,7 +655,7 @@ export default function OnboardingFlow() {
           onClick={goNext}
           whileTap={{ scale: 0.93 }}
           disabled={!canGoNext()}
-          className={`flex items-center gap-1.5 rounded-xl px-6 py-3 text-sm font-semibold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed ${
+          className={`flex items-center gap-1.5 rounded-xl px-6 py-3 text-sm font-semibold transition-all shadow-nm-accent disabled:opacity-40 disabled:cursor-not-allowed ${
             step === TOTAL_STEPS - 1
               ? 'bg-gradient-to-r from-emerald-500 to-amber-500 text-white'
               : 'bg-emerald-500 text-white hover:bg-emerald-600'

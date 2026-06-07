@@ -153,7 +153,7 @@ export function ZeroWasteRecipe() {
       {/* Content */}
       <div className="relative z-10 flex flex-col pb-24">
         {/* ── Header ───────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-emerald-200/50 bg-white/80 backdrop-blur-xl dark:border-emerald-800/50 dark:bg-background/80">
+        <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <Button
               variant="ghost"
@@ -174,7 +174,7 @@ export function ZeroWasteRecipe() {
               </div>
             </div>
           </div>
-          <div className="border-t border-emerald-100/50 px-4 py-2 dark:border-emerald-900/50">
+          <div className=" px-4 py-2 dark:border-emerald-900/50">
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Recycle className="h-3 w-3 text-emerald-500" />
               Selamatkan bahan makananmu dari pemborosan
@@ -225,7 +225,7 @@ export function ZeroWasteRecipe() {
                       whileTap={{ scale: 0.92 }}
                       className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                         isSelected
-                          ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
+                          ? 'bg-emerald-500 text-white shadow-nm-accent'
                           : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
                       }`}
                     >
@@ -271,7 +271,7 @@ export function ZeroWasteRecipe() {
               <Button
                 onClick={handleSearch}
                 disabled={isLoading || allIngredients.length === 0}
-                className="relative h-12 w-full overflow-hidden rounded-xl bg-emerald-600 text-base font-semibold text-white shadow-lg shadow-emerald-500/25 hover:bg-emerald-700 disabled:opacity-50"
+                className="relative h-12 w-full overflow-hidden rounded-xl bg-emerald-600 text-base font-semibold text-white shadow-nm-accent hover:bg-emerald-700 disabled:opacity-50"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">

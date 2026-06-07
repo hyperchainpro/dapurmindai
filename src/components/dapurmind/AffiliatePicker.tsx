@@ -317,7 +317,7 @@ export function AffiliatePicker({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border/40 bg-muted/30 px-5 py-3">
+        <div className=" bg-muted/30 px-5 py-3">
           <p className="text-center text-[10px] text-muted-foreground">
             Dengan menekan tombol, kamu akan diarahkan ke situs marketplace pilihan.
             DapurMind AI mendapat komisi dari pembelian yang berhasil.

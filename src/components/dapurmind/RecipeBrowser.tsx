@@ -245,10 +245,10 @@ export function RecipeBrowser() {
   const hasActiveFilters = maxCookTime < 180 || selectedDifficulty !== null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-stone-50/50 to-white dark:from-background dark:via-stone-950/20 dark:to-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-24">
         {/* ── Header ───────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
+        <header className="sticky top-0 z-20 glass">
           <div className="space-y-3 px-4 pb-3 pt-4">
             {/* Title row with mode toggle */}
             <div className="flex items-center justify-between">
@@ -684,7 +684,7 @@ function RecipeCard({
         <motion.div
           onClick={onClick}
           whileTap={{ scale: 0.97 }}
-          className="group cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/8"
+          className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 "
         >
           {/* Image */}
           <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
@@ -817,7 +817,7 @@ function ApiRecipeCard({
       <motion.div
         onClick={onClick}
         whileTap={{ scale: 0.97 }}
-        className="group cursor-pointer overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8"
+        className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8"
       >
         {/* Real image from API */}
         <div className="relative h-28 overflow-hidden bg-muted/30">

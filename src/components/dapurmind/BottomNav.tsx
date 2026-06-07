@@ -33,7 +33,7 @@ function BottomNavInner() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/40"
+      className="fixed bottom-0 left-0 right-0 z-50 glass"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="mx-auto flex max-w-md items-end justify-around px-2 pt-2 pb-1">
@@ -69,13 +69,13 @@ function BottomNavInner() {
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 className={`
                   flex items-center justify-center rounded-2xl transition-colors duration-200
-                  ${tab.isCenter ? 'h-14 w-14 -mt-4 shadow-lg' : 'h-10 w-10'}
+                  ${tab.isCenter ? 'h-14 w-14 -mt-4' : 'h-10 w-10'}
                   ${
                     tab.isCenter
-                      ? 'gradient-emerald text-white shadow-emerald-500/30'
+                      ? 'gradient-emerald text-white shadow-nm-accent'
                       : isActive
-                        ? 'bg-emerald-500/10 text-emerald-500'
-                        : 'text-muted-foreground'
+                        ? 'nm-raised-sm text-emerald-500'
+                        : 'nm-flat text-[var(--nm-text-muted)]'
                   }
                 `}
                 whileTap={{ scale: 0.92 }}
@@ -92,7 +92,7 @@ function BottomNavInner() {
               <span
                 className={`
                   text-[10px] font-medium transition-colors duration-200
-                  ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}
+                  ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--nm-text-muted)]'}
                   ${tab.isCenter ? '-mt-0.5' : ''}
                 `}
               >

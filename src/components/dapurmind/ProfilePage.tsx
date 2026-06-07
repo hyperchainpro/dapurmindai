@@ -165,7 +165,7 @@ export function ProfilePage() {
 
   /* ── Render ────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-stone-50/50 to-white dark:from-background dark:via-stone-950/20 dark:to-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <motion.div
         variants={stagger}
         initial="hidden"
@@ -173,7 +173,7 @@ export function ProfilePage() {
         className="flex flex-col pb-28"
       >
         {/* ── Header ─────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-border/50 bg-white/90 backdrop-blur-xl dark:bg-background/90">
+        <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <h1 className="flex items-center gap-2 text-lg font-bold tracking-tight">
               <GlowingText color="amber" intensity={1}>
@@ -186,7 +186,7 @@ export function ProfilePage() {
 
         {/* ── Profile Card ───────────────────────────── */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
-          <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm dark:from-emerald-500/10 dark:via-card dark:to-amber-500/5">
+          <div className="relative overflow-hidden rounded-2xl nm-raised p-5">
             {/* Decorative blobs */}
             <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-200/30 dark:bg-emerald-500/10 blur-2xl" />
             <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-amber-200/30 dark:bg-amber-500/10 blur-2xl" />
@@ -371,7 +371,7 @@ export function ProfilePage() {
                   key={plan.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleMealPlanTap(idx)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border/40 bg-card p-3.5 text-left shadow-sm transition-colors hover:bg-muted/30"
+                  className="flex w-full items-center gap-3 rounded-xl nm-raised p-3.5 text-left shadow-sm transition-colors hover:bg-muted/30"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
                     <Calendar className="h-5 w-5 text-emerald-500" />
@@ -408,7 +408,7 @@ export function ProfilePage() {
           </h3>
           <div className="space-y-2">
             {/* Dark Mode */}
-            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5">
+            <div className="flex items-center justify-between rounded-xl nm-raised p-3.5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
                   {isDark ? (
@@ -428,7 +428,7 @@ export function ProfilePage() {
             </div>
 
             {/* Language */}
-            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5">
+            <div className="flex items-center justify-between rounded-xl nm-raised p-3.5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-500/10">
                   <Globe className="h-4.5 w-4.5 text-sky-500" />
@@ -447,7 +447,7 @@ export function ProfilePage() {
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
-              className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-card p-3.5 text-left"
+              className="flex w-full items-center justify-between rounded-xl nm-raised p-3.5 text-left"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10">
@@ -462,7 +462,7 @@ export function ProfilePage() {
             </motion.button>
 
             {/* About */}
-            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5">
+            <div className="flex items-center justify-between rounded-xl nm-raised p-3.5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
                   <Info className="h-4.5 w-4.5 text-emerald-500" />
@@ -623,7 +623,7 @@ function PreferenceCard({
   onEdit?: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3.5 shadow-sm">
+    <div className="flex items-center justify-between rounded-xl nm-raised p-3.5 shadow-sm">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/60 text-lg">
           {icon}
@@ -668,7 +668,7 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
           </div>
         </StarBorder>
       ) : (
-        <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/30 bg-muted/30 p-3 text-center opacity-50">
+        <div className="flex flex-col items-center gap-1.5 rounded-xl nm-flat bg-muted/30 p-3 text-center opacity-50">
           <div className="relative">
             <span className="text-2xl grayscale">{achievement.icon}</span>
             <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-muted">

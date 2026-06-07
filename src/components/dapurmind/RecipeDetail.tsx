@@ -618,7 +618,7 @@ function RecipeDetailContent({
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setPortionScale((s) => Math.max(0.5, +(s - 0.5).toFixed(1)))}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                   disabled={portionScale <= 0.5}
                 >
                   <Minus className="h-4 w-4" />
@@ -638,7 +638,7 @@ function RecipeDetailContent({
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setPortionScale((s) => Math.min(10, +(s + 0.5).toFixed(1)))}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                   disabled={portionScale >= 10}
                 >
                   <Plus className="h-4 w-4" />
@@ -981,7 +981,7 @@ function RecipeDetailContent({
 
       {/* ── Bottom Action Buttons (fixed) ─────────── */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
-        <div className="flex gap-2 rounded-2xl border border-border/40 bg-card p-3 shadow-lg backdrop-blur-xl">
+        <div className="flex gap-2 rounded-2xl nm-raised p-3 shadow-lg backdrop-blur-xl">
           {/* Favorite */}
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -1008,7 +1008,7 @@ function RecipeDetailContent({
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={handleAddToShoppingList}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-emerald-700"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-2.5 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700"
           >
             <ShoppingCart className="h-4 w-4" />
             Tambah ke Daftar Belanja

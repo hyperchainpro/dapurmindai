@@ -469,7 +469,7 @@ export function AdminAffiliate() {
             <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={goBack}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                 aria-label="Kembali"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -488,7 +488,7 @@ export function AdminAffiliate() {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setScreen('admin-analytics')}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                 aria-label="Pengaturan analitik"
               >
                 <Settings className="h-5 w-5 text-muted-foreground" />
@@ -577,7 +577,7 @@ export function AdminAffiliate() {
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-2xl border border-border/40 bg-card p-4">
+              <div key={i} className="rounded-2xl nm-raised p-4">
                 <div className="flex items-center gap-3">
                   <Skeleton className="h-11 w-11 rounded-xl" />
                   <div className="flex-1 space-y-2">
@@ -633,7 +633,7 @@ export function AdminAffiliate() {
                 </p>
                 <Button
                     onClick={() => openAddDialog()}
-                    className="mt-5 gap-2 rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/25 hover:bg-emerald-600"
+                    className="mt-5 gap-2 rounded-xl bg-emerald-500 text-white shadow-nm-accent hover:bg-emerald-600"
                   >
                     <Plus className="h-4 w-4" />
                     Tambah Akun Pertama
@@ -803,11 +803,11 @@ export function AdminAffiliate() {
             </div>
           </div>
 
-          <div className="border-t border-border/40 bg-muted/30 px-5 py-4">
+          <div className=" bg-muted/30 px-5 py-4">
               <Button
                 onClick={handleAddSubmit}
                 disabled={!addPlatform || !addAffiliateId.trim() || !addBaseUrlTemplate.trim() || saving}
-                className="w-full gap-2 rounded-xl bg-emerald-500 text-white shadow-sm shadow-emerald-500/25 hover:bg-emerald-600 disabled:opacity-50"
+                className="w-full gap-2 rounded-xl bg-emerald-500 text-white shadow-nm-accent hover:bg-emerald-600 disabled:opacity-50"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -916,7 +916,7 @@ export function AdminAffiliate() {
             </div>
           </div>
 
-          <div className="border-t border-border/40 bg-muted/30 px-5 py-4">
+          <div className=" bg-muted/30 px-5 py-4">
               <Button
                 onClick={handleEditSubmit}
                 disabled={!editAffiliateId.trim() || !editBaseUrlTemplate.trim() || saving}
@@ -956,7 +956,7 @@ export function AdminAffiliate() {
             </DialogHeader>
           </div>
 
-          <div className="border-t border-border/40 px-5 py-4 flex gap-3">
+          <div className=" px-5 py-4 flex gap-3">
             <Button
               variant="outline"
               onClick={() => {

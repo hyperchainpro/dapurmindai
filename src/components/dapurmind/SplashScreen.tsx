@@ -92,11 +92,7 @@ export default function SplashScreen() {
         >
           {/* ── Background gradient ── */}
           <div
-            className={`absolute inset-0 ${
-              isDark
-                ? 'bg-gradient-to-br from-emerald-950 via-stone-950 to-amber-950'
-                : 'bg-gradient-to-br from-emerald-50 via-white to-amber-50'
-            }`}
+            className="absolute inset-0 bg-[var(--nm-bg)]"
           />
 
           {/* ── Floating emojis ── */}
@@ -130,11 +126,7 @@ export default function SplashScreen() {
 
           {/* ── Center glass card ── */}
           <motion.div
-            className={`relative z-10 flex flex-col items-center gap-4 px-8 py-10 sm:px-12 ${
-              isDark
-                ? 'bg-white/5 backdrop-blur-xl border border-white/10'
-                : 'bg-white/60 backdrop-blur-xl border border-white/50'
-            }`}
+            className={`relative z-10 flex flex-col items-center gap-4 px-8 py-10 sm:px-12 nm-raised`}
             style={{ borderRadius: 28 }}
             initial={{ opacity: 0, y: 40, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -150,9 +142,7 @@ export default function SplashScreen() {
 
             {/* Logo icon */}
             <motion.div
-              className={`relative flex h-20 w-20 items-center justify-center rounded-2xl ${
-                isDark ? 'bg-emerald-500/20' : 'bg-emerald-100'
-              }`}
+              className="relative flex h-20 w-20 items-center justify-center rounded-2xl nm-raised"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.6, delay: 0.4, type: 'spring', stiffness: 200, damping: 15 }}
@@ -186,11 +176,7 @@ export default function SplashScreen() {
 
             {/* Tagline */}
             <motion.div
-              className={`mt-2 rounded-full px-4 py-1.5 text-xs font-medium ${
-                isDark
-                  ? 'bg-amber-500/10 text-amber-300'
-                  : 'bg-amber-100 text-amber-700'
-              }`}
+              className="mt-2 rounded-full px-4 py-1.5 text-xs font-medium nm-badge"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.9 }}
@@ -207,9 +193,7 @@ export default function SplashScreen() {
             transition={{ duration: 0.4, delay: 1.0 }}
           >
             <div
-              className={`h-1.5 w-full overflow-hidden rounded-full ${
-                isDark ? 'bg-white/10' : 'bg-emerald-100'
-              }`}
+              className="h-1.5 w-full overflow-hidden rounded-full nm-pressed"
             >
               <motion.div
                 className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-amber-400"
@@ -218,9 +202,7 @@ export default function SplashScreen() {
               />
             </div>
             <p
-              className={`mt-3 text-center text-xs ${
-                isDark ? 'text-white/40' : 'text-stone-400'
-              }`}
+              className="mt-3 text-center text-xs text-[var(--nm-text-muted)]"
             >
               Memuat keajaiban dapur…
             </p>

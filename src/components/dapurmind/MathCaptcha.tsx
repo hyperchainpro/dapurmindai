@@ -82,7 +82,7 @@ export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
 
       <div className="flex items-center gap-2">
         {/* Captcha question box */}
-        <div className="flex-shrink-0 flex items-center justify-center h-11 px-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200/60 dark:border-emerald-500/20">
+        <div className="flex-shrink-0 flex items-center justify-center h-11 px-4 rounded-xl nm-raised-sm bg-emerald-500/10">
           <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tracking-wide select-none">
             {captcha.question}
           </span>
@@ -98,10 +98,10 @@ export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
             onChange={handleChange}
             placeholder="Jawaban"
             maxLength={4}
-            className={`h-11 w-full rounded-xl border bg-card pl-3 pr-9 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:outline-none focus:ring-2 ${
+            className={`h-11 w-full rounded-xl nm-input pl-3 pr-9 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)] ${
               isVerified
-                ? 'border-green-400 dark:border-green-500/50 focus:ring-green-500/20'
-                : 'border-border/60 focus:border-emerald-400 focus:ring-emerald-500/20'
+                ? 'shadow-[0_0_0_1px_rgba(34,197,94,0.3)]'
+                : ''
             }`}
           />
           {isVerified && (
@@ -116,7 +116,7 @@ export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
           type="button"
           onClick={regenerate}
           whileTap={{ scale: 0.9, rotate: 180 }}
-          className="flex-shrink-0 flex h-11 w-11 items-center justify-center rounded-xl border border-border/60 bg-card text-muted-foreground/60 hover:text-emerald-500 hover:border-emerald-300 dark:hover:border-emerald-500/30 transition-all shadow-sm"
+          className="flex-shrink-0 flex h-11 w-11 items-center justify-center rounded-xl nm-btn text-[var(--nm-text-muted)] hover:text-emerald-500 transition-all"
           aria-label="Ganti captcha"
         >
           <RefreshCw className="h-4 w-4" />

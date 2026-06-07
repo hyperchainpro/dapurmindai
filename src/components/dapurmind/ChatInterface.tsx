@@ -76,7 +76,7 @@ function TypingIndicator() {
         <ChefHat className="h-4 w-4 text-white" />
       </div>
 
-      <div className="max-w-[80%] rounded-2xl rounded-bl-md bg-card border border-border/40 px-4 py-3 shadow-sm">
+      <div className="max-w-[80%] rounded-2xl nm-raised px-4 py-3">
         <div className="flex items-center gap-1.5">
           {[0, 1, 2].map((i) => (
             <motion.span
@@ -186,7 +186,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: showActions ? 1 : 0, scale: showActions ? 1 : 0.9 }}
-              className="absolute -top-3 right-2 z-10 flex items-center gap-1 rounded-lg border border-border/60 bg-card px-1.5 py-1 shadow-sm"
+              className="absolute -top-3 right-2 z-10 flex items-center gap-1 rounded-lg nm-raised-sm px-1.5 py-1"
             >
               <button
                 onClick={handleCopy}
@@ -235,7 +235,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
       </div>
 
       <div className="max-w-[82%]">
-        <div className="mb-1 rounded-2xl border border-emerald-200/50 dark:border-emerald-500/20 bg-card px-4 py-3 shadow-sm">
+        <div className="mb-1 rounded-2xl nm-raised px-4 py-3">
             {/* Chef name badge */}
             <div className="mb-1.5 flex items-center gap-1.5">
               <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -300,7 +300,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
 
             <button
               onClick={onViewShopping}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-accent active:scale-[0.97]"
+              className="flex items-center justify-center gap-2 rounded-xl nm-btn px-4 py-2.5 text-sm font-medium text-[var(--nm-text)] active:scale-[0.97]"
             >
               <ShoppingCart className="h-4 w-4 text-emerald-500" />
               <span>Lihat Daftar Belanja</span>
@@ -552,7 +552,7 @@ function WelcomeCard() {
           duration={10}
           color={['#10b981', '#f59e0b', '#34d399', '#fbbf24']}
         >
-          <div className="rounded-2xl bg-card px-4 py-4 shadow-sm max-w-[85%]">
+          <div className="rounded-2xl nm-raised px-4 py-4 max-w-[85%]">
             <div className="mb-1.5 flex items-center gap-1.5">
               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 Chef Mindi
@@ -779,13 +779,13 @@ export function ChatInterface() {
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="glass sticky top-0 z-40 border-b border-border/40">
+      <header className="glass sticky top-0 z-40">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
           {/* Back button */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => useAppStore.getState().goBack()}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card shadow-sm transition-colors hover:bg-accent"
+            className="flex h-9 w-9 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-accent"
             aria-label="Kembali"
           >
             <ArrowLeft className="h-4.5 w-4.5" />
@@ -878,7 +878,7 @@ export function ChatInterface() {
 
       {/* ── Input Area (fixed to bottom, above nav) ─────────── */}
       <div
-        className="glass fixed bottom-[68px] left-0 right-0 z-30 border-t border-border/40"
+        className="glass fixed bottom-[68px] left-0 right-0 z-30"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
@@ -892,7 +892,7 @@ export function ChatInterface() {
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.03 }}
                 onClick={() => handleSuggestion(suggestion.label)}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50/50 dark:border-emerald-500/20 dark:bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:bg-emerald-100/70 dark:hover:bg-emerald-500/20 active:bg-emerald-200/80"
+                className="flex shrink-0 items-center gap-1.5 rounded-full nm-badge px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:opacity-80 active:opacity-70"
               >
                 <span>{suggestion.icon}</span>
                 <span>{suggestion.label}</span>
@@ -911,7 +911,7 @@ export function ChatInterface() {
                 onKeyDown={handleKeyDown}
                 placeholder="Tulis kebutuhan menu..."
                 disabled={isAILoading}
-                className="w-full rounded-2xl border border-border/60 bg-card px-4 py-3 pr-12 text-sm text-foreground placeholder:text-muted-foreground/60 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50"
+                className="w-full rounded-2xl nm-input px-4 py-3 pr-12 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)] disabled:opacity-50"
               />
             </div>
 
@@ -922,7 +922,7 @@ export function ChatInterface() {
                 whileHover={{ scale: 1.05 }}
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isAILoading}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-40 disabled:shadow-none"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-nm-accent transition-all disabled:opacity-40 disabled:shadow-none"
                 aria-label="Kirim pesan"
               >
                 <motion.div
