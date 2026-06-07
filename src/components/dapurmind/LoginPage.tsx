@@ -38,6 +38,7 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValid, setCaptchaValid] = useState(false);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const handleLogin = useCallback(async () => {
     setError('');
@@ -48,7 +49,7 @@ export function LoginPage() {
     }
     if (!captchaValid) {
       setError('Jawaban captcha salah atau belum diisi');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
       return;
     }
 
@@ -68,7 +69,7 @@ export function LoginPage() {
 
       if (!res.ok) {
         setError(data.error || 'Login gagal');
-        setResetTrigger((t) => t + 1);
+        setCaptchaKey((k) => k + 1);
         setIsLoading(false);
         return;
       }
@@ -101,7 +102,7 @@ export function LoginPage() {
       }
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setResetTrigger((t) => t + 1);
+      setCaptchaKey((k) => k + 1);
     }
 
     setIsLoading(false);
@@ -206,6 +207,7 @@ export function LoginPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
+              key={captchaKey}
               onVerify={setCaptchaValid}
             />
           </motion.div>
