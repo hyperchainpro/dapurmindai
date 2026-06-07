@@ -84,8 +84,8 @@
   --accent: var(--nm-accent-soft);
   --accent-foreground: var(--nm-text);
   --destructive: #ef4444;
-  --border: transparent;
-  --input: transparent;
+  --border: rgba(163, 177, 198, 0.3);
+  --input: rgba(163, 177, 198, 0.25);
   --ring: var(--nm-accent);
   --chart-1: oklch(0.55 0.18 145);
   --chart-2: oklch(0.65 0.20 55);
@@ -98,7 +98,7 @@
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--nm-accent-soft);
   --sidebar-accent-foreground: var(--nm-text);
-  --sidebar-border: transparent;
+  --sidebar-border: rgba(163, 177, 198, 0.2);
   --sidebar-ring: var(--nm-accent);
   --emerald: oklch(0.55 0.18 145);
   --orange: oklch(0.65 0.20 55);
@@ -133,8 +133,8 @@
   --accent: var(--nm-accent-soft);
   --accent-foreground: var(--nm-text);
   --destructive: #f87171;
-  --border: transparent;
-  --input: transparent;
+  --border: rgba(60, 60, 78, 0.4);
+  --input: rgba(60, 60, 78, 0.35);
   --ring: var(--nm-accent);
   --chart-1: oklch(0.65 0.20 145);
   --chart-2: oklch(0.70 0.18 55);

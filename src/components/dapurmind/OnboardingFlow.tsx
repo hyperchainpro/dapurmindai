@@ -112,7 +112,7 @@ function StepWelcome({
           className={`w-full rounded-xl border px-4 py-3 text-base outline-none transition-all focus:ring-2 focus:ring-emerald-500/50 ${
             isDark
               ? 'border-white/10 bg-white/5 placeholder:text-stone-500'
-              : 'border-stone-200 bg-white placeholder:text-stone-400'
+              : 'border-stone-200 bg-[var(--nm-bg)] placeholder:text-stone-400'
           }`}
           autoFocus
         />
@@ -163,7 +163,7 @@ function StepKeluarga({
                 ? 'cursor-not-allowed opacity-30'
                 : isDark
                   ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
             }`}
             aria-label="Kurangi"
           >
@@ -172,7 +172,7 @@ function StepKeluarga({
 
           <div
             className={`flex h-20 w-24 items-center justify-center rounded-2xl ${
-              isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-stone-200'
+              isDark ? 'bg-white/5 border border-white/10' : 'bg-[var(--nm-bg)] border border-stone-200'
             } shadow-lg`}
           >
             <NumberTicker
@@ -191,7 +191,7 @@ function StepKeluarga({
                 ? 'cursor-not-allowed opacity-30'
                 : isDark
                   ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
             }`}
             aria-label="Tambah"
           >
@@ -293,7 +293,7 @@ function StepPreferensi({
                     ? 'bg-red-500/15 border-red-500/40 text-red-600 dark:text-red-400'
                     : isDark
                       ? 'bg-white/5 border-white/10 text-stone-300 hover:bg-white/10'
-                      : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                      : 'nm-raised border-stone-200 text-stone-600 hover:bg-stone-100'
                 }`}
               >
                 {active && <Check className="mr-1 inline h-3.5 w-3.5" />}
@@ -327,7 +327,7 @@ function StepPreferensi({
                     ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
                     : isDark
                       ? 'bg-white/5 border-white/10 text-stone-300 hover:bg-white/10'
-                      : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                      : 'nm-raised border-stone-200 text-stone-600 hover:bg-stone-100'
                 }`}
               >
                 {active && <Check className="mr-1 inline h-3.5 w-3.5" />}
@@ -364,7 +364,7 @@ function StepPreferensi({
             className={`w-full rounded-xl border py-3 pl-11 pr-4 text-base outline-none transition-all focus:ring-2 focus:ring-emerald-500/50 ${
               isDark
                 ? 'border-white/10 bg-white/5 placeholder:text-stone-500'
-                : 'border-stone-200 bg-white placeholder:text-stone-400'
+                : 'border-stone-200 bg-[var(--nm-bg)] placeholder:text-stone-400'
             }`}
           />
         </div>
@@ -427,7 +427,7 @@ function StepSelesai({
         className={`w-full max-w-sm rounded-2xl border p-5 space-y-4 ${
           isDark
             ? 'bg-white/5 border-white/10'
-            : 'bg-white border-stone-200 shadow-lg'
+            : 'bg-[var(--nm-bg)] border-stone-200 shadow-lg'
         }`}
       >
         <SummaryRow icon="👤" label="Nama" value={name || '—'} />
@@ -566,7 +566,7 @@ export default function OnboardingFlow() {
       className={`fixed inset-0 z-50 flex flex-col overflow-hidden ${
         isDark
           ? 'bg-gradient-to-b from-stone-950 via-emerald-950/40 to-stone-950'
-          : 'bg-gradient-to-b from-emerald-50 via-white to-amber-50/30'
+          : 'bg-[var(--nm-bg)]'
       }`}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -641,7 +641,7 @@ export default function OnboardingFlow() {
             className={`flex items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-medium transition-all ${
               isDark
                 ? 'bg-white/10 text-white hover:bg-white/20'
-                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
             }`}
           >
             <ArrowLeft className="h-4 w-4" />

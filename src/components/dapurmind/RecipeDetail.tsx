@@ -414,7 +414,7 @@ function RecipeDetailContent({
 
   /* ── Main render ─────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-white dark:bg-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <motion.div
         variants={stagger}
         initial="hidden"

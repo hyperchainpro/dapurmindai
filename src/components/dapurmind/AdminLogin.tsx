@@ -70,7 +70,7 @@ export function AdminLogin() {
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-background">
+    <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col items-center justify-center px-6 py-12 min-h-screen">
         {/* Back button */}
         <motion.button
