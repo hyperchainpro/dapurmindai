@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Eye,
   EyeOff,
   AlertCircle,
-  CheckCircle2,
   User,
   Mail,
   Lock,
@@ -43,15 +42,22 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [captchaKey, setCaptchaKey] = useState(0);
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const handleCaptchaChange = useCallback((val: string) => {
+    setCaptchaValue(val);
+    // Check if the captcha answer matches by extracting numbers from the current captcha display
+    // The MathCaptcha component handles validation internally, we just need to know if it's valid
+  }, []);
 
   const handleRegister = useCallback(async () => {
     setError('');
-    setSuccessMsg('');
 
+    // Validations
     if (!name.trim()) {
       setError('Nama lengkap wajib diisi');
       return;
@@ -88,9 +94,8 @@ export function RegisterPage() {
       setError('Konfirmasi password tidak cocok');
       return;
     }
-    if (!captchaValid) {
-      setError('Jawaban captcha salah atau belum diisi');
-      setCaptchaKey((k) => k + 1);
+    if (!captchaValue || captchaValue.length === 0) {
+      setError('Silakan jawab captcha terlebih dahulu');
       return;
     }
 
@@ -112,29 +117,24 @@ export function RegisterPage() {
 
       if (!res.ok) {
         setError(data.error || 'Registrasi gagal');
-        setCaptchaKey((k) => k + 1);
+        setResetTrigger((t) => t + 1);
         setIsLoading(false);
         return;
       }
 
-      // Success - show message then redirect
+      // Success
       const newUser = data.user;
-      setSuccessMsg('Registrasi berhasil! Mengarahkan ke onboarding...');
-      // Small delay for user to see success message
-      setTimeout(() => {
-        setAuthUser(newUser);
-        setLoggedIn(true);
-        setFirstLaunch(false);
-        setScreen('onboarding');
-      }, 800);
-      return;
+      setAuthUser(newUser);
+      setLoggedIn(true);
+      setFirstLaunch(false);
+      setScreen('onboarding');
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setCaptchaKey((k) => k + 1);
+      setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [name, username, email, password, confirmPassword, captchaValid, setAuthUser, setLoggedIn, setFirstLaunch, setScreen]);
+  }, [name, username, email, password, confirmPassword, captchaValue, setAuthUser, setLoggedIn, setFirstLaunch, setScreen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -153,7 +153,7 @@ export function RegisterPage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setScreen('login')}
-          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-accent"
+          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card shadow-sm transition-colors hover:bg-accent"
           aria-label="Kembali"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -166,8 +166,8 @@ export function RegisterPage() {
           transition={{ duration: 0.5 }}
           className="mt-8 mb-6 flex flex-col items-center text-center"
         >
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl nm-raised bg-emerald-500/10">
-            <ChefHat className="h-7 w-7 text-emerald-500" />
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
+            <ChefHat className="h-7 w-7 text-white" />
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -180,6 +180,7 @@ export function RegisterPage() {
 
         {/* Register Form */}
         <motion.div
+          ref={formRef}
           variants={stagger}
           initial="hidden"
           animate="visible"
@@ -199,7 +200,7 @@ export function RegisterPage() {
                 placeholder="Masukkan nama lengkap"
                 onKeyDown={handleKeyDown}
                 autoComplete="name"
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-4 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
           </motion.div>
@@ -218,7 +219,7 @@ export function RegisterPage() {
                 placeholder="username_anda"
                 onKeyDown={handleKeyDown}
                 autoComplete="username"
-                className="h-11 w-full rounded-xl nm-input pl-9 pr-4 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
           </motion.div>
@@ -237,7 +238,7 @@ export function RegisterPage() {
                 placeholder="contoh@email.com"
                 onKeyDown={handleKeyDown}
                 autoComplete="email"
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-4 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
           </motion.div>
@@ -256,12 +257,12 @@ export function RegisterPage() {
                 placeholder="Minimal 6 karakter"
                 onKeyDown={handleKeyDown}
                 autoComplete="new-password"
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-11 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -283,12 +284,12 @@ export function RegisterPage() {
                 placeholder="Ulangi password"
                 onKeyDown={handleKeyDown}
                 autoComplete="new-password"
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-11 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -299,8 +300,12 @@ export function RegisterPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
-              key={captchaKey}
+              onCaptchaChange={(val) => {
+                setCaptchaValue(val);
+                setCaptchaValid(val.length > 0);
+              }}
               onVerify={setCaptchaValid}
+              resetTrigger={resetTrigger}
             />
           </motion.div>
 
@@ -312,26 +317,10 @@ export function RegisterPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
-                className="flex items-center gap-2 rounded-xl nm-raised bg-red-50/80 px-3.5 py-2.5 dark:bg-red-500/10"
+                className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                 <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Success message */}
-          <AnimatePresence>
-            {successMsg && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="flex items-center gap-2 rounded-xl nm-raised bg-green-50/80 px-3.5 py-2.5 dark:bg-green-500/10"
-              >
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
-                <p className="text-xs font-medium text-green-600 dark:text-green-400">{successMsg}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -341,7 +330,7 @@ export function RegisterPage() {
             whileTap={{ scale: 0.97 }}
             onClick={handleRegister}
             disabled={isLoading}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />

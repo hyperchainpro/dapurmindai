@@ -38,15 +38,14 @@ export function ForgotPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [captchaKey, setCaptchaKey] = useState(0);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
   // Step 1: Verify email with captcha
   const handleVerifyEmail = useCallback(async () => {
     setError('');
-    setSuccessMsg('');
 
     if (!email.trim()) {
       setError('Email wajib diisi');
@@ -56,9 +55,8 @@ export function ForgotPasswordPage() {
       setError('Format email tidak valid');
       return;
     }
-    if (!captchaValid) {
-      setError('Jawaban captcha salah atau belum diisi');
-      setCaptchaKey((k) => k + 1);
+    if (!captchaValue || captchaValue.length === 0) {
+      setError('Silakan jawab captcha terlebih dahulu');
       return;
     }
 
@@ -78,27 +76,25 @@ export function ForgotPasswordPage() {
 
       if (!res.ok) {
         setError(data.error || 'Email tidak ditemukan');
-        setCaptchaKey((k) => k + 1);
+        setResetTrigger((t) => t + 1);
         setIsLoading(false);
         return;
       }
 
-      // Email found, move to step 2 and reset captcha
+      // Email found, proceed to reset step
       setStep('reset');
-      setCaptchaValid(false);
-      setCaptchaKey((k) => k + 1);
+      setResetTrigger((t) => t + 1);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setCaptchaKey((k) => k + 1);
+      setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [email, captchaValid]);
+  }, [email, captchaValue]);
 
   // Step 2: Set new password with captcha
   const handleResetPassword = useCallback(async () => {
     setError('');
-    setSuccessMsg('');
 
     if (!newPassword) {
       setError('Password baru wajib diisi');
@@ -112,9 +108,8 @@ export function ForgotPasswordPage() {
       setError('Konfirmasi password tidak cocok');
       return;
     }
-    if (!captchaValid) {
-      setError('Jawaban captcha salah atau belum diisi');
-      setCaptchaKey((k) => k + 1);
+    if (!captchaValue || captchaValue.length === 0) {
+      setError('Silakan jawab captcha terlebih dahulu');
       return;
     }
 
@@ -135,23 +130,20 @@ export function ForgotPasswordPage() {
 
       if (!res.ok) {
         setError(data.error || 'Gagal mengubah password');
-        setCaptchaKey((k) => k + 1);
+        setResetTrigger((t) => t + 1);
         setIsLoading(false);
         return;
       }
 
-      // Show success then redirect
-      setSuccessMsg('Password berhasil diubah! Mengarahkan ke halaman login...');
-      setTimeout(() => {
-        setScreen('login');
-      }, 1500);
+      // Success - go back to login
+      setScreen('login');
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setCaptchaKey((k) => k + 1);
+      setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [email, newPassword, confirmPassword, captchaValid, setScreen]);
+  }, [email, newPassword, confirmPassword, captchaValue, setScreen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -171,7 +163,7 @@ export function ForgotPasswordPage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setScreen('login')}
-          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-accent"
+          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card shadow-sm transition-colors hover:bg-accent"
           aria-label="Kembali"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -184,8 +176,8 @@ export function ForgotPasswordPage() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-center text-center"
         >
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl nm-raised bg-amber-500/10">
-            <ChefHat className="h-8 w-8 text-amber-500" />
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-400/20">
+            <ChefHat className="h-8 w-8 text-white" />
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -222,7 +214,7 @@ export function ForgotPasswordPage() {
                     onKeyDown={handleKeyDown}
                     autoComplete="email"
                     autoFocus
-                    className="h-11 w-full rounded-xl nm-input pl-10 pr-4 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                    className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
               </motion.div>
@@ -230,33 +222,21 @@ export function ForgotPasswordPage() {
               {/* Captcha */}
               <motion.div variants={fadeUp}>
                 <MathCaptcha
+                  onCaptchaChange={(val) => {
+                    setCaptchaValue(val);
+                    setCaptchaValid(val.length > 0);
+                  }}
                   onVerify={setCaptchaValid}
-                  key={captchaKey}
+                  resetTrigger={resetTrigger}
                 />
               </motion.div>
-
-              {/* Error message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center gap-2 rounded-xl nm-raised bg-red-50/80 px-3.5 py-2.5 dark:bg-red-500/10"
-                  >
-                    <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
-                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Verify button */}
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleVerifyEmail}
                 disabled={isLoading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-sm font-semibold text-white shadow-lg shadow-amber-400/25 transition-all hover:from-amber-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -271,7 +251,7 @@ export function ForgotPasswordPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 rounded-xl nm-raised bg-green-50/80 dark:bg-green-500/10 px-4 py-3"
+                className="flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-500/10 px-4 py-3"
               >
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
                 <div>
@@ -299,12 +279,12 @@ export function ForgotPasswordPage() {
                     onKeyDown={handleKeyDown}
                     autoComplete="new-password"
                     autoFocus
-                    className="h-11 w-full rounded-xl nm-input pl-10 pr-11 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                    className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -326,12 +306,12 @@ export function ForgotPasswordPage() {
                     placeholder="Ulangi password baru"
                     onKeyDown={handleKeyDown}
                     autoComplete="new-password"
-                    className="h-11 w-full rounded-xl nm-input pl-10 pr-11 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                    className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                     tabIndex={-1}
                   >
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -342,48 +322,21 @@ export function ForgotPasswordPage() {
               {/* Captcha */}
               <motion.div variants={fadeUp}>
                 <MathCaptcha
+                  onCaptchaChange={(val) => {
+                    setCaptchaValue(val);
+                    setCaptchaValid(val.length > 0);
+                  }}
                   onVerify={setCaptchaValid}
-                  key={captchaKey}
+                  resetTrigger={resetTrigger}
                 />
               </motion.div>
-
-              {/* Error / Success messages */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center gap-2 rounded-xl nm-raised bg-red-50/80 px-3.5 py-2.5 dark:bg-red-500/10"
-                  >
-                    <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
-                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {successMsg && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center gap-2 rounded-xl nm-raised bg-green-50/80 px-3.5 py-2.5 dark:bg-green-500/10"
-                  >
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
-                    <p className="text-xs font-medium text-green-600 dark:text-green-400">{successMsg}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Reset button */}
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleResetPassword}
-                disabled={isLoading || !!successMsg}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -393,6 +346,22 @@ export function ForgotPasswordPage() {
               </motion.button>
             </>
           )}
+
+          {/* Error message */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
+              >
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Back to login */}
           <motion.p

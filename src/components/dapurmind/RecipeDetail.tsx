@@ -490,7 +490,7 @@ function RecipeDetailContent({
                 </motion.a>
               )}
               {/* Fade overlay at bottom */}
-              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-white dark:from-background" />
+              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background" />
             </div>
           ) : (
             <div className="relative h-56 overflow-hidden bg-muted">
@@ -548,7 +548,7 @@ function RecipeDetailContent({
               )}
 
               {/* Fade overlay at bottom */}
-              <div className="absolute bottom-0 inset-x-0 z-20 h-16 bg-gradient-to-t from-white dark:from-background" />
+              <div className="absolute bottom-0 inset-x-0 z-20 h-16 bg-gradient-to-t from-background" />
             </div>
           )}
 

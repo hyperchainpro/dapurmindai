@@ -112,7 +112,7 @@ function StepWelcome({
           className={`w-full rounded-xl border px-4 py-3 text-base outline-none transition-all focus:ring-2 focus:ring-emerald-500/50 ${
             isDark
               ? 'border-white/10 bg-white/5 placeholder:text-stone-500'
-              : 'border-stone-200 bg-[var(--nm-bg)] placeholder:text-stone-400'
+              : 'nm-input placeholder:text-[var(--nm-text-light)]'
           }`}
           autoFocus
         />
@@ -163,7 +163,7 @@ function StepKeluarga({
                 ? 'cursor-not-allowed opacity-30'
                 : isDark
                   ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
+                  : 'nm-raised-sm text-foreground'
             }`}
             aria-label="Kurangi"
           >
@@ -171,9 +171,7 @@ function StepKeluarga({
           </button>
 
           <div
-            className={`flex h-20 w-24 items-center justify-center rounded-2xl ${
-              isDark ? 'bg-white/5 border border-white/10' : 'bg-[var(--nm-bg)] border border-stone-200'
-            } shadow-lg`}
+            className={`flex h-20 w-24 items-center justify-center rounded-2xl nm-pressed-deep shadow-lg`}
           >
             <NumberTicker
               key={familySize}
@@ -191,7 +189,7 @@ function StepKeluarga({
                 ? 'cursor-not-allowed opacity-30'
                 : isDark
                   ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
+                  : 'nm-raised-sm text-foreground'
             }`}
             aria-label="Tambah"
           >
@@ -293,7 +291,7 @@ function StepPreferensi({
                     ? 'bg-red-500/15 border-red-500/40 text-red-600 dark:text-red-400'
                     : isDark
                       ? 'bg-white/5 border-white/10 text-stone-300 hover:bg-white/10'
-                      : 'nm-raised border-stone-200 text-stone-600 hover:bg-stone-100'
+                      : 'nm-badge text-foreground'
                 }`}
               >
                 {active && <Check className="mr-1 inline h-3.5 w-3.5" />}
@@ -327,7 +325,7 @@ function StepPreferensi({
                     ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
                     : isDark
                       ? 'bg-white/5 border-white/10 text-stone-300 hover:bg-white/10'
-                      : 'nm-raised border-stone-200 text-stone-600 hover:bg-stone-100'
+                      : 'nm-badge text-foreground'
                 }`}
               >
                 {active && <Check className="mr-1 inline h-3.5 w-3.5" />}
@@ -364,7 +362,7 @@ function StepPreferensi({
             className={`w-full rounded-xl border py-3 pl-11 pr-4 text-base outline-none transition-all focus:ring-2 focus:ring-emerald-500/50 ${
               isDark
                 ? 'border-white/10 bg-white/5 placeholder:text-stone-500'
-                : 'border-stone-200 bg-[var(--nm-bg)] placeholder:text-stone-400'
+                : 'nm-input placeholder:text-[var(--nm-text-light)]'
             }`}
           />
         </div>
@@ -427,7 +425,7 @@ function StepSelesai({
         className={`w-full max-w-sm rounded-2xl border p-5 space-y-4 ${
           isDark
             ? 'bg-white/5 border-white/10'
-            : 'bg-[var(--nm-bg)] border-stone-200 shadow-lg'
+            : 'nm-raised'
         }`}
       >
         <SummaryRow icon="👤" label="Nama" value={name || '—'} />
@@ -581,7 +579,7 @@ export default function OnboardingFlow() {
                 ? 'w-8 bg-emerald-500'
                 : i < step
                   ? 'w-2 bg-emerald-400'
-                  : 'w-2 ' + (isDark ? 'bg-white/20' : 'bg-stone-300')
+                  : 'w-2 ' + (isDark ? 'bg-white/20' : 'bg-[var(--nm-shadow-dark)]')
             }`}
             layout
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
@@ -641,7 +639,7 @@ export default function OnboardingFlow() {
             className={`flex items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-medium transition-all ${
               isDark
                 ? 'bg-white/10 text-white hover:bg-white/20'
-                : 'nm-raised-sm text-stone-700 hover:bg-stone-200'
+                : 'nm-raised-sm text-foreground'
             }`}
           >
             <ArrowLeft className="h-4 w-4" />

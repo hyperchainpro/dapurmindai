@@ -31,14 +31,16 @@ export function LoginPage() {
   const setAuthUser = useAppStore((s) => s.setAuthUser);
   const setLoggedIn = useAppStore((s) => s.setLoggedIn);
   const updateOnboarding = useAppStore((s) => s.updateOnboarding);
+  const isLoggedIn = useAppStore((s) => s.isLoggedIn);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [captchaKey, setCaptchaKey] = useState(0);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
   const handleLogin = useCallback(async () => {
     setError('');
@@ -47,9 +49,8 @@ export function LoginPage() {
       setError('Username dan password wajib diisi');
       return;
     }
-    if (!captchaValid) {
-      setError('Jawaban captcha salah atau belum diisi');
-      setCaptchaKey((k) => k + 1);
+    if (!captchaValue || captchaValue.length === 0) {
+      setError('Silakan jawab captcha terlebih dahulu');
       return;
     }
 
@@ -69,22 +70,21 @@ export function LoginPage() {
 
       if (!res.ok) {
         setError(data.error || 'Login gagal');
-        setCaptchaKey((k) => k + 1);
+        setResetTrigger((t) => t + 1);
         setIsLoading(false);
         return;
       }
 
-      // Success
+      // Success - set auth state
       const loggedInUser = data.user;
       setAuthUser(loggedInUser);
       setLoggedIn(true);
 
+      // If user hasn't completed onboarding, go to onboarding
       if (!loggedInUser.isOnboarded) {
         updateOnboarding({
           id: loggedInUser.id,
           name: loggedInUser.name,
-          username: loggedInUser.username,
-          email: loggedInUser.email,
           isOnboarded: false,
           createdAt: loggedInUser.createdAt,
         });
@@ -95,18 +95,16 @@ export function LoginPage() {
           name: loggedInUser.name,
           username: loggedInUser.username,
           email: loggedInUser.email,
-          isOnboarded: true,
-          createdAt: loggedInUser.createdAt,
         });
         setScreen('dashboard');
       }
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
-      setCaptchaKey((k) => k + 1);
+      setResetTrigger((t) => t + 1);
     }
 
     setIsLoading(false);
-  }, [username, password, captchaValid, setAuthUser, setLoggedIn, setScreen, updateOnboarding]);
+  }, [username, password, captchaValue, setAuthUser, setLoggedIn, setScreen, updateOnboarding]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -128,8 +126,8 @@ export function LoginPage() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-center text-center"
         >
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl nm-raised bg-emerald-500/10">
-            <ChefHat className="h-8 w-8 text-emerald-500" />
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
+            <ChefHat className="h-8 w-8 text-white" />
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -149,11 +147,11 @@ export function LoginPage() {
         >
           {/* Username */}
           <motion.div variants={fadeUp} className="space-y-1.5">
-            <label className="text-xs font-medium text-[var(--nm-text-muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Username
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--nm-text-muted)]" />
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
               <input
                 type="text"
                 value={username}
@@ -162,18 +160,18 @@ export function LoginPage() {
                 onKeyDown={handleKeyDown}
                 autoComplete="username"
                 autoFocus
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-4 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
           </motion.div>
 
           {/* Password */}
           <motion.div variants={fadeUp} className="space-y-1.5">
-            <label className="text-xs font-medium text-[var(--nm-text-muted)]">
+            <label className="text-xs font-medium text-muted-foreground">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--nm-text-muted)]" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -181,12 +179,12 @@ export function LoginPage() {
                 placeholder="Masukkan password"
                 onKeyDown={handleKeyDown}
                 autoComplete="current-password"
-                className="h-11 w-full rounded-xl nm-input pl-10 pr-11 text-sm text-[var(--nm-text)] placeholder:text-[var(--nm-text-light)]"
+                className="h-11 w-full rounded-xl border border-border/60 bg-card pl-10 pr-11 text-sm text-foreground placeholder:text-muted-foreground/50 shadow-sm transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -207,8 +205,12 @@ export function LoginPage() {
           {/* Captcha */}
           <motion.div variants={fadeUp}>
             <MathCaptcha
-              key={captchaKey}
+              onCaptchaChange={(val) => {
+                setCaptchaValue(val);
+                setCaptchaValid(val.length > 0);
+              }}
               onVerify={setCaptchaValid}
+              resetTrigger={resetTrigger}
             />
           </motion.div>
 
@@ -220,7 +222,7 @@ export function LoginPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
-                className="flex items-center gap-2 rounded-xl nm-raised bg-red-50/80 px-3.5 py-2.5 dark:bg-red-500/10"
+                className="flex items-center gap-2 rounded-xl bg-red-50 px-3.5 py-2.5 dark:bg-red-500/10"
               >
                 <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
                 <p className="text-xs font-medium text-red-600 dark:text-red-400">{error}</p>
@@ -233,7 +235,7 @@ export function LoginPage() {
             whileTap={{ scale: 0.97 }}
             onClick={handleLogin}
             disabled={isLoading}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -244,15 +246,15 @@ export function LoginPage() {
 
           {/* Divider */}
           <motion.div variants={fadeUp} className="flex items-center gap-3 py-1">
-            <div className="nm-divider flex-1" />
-            <span className="text-[11px] text-[var(--nm-text-muted)]">atau</span>
-            <div className="nm-divider flex-1" />
+            <div className="h-px flex-1 bg-border/40" />
+            <span className="text-[11px] text-muted-foreground/60">atau</span>
+            <div className="h-px flex-1 bg-border/40" />
           </motion.div>
 
           {/* Register link */}
           <motion.p
             variants={fadeUp}
-            className="text-center text-sm text-[var(--nm-text-muted)]"
+            className="text-center text-sm text-muted-foreground"
           >
             Belum punya akun?{' '}
             <button

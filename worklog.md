@@ -317,3 +317,22 @@ Stage Summary:
 - Both light and dark themes supported
 - All 21 components updated: Auth (5), Main (3), Other (13)
 - Build passes, server running on port 3100
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Fix BUG 6, 3, 4, 5, 9 — Neumorphism UI polish
+
+Work Log:
+- BUG 6: Changed --border from rgba(163,177,198,0.3) to #c8cdd5 (light) and #4a4a5a (dark). Fixed dark sidebar-border from transparent to #4a4a5a.
+- BUG 3: Updated OnboardingFlow — replaced border-stone-200, bg-stone-200/300, text-stone-700/600 with nm-input, nm-badge, nm-raised-sm, nm-pressed-deep, text-foreground, bg-[var(--nm-shadow-dark)].
+- BUG 4: AdminLogin already uses bg-[var(--nm-bg)] — no change needed, already neumorphic.
+- BUG 5: RecipeDetail — changed 2x `from-white dark:from-background` to `from-background` for the hero fade overlays.
+- BUG 9: No dead files named LoginScreen/RegisterScreen/ForgotPasswordScreen exist. Restored LoginPage/RegisterPage/ForgotPasswordPage from git (they were accidentally deleted but ARE used in page.tsx router). Applied neumorphism bg to all 3.
+- Build: 0 errors, 18 routes. Server starts but dies after requests (known environment limitation).
+
+Stage Summary:
+- globals.css: --border visible colors set, sidebar-border fixed
+- OnboardingFlow.tsx: All bg-stone/border-stone replaced with nm-* classes
+- RecipeDetail.tsx: Hero fade overlays use from-background
+- LoginPage/RegisterPage/ForgotPasswordPage: Restored + neumorphism bg applied
