@@ -1,9 +1,8 @@
 #!/bin/bash
+cd /home/z/my-project
 while true; do
-    echo "Starting server at $(date)" >> /tmp/keepalive.log
-    cd /home/z/my-project
-    NODE_ENV=production node .next/standalone/server.js >> /tmp/keepalive.log 2>&1
-    EXIT_CODE=$?
-    echo "Server exited with code $EXIT_CODE at $(date)" >> /tmp/keepalive.log
-    sleep 2
+  echo "$(date): Starting DapurMind AI server..."
+  npx next dev -p 3000 2>&1
+  echo "$(date): Server crashed, restarting in 3s..."
+  sleep 3
 done
