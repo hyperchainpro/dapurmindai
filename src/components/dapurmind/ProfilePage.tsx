@@ -24,6 +24,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { Achievement, AppScreen } from '@/types';
 import { AnimatedList } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, StarBorder } from '@/components/dapurmind/ReactBits';
@@ -86,6 +87,7 @@ export function ProfilePage() {
   const setCurrentMealPlan = useAppStore((s) => s.setCurrentMealPlan);
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ── Avatar upload handler ──────────────────────────── */
@@ -204,9 +206,9 @@ export function ProfilePage() {
           <div className="flex items-center gap-3 px-4 py-3">
             <h1 className="flex items-center gap-2 text-lg font-bold tracking-tight">
               <GlowingText color="amber" intensity={1}>
-                Profil
+                {t('profile.title')}
               </GlowingText>{' '}
-              Saya
+              {t('profile.myProfile')}
             </h1>
           </div>
         </header>
@@ -284,7 +286,7 @@ export function ProfilePage() {
                         onClick={handleSaveName}
                         className="h-8 rounded-lg bg-emerald-500 px-3 text-xs hover:bg-emerald-600"
                       >
-                        Simpan
+                        {t('profile.save')}
                       </Button>
                     </motion.div>
                   ) : (
@@ -296,7 +298,7 @@ export function ProfilePage() {
                       className="flex items-center gap-2"
                     >
                       <h2 className="text-xl font-bold truncate">
-                        {user?.name || 'Chef Baru'}
+                        {user?.name || t('profile.chefNew')}
                       </h2>
                       <motion.button
                         whileTap={{ scale: 0.9 }}
@@ -313,12 +315,12 @@ export function ProfilePage() {
                 <div className="mt-2 space-y-1">
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span className="text-sm">👨‍👩‍👧‍👦</span>
-                    {user?.familySize ?? 4} anggota keluarga
+                    {user?.familySize ?? 4} {t('profile.familyMembers')}
                   </p>
                   {user?.createdAt && (
                     <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
-                      Bergabung {formatDateID(user.createdAt)}
+                      {t('profile.joined')} {formatDateID(user.createdAt)}
                     </p>
                   )}
                 </div>
@@ -332,21 +334,21 @@ export function ProfilePage() {
                   <Heart className="h-3.5 w-3.5 text-rose-500" />
                   <p className="text-lg font-bold text-foreground">{favoriteRecipes.length}</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground">Resep Disimpan</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.savedRecipes')}</p>
               </div>
               <div className="border-x border-border/30">
                 <div className="flex items-center justify-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-amber-500" />
                   <p className="text-lg font-bold text-foreground">{mealPlans.length}</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground">Menu Direncanakan</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.menuPlanned')}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1">
                   <Trophy className="h-3.5 w-3.5 text-emerald-500" />
                   <p className="text-lg font-bold text-foreground">{unlockedCount}</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground">Pencapaian</p>
+                <p className="text-[10px] text-muted-foreground">{t('profile.achievements')}</p>
               </div>
             </div>
           </div>
@@ -356,17 +358,17 @@ export function ProfilePage() {
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Sparkles className="h-4 w-4 text-amber-500" />
-            Preferensi
+            {t('profile.preferences')}
           </h3>
           <div className="space-y-2">
             {/* Allergies */}
             <PreferenceCard
-              label="Allergi"
+              label={t('profile.allergies')}
               value={
                 user?.allergies.length
                   ? user.allergies.slice(0, 2).join(', ') +
                     (user.allergies.length > 2 ? ` +${user.allergies.length - 2}` : '')
-                  : 'Belum ada'
+                  : t('profile.noAllergies')
               }
               icon="🛡️"
               onEdit={() => setShowAllergyDialog(true)}
@@ -374,19 +376,19 @@ export function ProfilePage() {
 
             {/* Budget */}
             <PreferenceCard
-              label="Budget Mingguan"
+              label={t('profile.weeklyBudget')}
               value={formatRupiah(user?.weeklyBudget ?? 300000)}
               icon="💰"
             />
 
             {/* Taste Preferences */}
             <PreferenceCard
-              label="Selera"
+              label={t('profile.taste')}
               value={
                 user?.tastePreferences.length
                   ? user.tastePreferences.slice(0, 3).join(', ') +
                     (user.tastePreferences.length > 3 ? ` +${user.tastePreferences.length - 3}` : '')
-                  : 'Belum ada'
+                  : t('profile.noAllergies')
               }
               icon="👅"
             />
@@ -398,7 +400,7 @@ export function ProfilePage() {
           <div className="mb-3 flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
               <Trophy className="h-4 w-4 text-amber-500" />
-              Pencapaian
+              {t('profile.achievements')}
               <span className="text-xs font-normal text-muted-foreground">
                 ({unlockedCount}/{achievements.length})
               </span>
@@ -417,7 +419,7 @@ export function ProfilePage() {
           <motion.section variants={fadeUp} className="px-4 pt-5">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
               <ChefHat className="h-4 w-4 text-emerald-500" />
-              Riwayat Menu
+              {t('profile.menuHistory')}
             </h3>
             <div className="space-y-2">
               {mealPlans.slice(0, 5).map((plan, idx) => (
@@ -432,10 +434,10 @@ export function ProfilePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      Menu {plan.days.length} hari
+                      {t('profile.menuDays', { count: plan.days.length })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Mulai{' '}
+                      {t('profile.starting')}{' '}
                       {new Date(plan.weekStart).toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'short',
@@ -458,7 +460,7 @@ export function ProfilePage() {
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Shield className="h-4 w-4 text-slate-500" />
-            Pengaturan
+            {t('profile.settings')}
           </h3>
           <div className="space-y-2">
             {/* Dark Mode */}
@@ -472,9 +474,9 @@ export function ProfilePage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Mode Gelap</p>
+                  <p className="text-sm font-medium">{t('profile.darkMode')}</p>
                   <p className="text-xs text-muted-foreground">
-                    {isDark ? 'Sedang aktif' : 'Sedang nonaktif'}
+                    {isDark ? t('profile.darkModeActive') : t('profile.darkModeInactive')}
                   </p>
                 </div>
               </div>
@@ -488,9 +490,9 @@ export function ProfilePage() {
                   <Globe className="h-4.5 w-4.5 text-sky-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Bahasa</p>
+                  <p className="text-sm font-medium">{t('profile.language')}</p>
                   <p className="text-xs text-muted-foreground">
-                    {language === 'id' ? 'Bahasa Indonesia' : 'English'}
+                    {language === 'id' ? t('profile.currentLang') : t('profile.langEnglish')}
                   </p>
                 </div>
               </div>
@@ -531,8 +533,8 @@ export function ProfilePage() {
                   <LogOut className="h-4.5 w-4.5 text-rose-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-rose-600 dark:text-rose-400">Keluar</p>
-                  <p className="text-xs text-muted-foreground">Logout dari akun</p>
+                  <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{t('profile.signOut')}</p>
+                  <p className="text-xs text-muted-foreground">{t('profile.logoutDesc')}</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -545,9 +547,9 @@ export function ProfilePage() {
                   <Info className="h-4.5 w-4.5 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Tentang DapurMind AI</p>
+                  <p className="text-sm font-medium">{t('profile.about')}</p>
                   <p className="text-xs text-muted-foreground">
-                    Versi 1.0.0 · Dibuat dengan ❤️
+                    {t('profile.version')}
                   </p>
                 </div>
               </div>
@@ -563,10 +565,10 @@ export function ProfilePage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20"
           >
             <Trash2 className="h-4 w-4" />
-            Reset Semua Data
+            {t('profile.resetData')}
           </Button>
           <p className="mt-2 text-center text-[10px] text-muted-foreground/60">
-            Semua data akan dihapus dan tidak dapat dikembalikan
+            {t('profile.deleteWarning')}
           </p>
         </motion.section>
       </motion.div>
@@ -577,10 +579,10 @@ export function ProfilePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <span className="text-lg">🛡️</span>
-              Kelola Allergi
+              {t('profile.manageAllergies')}
             </DialogTitle>
             <DialogDescription>
-              Tambahkan atau hapus allergi makanan kamu.
+              {t('profile.addAllergyDesc')}
             </DialogDescription>
           </DialogHeader>
 
@@ -612,7 +614,7 @@ export function ProfilePage() {
                 value={newAllergy}
                 onChange={(e) => setNewAllergy(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddAllergy()}
-                placeholder="Contoh: Kacang, Susu..."
+                placeholder={t('profile.addAllergyPlaceholder')}
                 className="flex-1 rounded-xl border-border/50 bg-muted/30 text-sm"
                 maxLength={30}
               />
@@ -633,7 +635,7 @@ export function ProfilePage() {
               onClick={() => setShowAllergyDialog(false)}
               className="flex-1 rounded-full"
             >
-              Tutup
+              {t('profile.close')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -645,11 +647,10 @@ export function ProfilePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
               <Trash2 className="h-5 w-5" />
-              Reset Semua Data?
+              {t('profile.resetConfirm')}
             </DialogTitle>
             <DialogDescription>
-              Semua data termasuk profil, rencana menu, daftar belanja, dan resep
-              favorit akan dihapus secara permanen. Tindakan ini tidak bisa dibatalkan.
+              {t('profile.resetDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-xl bg-rose-50 p-4 text-center dark:bg-rose-500/10">
@@ -660,7 +661,7 @@ export function ProfilePage() {
               <span className="text-4xl">⚠️</span>
             </motion.div>
             <p className="mt-2 text-sm font-medium text-rose-700 dark:text-rose-300">
-              Apakah kamu benar-benar yakin?
+              {t('profile.resetWarning')}
             </p>
           </div>
           <DialogFooter className="gap-2">
@@ -669,7 +670,7 @@ export function ProfilePage() {
               onClick={() => setShowResetDialog(false)}
               className="flex-1 rounded-full"
             >
-              Batal
+              {t('profile.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -677,7 +678,7 @@ export function ProfilePage() {
               className="flex-1 rounded-full"
             >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-              Ya, Hapus Semua
+              {t('profile.yesDelete')}
             </Button>
           </DialogFooter>
         </DialogContent>

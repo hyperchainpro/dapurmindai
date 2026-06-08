@@ -55,6 +55,7 @@ export interface MealPlan {
   days: MealDay[];
   totalPrice: number;
   createdAt: string;
+  budget?: number;
 }
 
 export interface MealDay {
@@ -124,7 +125,8 @@ export type AppScreen =
   | 'marketplace'
   | 'admin-login'
   | 'admin-affiliate'
-  | 'admin-analytics';
+  | 'admin-analytics'
+  | 'favorites';
 
 /* ── Auth Types ────────────────────────────────────── */
 

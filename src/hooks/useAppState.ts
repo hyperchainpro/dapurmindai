@@ -38,12 +38,15 @@ interface AppState {
   currentMealPlan: MealPlan | null;
   setCurrentMealPlan: (plan: MealPlan | null) => void;
   addMealPlan: (plan: MealPlan) => void;
+  removeMealPlan: (index: number) => void;
 
   // Shopping
   shoppingItems: ShoppingItem[];
   setShoppingItems: (items: ShoppingItem[]) => void;
   addShoppingItem: (item: ShoppingItem) => void;
   toggleShoppingItem: (id: string) => void;
+  removeShoppingItem: (id: string) => void;
+  clearShoppingItems: () => void;
 
   // Recipes
   favoriteRecipes: string[];
@@ -52,6 +55,7 @@ interface AppState {
   // Achievements
   achievements: Achievement[];
   unlockAchievement: (id: string) => void;
+  checkAndUnlockAchievements: () => void;
 
   // Selected recipe for detail view
   selectedRecipe: Recipe | null;
@@ -150,34 +154,52 @@ export const useAppStore = create<AppState>()(
       mealPlans: [],
       currentMealPlan: null,
       setCurrentMealPlan: (plan) => set({ currentMealPlan: plan }),
-      addMealPlan: (plan) =>
+      addMealPlan: (plan) => {
         set((state) => ({
           mealPlans: [plan, ...state.mealPlans],
           currentMealPlan: plan,
+        }));
+        // Trigger achievement check after meal plan is added
+        setTimeout(() => get().checkAndUnlockAchievements(), 0);
+      },
+      removeMealPlan: (index) =>
+        set((state) => ({
+          mealPlans: state.mealPlans.filter((_, i) => i !== index),
         })),
 
       // Shopping
       shoppingItems: [],
       setShoppingItems: (items) => set({ shoppingItems: items }),
-      addShoppingItem: (item) =>
+      addShoppingItem: (item) => {
         set((state) => ({
           shoppingItems: [...state.shoppingItems, item],
-        })),
+        }));
+        // Trigger achievement check after shopping item is added
+        setTimeout(() => get().checkAndUnlockAchievements(), 0);
+      },
       toggleShoppingItem: (id) =>
         set((state) => ({
           shoppingItems: state.shoppingItems.map((item) =>
             item.id === id ? { ...item, checked: !item.checked } : item
           ),
         })),
+      removeShoppingItem: (id) =>
+        set((state) => ({
+          shoppingItems: state.shoppingItems.filter((item) => item.id !== id),
+        })),
+      clearShoppingItems: () => set({ shoppingItems: [] }),
 
       // Recipes
       favoriteRecipes: [],
-      toggleFavorite: (recipeId) =>
+      toggleFavorite: (recipeId) => {
         set((state) => ({
           favoriteRecipes: state.favoriteRecipes.includes(recipeId)
             ? state.favoriteRecipes.filter((id) => id !== recipeId)
             : [...state.favoriteRecipes, recipeId],
-        })),
+        }));
+        // Trigger achievement check after favorite is toggled
+        setTimeout(() => get().checkAndUnlockAchievements(), 0);
+      },
 
       // Achievements
       achievements: [
@@ -195,6 +217,27 @@ export const useAppStore = create<AppState>()(
               : a
           ),
         })),
+      checkAndUnlockAchievements: () => {
+        const state = get();
+        const user = state.user;
+        if (!user) return;
+
+        // 🎯 Perencana Pertama — has at least 1 meal plan
+        if (state.mealPlans.length >= 1) {
+          get().unlockAchievement('first_plan');
+        }
+        // 👨‍🍳 Chef Rumahan — 5 or more favorites
+        if (state.favoriteRecipes.length >= 5) {
+          get().unlockAchievement('chef_5');
+        }
+        // 💰 Ahli Budget — has a meal plan under budget (check latest)
+        if (state.mealPlans.length > 0) {
+          const latest = state.mealPlans[state.mealPlans.length - 1];
+          if (latest.budget && latest.totalPrice && latest.totalPrice <= latest.budget) {
+            get().unlockAchievement('budget_master');
+          }
+        }
+      },
 
       // Selected recipe
       selectedRecipe: null,

@@ -336,3 +336,30 @@ Stage Summary:
 - OnboardingFlow.tsx: All bg-stone/border-stone replaced with nm-* classes
 - RecipeDetail.tsx: Hero fade overlays use from-background
 - LoginPage/RegisterPage/ForgotPasswordPage: Restored + neumorphism bg applied
+
+---
+Task ID: 1
+Agent: General-Purpose Sub-Agent
+Task: Restore all missing features — i18n integration, Suspense fallbacks, store methods, FavoritePage, auto-unlock achievements
+
+Work Log:
+- Read and analyzed all relevant source files: useTranslation.ts, i18n.ts, BottomNav.tsx, Dashboard.tsx, ProfilePage.tsx, page.tsx, useAppState.ts, types/index.ts, recipes.ts
+- Added 45+ new i18n translation keys (both ID and EN) for dashboard, profile, favorites, and common sections
+- Task 1a (BottomNav.tsx): Imported useTranslation, changed label → labelKey in NavTab interface and tabs array, added t() calls for all tab labels and aria-labels
+- Task 1b (Dashboard.tsx): Imported useTranslation, refactored getGreeting() to accept t parameter, replaced formatDateID() with locale-aware formatDate(), updated formatRelativeDate() to use t() for relative dates, changed quickActions to use titleKey/descKey, updated RecipeCard to accept t prop, replaced 20+ hardcoded Indonesian text strings with t() calls for greetings, subtitles, section headers, stats labels, plan details, marketplace descriptions
+- Task 1c (ProfilePage.tsx): Imported useTranslation, replaced 30+ hardcoded text strings with t() calls for header, profile card, stats, preferences, achievements, menu history, settings (dark mode, language, logout, about), danger zone, allergy dialog, reset dialog
+- Task 2 (page.tsx): Added Suspense import from React, Loader2 from lucide-react, created ScreenLoader component, wrapped all 18 dynamic component renders in Suspense with ScreenLoader fallback
+- Task 3 (useAppState.ts): Added removeMealPlan(index), removeShoppingItem(id), clearShoppingItems() to AppState interface and implementation
+- Task 4 (FavoritePage): Created new FavoritePage component at src/components/dapurmind/FavoritePage.tsx with header, recipe grid, unfavorite button, empty state, back navigation, neumorphism styling, full i18n support; added 'favorites' to AppScreen type; added dynamic import and screen render case in page.tsx
+- Task 5 (useAppState.ts): Added checkAndUnlockAchievements() function that evaluates achievement conditions (first_plan, chef_5, budget_master); called it from addMealPlan, toggleFavorite, and addShoppingItem via setTimeout to ensure state is settled
+- TypeScript type check: 0 errors in src/ files
+
+Stage Summary:
+- i18n fully wired in BottomNav, Dashboard, ProfilePage — all visible text uses t() function
+- 45+ new translation keys added for both Indonesian and English
+- Suspense with loading spinner on all 18 dynamic imports in page.tsx
+- 3 new store methods: removeMealPlan, removeShoppingItem, clearShoppingItems
+- New FavoritePage screen with recipe grid, unfavorite, empty state
+- Auto-unlock achievements on addMealPlan, toggleFavorite, addShoppingItem
+- budget field added to MealPlan type (optional)
+- favorites added to AppScreen union type

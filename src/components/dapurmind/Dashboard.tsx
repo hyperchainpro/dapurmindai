@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { useTranslation } from '@/hooks/useTranslation';
 import { recipes } from '@/lib/recipes';
 import type { AppScreen, Recipe } from '@/types';
 import {
@@ -31,31 +32,33 @@ import { AFFILIATE_MARKETPLACES } from '@/lib/affiliate';
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 
-function getGreeting(): string {
+function getGreeting(t: (key: string, params?: Record<string, string | number>) => string): string {
   const h = new Date().getHours();
-  if (h < 11) return 'Selamat Pagi';
-  if (h < 15) return 'Selamat Siang';
-  if (h < 18) return 'Selamat Sore';
-  return 'Selamat Malam';
+  if (h < 11) return t('dashboard.morning');
+  if (h < 15) return t('dashboard.afternoon');
+  if (h < 18) return t('dashboard.evening');
+  return t('dashboard.night');
 }
 
-function formatDateID(): string {
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ];
-  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+function formatDate(locale: string): string {
   const now = new Date();
-  return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  return now.toLocaleDateString(locale === 'id' ? 'id-ID' : 'en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
-function formatRelativeDate(dateStr?: string): string {
+function formatRelativeDate(dateStr?: string, t?: (key: string, params?: Record<string, string | number>) => string): string {
   if (!dateStr) return '';
   const diff = Date.now() - new Date(dateStr).getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days === 0) return 'Hari ini';
-  if (days === 1) return 'Kemarin';
-  if (days < 7) return `${days} hari lalu`;
+  if (t) {
+    if (days === 0) return t('common.today');
+    if (days === 1) return t('common.yesterday');
+    if (days < 7) return t('common.daysAgo', { count: days });
+  }
   return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
@@ -93,8 +96,8 @@ const featuredIds = ['nasi-goreng', 'rendang', 'sate-ayam', 'klepon'];
 interface QuickAction {
   screen: AppScreen;
   icon: React.ElementType;
-  title: string;
-  desc: string;
+  titleKey: string;
+  descKey: string;
   gradient: string;
 }
 
@@ -102,36 +105,36 @@ const quickActions: QuickAction[] = [
   {
     screen: 'chat',
     icon: Calendar,
-    title: 'Rencana Menu',
-    desc: 'Buat rencana menu mingguan',
+    titleKey: 'dashboard.planMenu',
+    descKey: 'dashboard.planDescChat',
     gradient: 'from-emerald-500/10 to-emerald-500/5',
   },
   {
     screen: 'zero-waste',
     icon: Leaf,
-    title: 'Zero Waste',
-    desc: 'Selamatkan bahan makananmu',
+    titleKey: 'dashboard.zeroWaste',
+    descKey: 'dashboard.planDescZeroWaste',
     gradient: 'from-amber-500/10 to-amber-500/5',
   },
   {
     screen: 'marketplace',
     icon: ShoppingCart,
-    title: 'Marketplace',
-    desc: 'Belanja bahan langsung dari app',
+    titleKey: 'dashboard.marketplaceHub',
+    descKey: 'dashboard.planDescMarketplace',
     gradient: 'from-sky-500/10 to-sky-500/5',
   },
   {
     screen: 'recipes',
     icon: Search,
-    title: 'Cari Resep',
-    desc: 'Jelajahi 25+ resep Nusantara',
+    titleKey: 'dashboard.findRecipes',
+    descKey: 'dashboard.planDescRecipes',
     gradient: 'from-rose-500/10 to-rose-500/5',
   },
 ];
 
 /* ── Sub-components ─────────────────────────────────────────── */
 
-function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
+function RecipeCard({ recipe, onClick, t }: { recipe: Recipe; onClick: () => void; t: (key: string, params?: Record<string, string | number>) => string }) {
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
@@ -150,7 +153,7 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
           <div className="mt-1.5 flex items-center gap-2">
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <Clock className="h-3 w-3" />
-              {recipe.cookTime} menit
+              {recipe.cookTime} {t('recipes.min')}
             </span>
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${difficultyColor[recipe.difficulty]}`}>
               {recipe.difficulty}
@@ -174,6 +177,7 @@ function DashboardInner() {
   const achievements = useAppStore((s) => s.achievements);
   const isDark = useAppStore((s) => s.isDark);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const { t, language } = useTranslation();
 
   const featuredRecipes = useMemo(
     () => featuredIds.map((id) => recipes.find((r) => r.id === id)!).filter(Boolean),
@@ -202,7 +206,7 @@ function DashboardInner() {
             </span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{a.title}</p>
-              <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt)}</p>
+              <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt, t)}</p>
             </div>
             <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
           </div>
@@ -231,16 +235,16 @@ function DashboardInner() {
       <motion.div variants={fadeUp} className="mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm text-muted-foreground">{formatDateID()}</p>
+            <p className="text-sm text-muted-foreground">{formatDate(language)}</p>
             <h1 className="mt-1 text-2xl font-bold leading-tight">
-              {getGreeting()},{' '}
+              {getGreeting(t)},{' '}
               <GlowingText color="emerald" intensity={2}>
                 {user?.name || 'Chef'}
               </GlowingText>
               <span>! 👋</span>
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Apa yang mau dimasak hari ini?
+              {t('dashboard.subtitle')}
             </p>
           </div>
 
@@ -280,11 +284,9 @@ function DashboardInner() {
                   <action.icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">{action.title}</p>
+                  <p className="text-sm font-semibold">{t(action.titleKey)}</p>
                   <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                    {action.screen === 'shopping'
-                      ? `Daftar belanja ${shoppingItems.length} item`
-                      : action.desc}
+                    {t(action.descKey)}
                   </p>
                 </div>
               </motion.div>
@@ -313,10 +315,10 @@ function DashboardInner() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <GlowingText color="emerald" intensity={1}>
-                      <h2 className="text-base font-bold">Marketplace Hub</h2>
+                      <h2 className="text-base font-bold">{t('dashboard.marketplaceHub')}</h2>
                     </GlowingText>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Belanja bahan segar dari {AFFILIATE_MARKETPLACES.length} marketplace terpercaya
+                      {t('dashboard.marketplaceDesc', { count: AFFILIATE_MARKETPLACES.length })}
                     </p>
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex -space-x-1">
@@ -330,7 +332,7 @@ function DashboardInner() {
                         ))}
                       </div>
                       <span className="text-[10px] text-muted-foreground">
-                        +{AFFILIATE_MARKETPLACES.length - 4} lainnya
+                        {t('dashboard.othersCount', { count: AFFILIATE_MARKETPLACES.length - 4 })}
                       </span>
                     </div>
                   </div>
@@ -357,20 +359,20 @@ function DashboardInner() {
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-amber-500" />
-            <h2 className="text-base font-semibold">Resep Populer</h2>
+            <h2 className="text-base font-semibold">{t('dashboard.popularRecipes')}</h2>
           </div>
           <button
             onClick={() => setScreen('recipes')}
             className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
           >
-            Lihat Semua
+            {t('dashboard.viewAll')}
             <ArrowRight className="h-3 w-3" />
           </button>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
           {featuredRecipes.map((recipe, i) => (
             <Bounce key={recipe.id} delay={i * 0.1} intensity={1}>
-              <RecipeCard recipe={recipe} onClick={() => handleRecipeClick(recipe)} />
+              <RecipeCard recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
             </Bounce>
           ))}
         </div>
@@ -381,7 +383,7 @@ function DashboardInner() {
         <motion.div variants={fadeUp} className="mb-6">
           <div className="mb-3 flex items-center gap-2">
             <ChefHat className="h-4 w-4 text-emerald-500" />
-            <h2 className="text-base font-semibold">Rencana Menu Minggu Ini</h2>
+            <h2 className="text-base font-semibold">{t('dashboard.weeklyPlan')}</h2>
           </div>
           <ShineBorder
             borderRadius={16}
@@ -393,13 +395,13 @@ function DashboardInner() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    Mulai {new Date(latestPlan.weekStart).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    {t('dashboard.starting')} {new Date(latestPlan.weekStart).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short' })}
                   </p>
                   <p className="mt-1 text-sm font-semibold">
-                    {latestPlan.days.length} hari rencana menu
+                    {t('dashboard.planDays', { count: latestPlan.days.length })}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Estimasi budget:{' '}
+                    {t('dashboard.estimatedBudget')}:{' '}
                     <span className="font-medium text-emerald-600 dark:text-emerald-400">
                       Rp {latestPlan.totalPrice.toLocaleString('id-ID')}
                     </span>
@@ -413,7 +415,7 @@ function DashboardInner() {
                 onClick={() => handleNavigate('meal-plan-detail')}
                 className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl nm-btn-primary py-2.5 text-sm font-medium text-white transition-colors"
               >
-                Lihat Detail
+                {t('dashboard.viewDetail')}
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -426,7 +428,7 @@ function DashboardInner() {
         <motion.div variants={fadeUp} className="mb-6">
           <div className="mb-3 flex items-center gap-2">
             <Trophy className="h-4 w-4 text-amber-500" />
-            <h2 className="text-base font-semibold">Pencapaian Terbaru</h2>
+            <h2 className="text-base font-semibold">{t('dashboard.achievements')}</h2>
           </div>
           <AnimatedList items={achievementItems} staggerDelay={0.12} animationDuration={0.45} />
         </motion.div>
@@ -434,28 +436,28 @@ function DashboardInner() {
 
       {/* ── Stats Section ─────────────────────────────────── */}
       <motion.div variants={fadeUp} className="mb-6">
-        <h2 className="mb-3 text-base font-semibold">Statistik Kamu</h2>
+        <h2 className="mb-3 text-base font-semibold">{t('dashboard.stats')}</h2>
         <BentoGrid columns={{ default: 3, sm: 3, md: 3, lg: 3 }} gap={0.625}>
           <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
             <span className="text-2xl mb-1">❤️</span>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               <NumberTicker value={favoriteRecipes.length} duration={1.5} />
             </p>
-            <p className="mt-1 text-[11px] text-muted-foreground">Resep Disimpan</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.savedRecipes')}</p>
           </BentoGridItem>
           <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
             <span className="text-2xl mb-1">📋</span>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               <NumberTicker value={mealPlans.length} duration={1.5} />
             </p>
-            <p className="mt-1 text-[11px] text-muted-foreground">Menu Direncanakan</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.menuPlanned')}</p>
           </BentoGridItem>
           <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
             <span className="text-2xl mb-1">🛒</span>
             <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
               <NumberTicker value={shoppingItems.length} duration={1.5} />
             </p>
-            <p className="mt-1 text-[11px] text-muted-foreground">Item Belanja</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.shoppingItems')}</p>
           </BentoGridItem>
         </BentoGrid>
       </motion.div>

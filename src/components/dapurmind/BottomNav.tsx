@@ -4,26 +4,28 @@ import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Home, MessageCircle, Leaf, BookOpen, User } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { useTranslation } from '@/hooks/useTranslation';
 import type { AppScreen } from '@/types';
 
 interface NavTab {
   screen: AppScreen;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
   isCenter?: boolean;
 }
 
 const tabs: NavTab[] = [
-  { screen: 'dashboard', label: 'Beranda', icon: Home },
-  { screen: 'chat', label: 'Chat', icon: MessageCircle },
-  { screen: 'zero-waste', label: 'Zero Waste', icon: Leaf, isCenter: true },
-  { screen: 'recipes', label: 'Resep', icon: BookOpen },
-  { screen: 'profile', label: 'Profil', icon: User },
+  { screen: 'dashboard', labelKey: 'nav.home', icon: Home },
+  { screen: 'chat', labelKey: 'nav.chat', icon: MessageCircle },
+  { screen: 'zero-waste', labelKey: 'nav.zeroWaste', icon: Leaf, isCenter: true },
+  { screen: 'recipes', labelKey: 'nav.recipes', icon: BookOpen },
+  { screen: 'profile', labelKey: 'nav.profile', icon: User },
 ];
 
 function BottomNavInner() {
   const currentScreen = useAppStore((s) => s.currentScreen);
   const setScreen = useAppStore((s) => s.setScreen);
+  const { t } = useTranslation();
 
   // Hide on splash, auth screens and onboarding
   const hiddenScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
@@ -45,7 +47,7 @@ function BottomNavInner() {
               key={tab.screen}
               onClick={() => setScreen(tab.screen)}
               className="relative flex flex-col items-center gap-0.5 focus:outline-none"
-              aria-label={tab.label}
+              aria-label={t(tab.labelKey)}
               aria-current={isActive ? 'page' : undefined}
             >
               {/* Dot indicator for active tab */}
@@ -96,7 +98,7 @@ function BottomNavInner() {
                   ${tab.isCenter ? '-mt-0.5' : ''}
                 `}
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </span>
             </button>
           );

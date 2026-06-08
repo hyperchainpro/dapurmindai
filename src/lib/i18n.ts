@@ -370,6 +370,41 @@ const id: TranslationMap = {
   'common.noData': 'Tidak ada data',
   'common.viewAll': 'Lihat Semua',
   'common.or': 'atau',
+  'common.today': 'Hari ini',
+  'common.yesterday': 'Kemarin',
+  'common.daysAgo': '{count} hari lalu',
+
+  // ── Dashboard (extra) ──
+  'dashboard.morning': 'Selamat Pagi',
+  'dashboard.afternoon': 'Selamat Siang',
+  'dashboard.evening': 'Selamat Sore',
+  'dashboard.night': 'Selamat Malam',
+  'dashboard.featuredRecipes': 'Resep Populer',
+  'dashboard.stats': 'Statistik Kamu',
+  'dashboard.achievements': 'Pencapaian Terbaru',
+  'dashboard.savedRecipes': 'Resep Disimpan',
+  'dashboard.menuPlanned': 'Menu Direncanakan',
+  'dashboard.shoppingItems': 'Item Belanja',
+  'dashboard.planDays': '{count} hari rencana menu',
+  'dashboard.estimatedBudget': 'Estimasi budget',
+  'dashboard.viewDetail': 'Lihat Detail',
+  'dashboard.marketplaceDesc': 'Belanja bahan segar dari {count} marketplace terpercaya',
+  'dashboard.othersCount': '+{count} lainnya',
+  'dashboard.starting': 'Mulai',
+  'dashboard.planDescChat': 'Buat rencana menu mingguan',
+  'dashboard.planDescZeroWaste': 'Selamatkan bahan makananmu',
+  'dashboard.planDescMarketplace': 'Belanja bahan langsung dari app',
+  'dashboard.planDescRecipes': 'Jelajahi 25+ resep Nusantara',
+
+  // ── Profile (extra) ──
+  'profile.logoutDesc': 'Logout dari akun',
+  'profile.langEnglish': 'English',
+
+  // ── Favorites ──
+  'nav.favorites': 'Favorit',
+  'favorites.title': 'Resep Favorit',
+  'favorites.empty': 'Belum ada resep favorit',
+  'favorites.emptyDesc': 'Tekan ikon ❤️ di halaman resep untuk menambahkan',
 };
 
 const en: TranslationMap = {
@@ -740,6 +775,41 @@ const en: TranslationMap = {
   'common.noData': 'No data',
   'common.viewAll': 'View All',
   'common.or': 'or',
+  'common.today': 'Today',
+  'common.yesterday': 'Yesterday',
+  'common.daysAgo': '{count} days ago',
+
+  // ── Dashboard (extra) ──
+  'dashboard.morning': 'Good Morning',
+  'dashboard.afternoon': 'Good Afternoon',
+  'dashboard.evening': 'Good Evening',
+  'dashboard.night': 'Good Night',
+  'dashboard.featuredRecipes': 'Popular Recipes',
+  'dashboard.stats': 'Your Statistics',
+  'dashboard.achievements': 'Recent Achievements',
+  'dashboard.savedRecipes': 'Saved Recipes',
+  'dashboard.menuPlanned': 'Menus Planned',
+  'dashboard.shoppingItems': 'Shopping Items',
+  'dashboard.planDays': '{count}-day meal plan',
+  'dashboard.estimatedBudget': 'Estimated budget',
+  'dashboard.viewDetail': 'View Details',
+  'dashboard.marketplaceDesc': 'Shop fresh ingredients from {count} trusted marketplaces',
+  'dashboard.othersCount': '+{count} more',
+  'dashboard.starting': 'Starting',
+  'dashboard.planDescChat': 'Create weekly meal plan',
+  'dashboard.planDescZeroWaste': 'Save your ingredients',
+  'dashboard.planDescMarketplace': 'Shop ingredients directly from the app',
+  'dashboard.planDescRecipes': 'Explore 25+ Indonesian recipes',
+
+  // ── Profile (extra) ──
+  'profile.logoutDesc': 'Sign out of your account',
+  'profile.langEnglish': 'English',
+
+  // ── Favorites ──
+  'nav.favorites': 'Favorites',
+  'favorites.title': 'Favorite Recipes',
+  'favorites.empty': 'No favorite recipes yet',
+  'favorites.emptyDesc': 'Tap the ❤️ icon on a recipe to add it to favorites',
 };
 
 export const translations: Record<Language, TranslationMap> = { id, en };
