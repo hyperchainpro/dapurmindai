@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ import {
   ChefHat,
   Sparkles,
   Shield,
+  Camera,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { Achievement, AppScreen } from '@/types';
@@ -83,6 +84,32 @@ export function ProfilePage() {
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const setScreen = useAppStore((s) => s.setScreen);
   const setCurrentMealPlan = useAppStore((s) => s.setCurrentMealPlan);
+  const language = useAppStore((s) => s.language);
+  const setLanguage = useAppStore((s) => s.setLanguage);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /* ── Avatar upload handler ──────────────────────────── */
+  const handleAvatarUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !user) return;
+
+      // Validate file type & size
+      if (!file.type.startsWith('image/')) return;
+      if (file.size > 2 * 1024 * 1024) return; // 2MB max
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setUser({ ...user, avatar: dataUrl });
+      };
+      reader.readAsDataURL(file);
+
+      // Reset input so re-selecting the same file triggers onChange
+      e.target.value = '';
+    },
+    [user, setUser]
+  );
 
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -192,11 +219,30 @@ export function ProfilePage() {
             <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-amber-200/30 dark:bg-amber-500/10 blur-2xl" />
 
             <div className="relative flex items-start gap-4">
-              {/* Avatar */}
+              {/* Avatar with photo upload */}
               <div className="relative">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-500/30">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
-                </div>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative block"
+                  aria-label="Upload foto profil"
+                >
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="flex h-16 w-16 items-center justify-center rounded-2xl object-cover text-2xl font-bold text-white shadow-lg shadow-emerald-500/30"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-2xl font-bold text-white shadow-lg shadow-emerald-500/30">
+                      {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+                    </div>
+                  )}
+                  {/* Camera icon overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/0 transition-colors hover:bg-black/30">
+                    <Camera className="h-5 w-5 text-white opacity-0 transition-opacity hover:opacity-100" />
+                  </div>
+                </motion.button>
                 <motion.div
                   className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs shadow-sm"
                   animate={{ rotate: [0, 10, -10, 0] }}
@@ -204,6 +250,14 @@ export function ProfilePage() {
                 >
                   👨‍🍳
                 </motion.div>
+                {/* Hidden file picker */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
               </div>
 
               {/* Info */}
@@ -427,7 +481,7 @@ export function ProfilePage() {
               <Switch checked={isDark} onCheckedChange={toggleTheme} />
             </div>
 
-            {/* Language */}
+            {/* Language Switcher – ID/EN pill buttons */}
             <div className="flex items-center justify-between rounded-xl nm-raised p-3.5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-500/10">
@@ -435,12 +489,35 @@ export function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Bahasa</p>
-                  <p className="text-xs text-muted-foreground">Bahasa Indonesia</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'id' ? 'Bahasa Indonesia' : 'English'}
+                  </p>
                 </div>
               </div>
-              <Badge variant="secondary" className="rounded-full text-[10px]">
-                ID
-              </Badge>
+              <div className="flex items-center rounded-full bg-muted/60 p-0.5">
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => setLanguage('id')}
+                  className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+                    language === 'id'
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  ID
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => setLanguage('en')}
+                  className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+                    language === 'en'
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  EN
+                </motion.button>
+              </div>
             </div>
 
             {/* Logout / Keluar */}

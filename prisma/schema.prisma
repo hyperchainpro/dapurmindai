@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,60 +7,221 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ── User ──
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  password  String?
+  avatar    String?
+  language  String   @default("id")
+  role      String   @default("user")
+  isActive  Boolean  @default(true)
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  creatorRecipes  CreatorRecipe[]
+  creatorProfiles CreatorProfile[]
+  financeRecords  FinanceRecord[]
+  financeBudgets  FinanceBudget[]
+  financeGoals    FinanceGoal[]
 }
+
+// ── Post (legacy) ──
 
 model Post {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   content   String?
-  published Boolean  @default(false)
+  published Boolean   @default(false)
   authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
+// ── Affiliate System ──
+
 model AffiliateAccount {
-  id              String   @id @default(cuid())
-  platform        String   // tokopedia, shopee, tiktokshop, sayurbox, happyfresh, etc.
-  affiliateId     String   // ID afiliasi di platform
-  apiKey          String?  // optional API key
-  baseUrlTemplate String   // URL template, e.g. "https://tokopedia.link/aff?product={productId}&aff={affiliateId}"
+  id              String    @id @default(cuid())
+  platform        String
+  affiliateId     String
+  apiKey          String?
+  baseUrlTemplate String
   isActive        Boolean  @default(true)
-  createdAt       Int      @default(0) // Unix timestamp
+  deletedAt       DateTime?
+  createdAt       Int      @default(0)
+  updatedAt       Int      @default(0)
 
   productLinks ProductLink[]
 }
 
 model ProductLink {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   productName    String
-  category       String   // sayuran, bumbu, alat masak, etc.
+  category       String
   imageUrl       String?
   platform       String
   affiliateUrl   String
-  originalPrice  Float?   // reference price
+  originalPrice  Float?
   createdByAi    Boolean  @default(false)
-  lastVerified   Int?     // Unix timestamp
+  lastVerified   Int?
+  isActive       Boolean  @default(true)
+  deletedAt      DateTime?
   createdAt      Int      @default(0)
+  updatedAt      Int      @default(0)
 
-  account     AffiliateAccount @relation(fields: [accountId], references: [id])
-  accountId   String
-  clickLogs   ClickLog[]
+  account   AffiliateAccount @relation(fields: [accountId], references: [id])
+  accountId String
+  clickLogs ClickLog[]
 }
 
 model ClickLog {
-  id             String   @id @default(cuid())
-  productLinkId  String
-  platform       String
-  userId         String?  // optional, if user logged in
-  context        String   // weekly_plan, zero_waste, recommendation, etc.
-  clickedAt      Int      @default(0) // Unix timestamp
+  id            String    @id @default(cuid())
+  productLinkId String
+  platform      String
+  userId        String?
+  context       String
+  clickedAt     Int      @default(0)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
 
   productLink ProductLink @relation(fields: [productLinkId], references: [id])
+}
+
+// ── Creator Feature ──
+
+model CreatorRecipe {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String    @default("")
+  image       String     @default("")
+  category    String     @default("Lainnya")
+  difficulty  String     @default("Mudah")
+  cookTime    Int        @default(30)
+  prepTime    Int        @default(15)
+  servings    Int        @default(4)
+  ingredients String     @default("[]")
+  steps       String     @default("[]")
+  tags        String     @default("[]")
+  youtubeUrl  String?
+  likes       Int        @default(0)
+  isPublished Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model CreatorProfile {
+  id           String    @id @default(cuid())
+  userId       String     @unique
+  displayName  String     @default("")
+  bio          String     @default("")
+  avatar       String     @default("")
+  totalRecipes Int        @default(0)
+  totalLikes   Int        @default(0)
+  followers    Int        @default(0)
+  isActive     Boolean    @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ── Financial Planner Feature ──
+
+model FinanceRecord {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String
+  category    String
+  amount      Float
+  description String     @default("")
+  date        DateTime   @default(now())
+  isActive    Boolean    @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model FinanceBudget {
+  id           String    @id @default(cuid())
+  userId       String
+  category     String
+  limitAmount  Float
+  spentAmount  Float     @default(0)
+  period       String
+  startDate    DateTime   @default(now())
+  isActive     Boolean    @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model FinanceGoal {
+  id           String    @id @default(cuid())
+  userId       String
+  title        String
+  targetAmount Float
+  savedAmount  Float     @default(0)
+  deadline     DateTime   @default(now())
+  icon         String     @default("")
+  isActive     Boolean    @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ── AI Agent Management ──
+
+model AiAgent {
+  id             String    @id @default(cuid())
+  name           String
+  provider       String
+  model          String
+  apiKey         String?
+  apiBaseUrl     String?
+  maxTokens      Int       @default(1000000)
+  usedTokens     Int       @default(0)
+  totalRequests  Int       @default(0)
+  failedRequests Int       @default(0)
+  isActive       Boolean   @default(true)
+  isDefault      Boolean   @default(false)
+  description    String    @default("")
+  purpose        String    @default("all")
+  lastUsedAt     DateTime?
+  lastError      String?
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  usageLogs AiAgentUsageLog[]
+}
+
+model AiAgentUsageLog {
+  id            String   @id @default(cuid())
+  agentId       String
+  userId        String?
+  feature       String
+  inputTokens   Int      @default(0)
+  outputTokens  Int      @default(0)
+  latencyMs     Int      @default(0)
+  status        String
+  errorMsg      String?
+  createdAt     DateTime @default(now())
+
+  agent AiAgent @relation(fields: [agentId], references: [id])
 }

@@ -1,3 +1,5 @@
+export type Language = 'id' | 'en';
+
 export interface UserProfile {
   id: string;
   username?: string;
@@ -133,6 +135,8 @@ export interface AuthUser {
   name: string;
   createdAt: string;
   isOnboarded: boolean;
+  avatar?: string;
+  language?: Language;
 }
 
 /* ── Affiliate Types ──────────────────────────────────── */

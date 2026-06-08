@@ -11,6 +11,8 @@ interface StoredUser {
   password: string;
   createdAt: string;
   isOnboarded: boolean;
+  avatar?: string;
+  language?: string;
 }
 
 declare global {

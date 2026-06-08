@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider, ThemeInitScript } from "@/components/dapurmind/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,18 +65,21 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
+        <ThemeInitScript />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-app-capable" content="yes" />
+        <meta name="apple-mobile-app-status-bar-style" content="default" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <div className="mx-auto max-w-lg min-h-screen relative overflow-x-hidden">
-          {children}
-        </div>
+        <ThemeProvider>
+          <div className="mx-auto max-w-lg min-h-screen relative overflow-x-hidden">
+            {children}
+          </div>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

@@ -30,6 +30,7 @@ export function LoginPage() {
   const setScreen = useAppStore((s) => s.setScreen);
   const setAuthUser = useAppStore((s) => s.setAuthUser);
   const setLoggedIn = useAppStore((s) => s.setLoggedIn);
+  const setLanguage = useAppStore((s) => s.setLanguage);
   const updateOnboarding = useAppStore((s) => s.updateOnboarding);
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
 
@@ -80,6 +81,11 @@ export function LoginPage() {
       setAuthUser(loggedInUser);
       setLoggedIn(true);
 
+      // Sync language preference from server-stored user profile
+      if (loggedInUser.language) {
+        setLanguage(loggedInUser.language);
+      }
+
       // If user hasn't completed onboarding, go to onboarding
       if (!loggedInUser.isOnboarded) {
         updateOnboarding({
@@ -104,7 +110,7 @@ export function LoginPage() {
     }
 
     setIsLoading(false);
-  }, [username, password, captchaValue, setAuthUser, setLoggedIn, setScreen, updateOnboarding]);
+  }, [username, password, captchaValue, setAuthUser, setLoggedIn, setLanguage, setScreen, updateOnboarding]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

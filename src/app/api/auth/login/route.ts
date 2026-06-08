@@ -10,6 +10,8 @@ interface StoredUser {
   password: string;
   createdAt: string;
   isOnboarded: boolean;
+  avatar?: string;
+  language?: string;
 }
 
 declare global {
@@ -57,6 +59,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'Login berhasil',
       user: safeUser,
+      avatar: user.avatar || null,
+      language: user.language || 'id',
     });
   } catch {
     return NextResponse.json(

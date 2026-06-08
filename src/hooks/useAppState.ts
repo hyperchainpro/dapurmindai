@@ -11,6 +11,7 @@ import type {
   AffiliateAccount,
   ProductLink,
   AuthUser,
+  Language,
 } from '@/types';
 
 interface AppState {
@@ -55,6 +56,10 @@ interface AppState {
   // Selected recipe for detail view
   selectedRecipe: Recipe | null;
   setSelectedRecipe: (recipe: Recipe | null) => void;
+
+  // Language
+  language: Language;
+  setLanguage: (lang: Language) => void;
 
   // Theme
   isDark: boolean;
@@ -195,6 +200,10 @@ export const useAppStore = create<AppState>()(
       selectedRecipe: null,
       setSelectedRecipe: (recipe) => set({ selectedRecipe: recipe }),
 
+      // Language
+      language: 'id' as Language,
+      setLanguage: (lang) => set({ language: lang }),
+
       // Theme
       isDark: false,
       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
@@ -252,6 +261,7 @@ export const useAppStore = create<AppState>()(
         shoppingItems: state.shoppingItems,
         favoriteRecipes: state.favoriteRecipes,
         achievements: state.achievements,
+        language: state.language,
         isDark: state.isDark,
         authUser: state.authUser,
         isLoggedIn: state.isLoggedIn,
