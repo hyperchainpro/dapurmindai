@@ -327,7 +327,7 @@ export function RecipeBrowser() {
                   className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'local'
                       ? 'nm-raised-sm bg-emerald-600 text-white'
-                      : 'text-muted-foreground/70 hover:text-foreground'
+                      : 'text-foreground/60 hover:text-foreground'
                   }`}
                 >
                   <Wifi className="h-3.5 w-3.5" />
@@ -338,7 +338,7 @@ export function RecipeBrowser() {
                   className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'api'
                       ? 'nm-raised-sm bg-blue-600 text-white'
-                      : 'text-muted-foreground/70 hover:text-foreground'
+                      : 'text-foreground/60 hover:text-foreground'
                   }`}
                 >
                   <Globe2 className="h-3.5 w-3.5" />
