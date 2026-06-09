@@ -476,19 +476,20 @@ function RecipeDetailContent({
                 <Globe2 className="h-3 w-3" />
                 Resep Global - TheMealDB
               </div>
-              {/* YouTube button if available */}
+              {/* YouTube button for API recipes with real URL */}
               {(recipe as any).youtubeUrl && (
                 <motion.a
                   href={(recipe as any).youtubeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   whileTap={{ scale: 0.9 }}
-                  className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
+                  className="absolute bottom-6 right-4 z-30 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
                 >
                   <Play className="h-3 w-3" />
                   Lihat Video
                 </motion.a>
               )}
+
               {/* Fade overlay at bottom */}
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background" />
             </div>
@@ -547,27 +548,13 @@ function RecipeDetailContent({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               )}
 
-              {/* YouTube button if available */}
-              {recipe.youtubeUrl && (
-                <motion.a
-                  href={recipe.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileTap={{ scale: 0.9 }}
-                  className="absolute bottom-6 right-4 z-30 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
-                >
-                  <Play className="h-3 w-3" />
-                  Lihat Video
-                </motion.a>
-              )}
-
               {/* Fade overlay at bottom */}
-              <div className="absolute bottom-0 inset-x-0 z-20 h-16 bg-gradient-to-t from-background" />
+              <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background" />
             </div>
           )}
 
           {/* Recipe info */}
-          <div className="relative z-10 -mt-4 px-5">
+          <div className="relative z-10 -mt-3 px-5 pt-1">
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1029,6 +1016,18 @@ function RecipeDetailContent({
             <ShoppingCart className="h-4 w-4" />
             Tambah ke Daftar Belanja
           </motion.button>
+
+          {/* Watch Video - YouTube search */}
+          <motion.a
+            whileTap={{ scale: 0.9 }}
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.name + ' resep masakan')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl nm-raised text-red-500 transition-all hover:text-red-600"
+            aria-label="Lihat video tutorial"
+          >
+            <Play className="h-5 w-5" />
+          </motion.a>
 
           {/* Share */}
           <motion.button
