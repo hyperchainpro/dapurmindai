@@ -86,8 +86,8 @@ export function LoginPage() {
         setLanguage(loggedInUser.language);
       }
 
-      // If user has admin role, redirect to admin panel
-      if (loggedInUser.role === 'admin') {
+      // If user has admin/superadmin role, redirect to admin panel
+      if (loggedInUser.role === 'admin' || loggedInUser.role === 'superadmin') {
         updateOnboarding({
           id: loggedInUser.id,
           name: loggedInUser.name,
