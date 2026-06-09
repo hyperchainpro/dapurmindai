@@ -188,6 +188,16 @@ export function AdminLogin() {
               'Masuk'
             )}
           </motion.button>
+
+          {/* Back to user login */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setScreen('login')}
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl nm-btn text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Kembali ke Login Pengguna
+          </motion.button>
         </motion.div>
       </div>
     </div>
