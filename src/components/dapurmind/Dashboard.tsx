@@ -15,6 +15,9 @@ import {
   Sparkles,
   PenSquare,
   Wallet,
+  Wifi,
+  Globe2,
+  Compass,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -152,18 +155,49 @@ const quickActions: QuickAction[] = [
 /* ── Sub-components ─────────────────────────────────────────── */
 
 function RecipeCard({ recipe, onClick, t }: { recipe: Recipe; onClick: () => void; t: (key: string, params?: Record<string, string | number>) => string }) {
+  const imagePath = `/recipes/${recipe.id}.jpg`;
+
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
       whileHover={{ scale: 1.03 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={onClick}
-      className="min-w-[140px] max-w-[160px] cursor-pointer snap-start"
+      className="min-w-[160px] max-w-[180px] cursor-pointer snap-start"
     >
       <div className="overflow-hidden rounded-2xl nm-raised shadow-sm">
-        {/* Emoji image area */}
-        <div className="flex h-24 items-center justify-center bg-[var(--nm-bg)]">
-          <span className="text-5xl">{recipe.image}</span>
+        {/* Image area with real photo */}
+        <div className="relative h-28 overflow-hidden bg-[var(--nm-bg)]">
+          <img
+            src={imagePath}
+            alt={recipe.name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              if (!img.dataset.triedPng) {
+                img.dataset.triedPng = '1';
+                img.src = `/recipes/${recipe.id}.png`;
+              } else if (!img.dataset.triedApi) {
+                img.dataset.triedApi = '1';
+                const params = new URLSearchParams({ id: recipe.id, name: recipe.name });
+                img.src = `/api/recipe-image?${params.toString()}`;
+              } else {
+                img.style.display = 'none';
+                const parent = img.parentElement;
+                if (parent && !parent.querySelector('.emoji-fallback')) {
+                  const span = document.createElement('span');
+                  span.className = 'emoji-fallback flex h-full items-center justify-center text-5xl';
+                  span.textContent = recipe.image;
+                  parent.appendChild(span);
+                }
+              }
+            }}
+          />
+          {/* Difficulty badge overlay */}
+          <span className={`absolute bottom-1.5 left-1.5 rounded-md px-1.5 py-0.5 text-[9px] font-bold ${difficultyColor[recipe.difficulty]}`}>
+            {recipe.difficulty}
+          </span>
         </div>
         <div className="p-2.5">
           <h4 className="text-[13px] font-semibold leading-tight truncate">{recipe.name}</h4>
@@ -171,9 +205,6 @@ function RecipeCard({ recipe, onClick, t }: { recipe: Recipe; onClick: () => voi
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <Clock className="h-3 w-3" />
               {recipe.cookTime} {t('recipes.min')}
-            </span>
-            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${difficultyColor[recipe.difficulty]}`}>
-              {recipe.difficulty}
             </span>
           </div>
         </div>
@@ -258,6 +289,35 @@ function DashboardInner() {
               )}
             </motion.div>
           </motion.button>
+        </div>
+      </motion.div>
+
+      {/* ── Lokal / Global / Explore Buttons ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
+        <div className="flex items-center justify-center gap-2.5">
+          <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-1">
+            <button
+              onClick={() => setScreen('recipes')}
+              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all bg-emerald-600 text-white nm-raised-sm active:scale-95"
+            >
+              <Wifi className="h-3.5 w-3.5" />
+              Lokal
+            </button>
+            <button
+              onClick={() => { setScreen('recipes'); }}
+              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all text-muted-foreground/70 hover:text-foreground"
+            >
+              <Globe2 className="h-3.5 w-3.5" />
+              Global
+            </button>
+          </div>
+          <button
+            onClick={() => setScreen('explore')}
+            className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700 active:scale-95"
+          >
+            <Compass className="h-3.5 w-3.5" />
+            Explore
+          </button>
         </div>
       </motion.div>
 
