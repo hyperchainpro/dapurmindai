@@ -92,6 +92,14 @@ const FavoritePage = dynamic(
   () => import('@/components/dapurmind/FavoritePage').then(m => ({ default: m.FavoritePage })),
   { ssr: false }
 );
+const CreatorPage = dynamic(
+  () => import('@/components/dapurmind/CreatorPage').then(m => ({ default: m.default })),
+  { ssr: false }
+);
+const FinancialPlannerPage = dynamic(
+  () => import('@/components/dapurmind/FinancialPlannerPage').then(m => ({ default: m.default })),
+  { ssr: false }
+);
 
 /* ── Screen renderer ──────────────────────────────────────────── */
 
@@ -215,6 +223,16 @@ function ScreenRouter() {
       {currentScreen === 'favorites' && (
         <motion.div key="favorites" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <Suspense fallback={<ScreenLoader />}><FavoritePage /></Suspense>
+        </motion.div>
+      )}
+      {currentScreen === 'creator' && (
+        <motion.div key="creator" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <Suspense fallback={<ScreenLoader />}><CreatorPage /></Suspense>
+        </motion.div>
+      )}
+      {currentScreen === 'financial-planner' && (
+        <motion.div key="financial-planner" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <Suspense fallback={<ScreenLoader />}><FinancialPlannerPage /></Suspense>
         </motion.div>
       )}
     </AnimatePresence>

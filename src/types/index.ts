@@ -126,7 +126,9 @@ export type AppScreen =
   | 'admin-login'
   | 'admin-affiliate'
   | 'admin-analytics'
-  | 'favorites';
+  | 'favorites'
+  | 'creator'
+  | 'financial-planner';
 
 /* ── Auth Types ────────────────────────────────────── */
 
@@ -185,4 +187,71 @@ export interface AffiliateAnalytics {
   totalAffiliateAccounts: number;
   totalProductLinks: number;
   activePlatforms: string[];
+}
+
+/* ── Creator Types ──────────────────────────────────── */
+
+export interface CreatorRecipeItem {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  image: string;
+  category: string;
+  difficulty: string;
+  cookTime: number;
+  prepTime: number;
+  servings: number;
+  ingredients: string; // JSON string
+  steps: string; // JSON string
+  tags: string; // JSON string
+  youtubeUrl?: string;
+  likes: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatorProfileData {
+  id: string;
+  userId: string;
+  displayName: string;
+  bio: string;
+  avatar: string;
+  totalRecipes: number;
+  totalLikes: number;
+  followers: number;
+}
+
+/* ── Financial Planner Types ──────────────────────────── */
+
+export interface FinanceRecord {
+  id: string;
+  userId: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface FinanceBudget {
+  id: string;
+  userId: string;
+  category: string;
+  limitAmount: number;
+  spentAmount: number;
+  period: 'weekly' | 'monthly' | 'yearly';
+  startDate: string;
+}
+
+export interface FinanceGoal {
+  id: string;
+  userId: string;
+  title: string;
+  targetAmount: number;
+  savedAmount: number;
+  deadline: string;
+  icon: string;
 }

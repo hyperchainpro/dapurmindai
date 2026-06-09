@@ -12,6 +12,11 @@ import type {
   ProductLink,
   AuthUser,
   Language,
+  CreatorRecipeItem,
+  CreatorProfileData,
+  FinanceRecord,
+  FinanceBudget,
+  FinanceGoal,
 } from '@/types';
 
 interface AppState {
@@ -96,6 +101,36 @@ interface AppState {
   addProductLink: (link: ProductLink) => void;
   isGeneratingLinks: boolean;
   setGeneratingLinks: (loading: boolean) => void;
+
+  // Creator
+  creatorRecipes: CreatorRecipeItem[];
+  creatorProfile: CreatorProfileData | null;
+  isCreatorLoading: boolean;
+  setCreatorRecipes: (recipes: CreatorRecipeItem[]) => void;
+  addCreatorRecipe: (recipe: CreatorRecipeItem) => void;
+  updateCreatorRecipe: (id: string, updates: Partial<CreatorRecipeItem>) => void;
+  removeCreatorRecipe: (id: string) => void;
+  setCreatorProfile: (profile: CreatorProfileData | null) => void;
+  setCreatorLoading: (loading: boolean) => void;
+
+  // Finance
+  financeRecords: FinanceRecord[];
+  financeBudgets: FinanceBudget[];
+  financeGoals: FinanceGoal[];
+  isFinanceLoading: boolean;
+  setFinanceRecords: (records: FinanceRecord[]) => void;
+  addFinanceRecord: (record: FinanceRecord) => void;
+  updateFinanceRecord: (id: string, updates: Partial<FinanceRecord>) => void;
+  removeFinanceRecord: (id: string) => void;
+  setFinanceBudgets: (budgets: FinanceBudget[]) => void;
+  addFinanceBudget: (budget: FinanceBudget) => void;
+  updateFinanceBudget: (id: string, updates: Partial<FinanceBudget>) => void;
+  removeFinanceBudget: (id: string) => void;
+  setFinanceGoals: (goals: FinanceGoal[]) => void;
+  addFinanceGoal: (goal: FinanceGoal) => void;
+  updateFinanceGoal: (id: string, updates: Partial<FinanceGoal>) => void;
+  removeFinanceGoal: (id: string) => void;
+  setFinanceLoading: (loading: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -294,6 +329,80 @@ export const useAppStore = create<AppState>()(
         })),
       isGeneratingLinks: false,
       setGeneratingLinks: (loading) => set({ isGeneratingLinks: loading }),
+
+      // Creator
+      creatorRecipes: [],
+      creatorProfile: null,
+      isCreatorLoading: false,
+      setCreatorRecipes: (recipes) => set({ creatorRecipes: recipes }),
+      addCreatorRecipe: (recipe) =>
+        set((state) => ({
+          creatorRecipes: [...state.creatorRecipes, recipe],
+        })),
+      updateCreatorRecipe: (id, updates) =>
+        set((state) => ({
+          creatorRecipes: state.creatorRecipes.map((r) =>
+            r.id === id ? { ...r, ...updates } : r
+          ),
+        })),
+      removeCreatorRecipe: (id) =>
+        set((state) => ({
+          creatorRecipes: state.creatorRecipes.filter((r) => r.id !== id),
+        })),
+      setCreatorProfile: (profile) => set({ creatorProfile: profile }),
+      setCreatorLoading: (loading) => set({ isCreatorLoading: loading }),
+
+      // Finance
+      financeRecords: [],
+      financeBudgets: [],
+      financeGoals: [],
+      isFinanceLoading: false,
+      setFinanceRecords: (records) => set({ financeRecords: records }),
+      addFinanceRecord: (record) =>
+        set((state) => ({
+          financeRecords: [...state.financeRecords, record],
+        })),
+      updateFinanceRecord: (id, updates) =>
+        set((state) => ({
+          financeRecords: state.financeRecords.map((r) =>
+            r.id === id ? { ...r, ...updates } : r
+          ),
+        })),
+      removeFinanceRecord: (id) =>
+        set((state) => ({
+          financeRecords: state.financeRecords.filter((r) => r.id !== id),
+        })),
+      setFinanceBudgets: (budgets) => set({ financeBudgets: budgets }),
+      addFinanceBudget: (budget) =>
+        set((state) => ({
+          financeBudgets: [...state.financeBudgets, budget],
+        })),
+      updateFinanceBudget: (id, updates) =>
+        set((state) => ({
+          financeBudgets: state.financeBudgets.map((b) =>
+            b.id === id ? { ...b, ...updates } : b
+          ),
+        })),
+      removeFinanceBudget: (id) =>
+        set((state) => ({
+          financeBudgets: state.financeBudgets.filter((b) => b.id !== id),
+        })),
+      setFinanceGoals: (goals) => set({ financeGoals: goals }),
+      addFinanceGoal: (goal) =>
+        set((state) => ({
+          financeGoals: [...state.financeGoals, goal],
+        })),
+      updateFinanceGoal: (id, updates) =>
+        set((state) => ({
+          financeGoals: state.financeGoals.map((g) =>
+            g.id === id ? { ...g, ...updates } : g
+          ),
+        })),
+      removeFinanceGoal: (id) =>
+        set((state) => ({
+          financeGoals: state.financeGoals.filter((g) => g.id !== id),
+        })),
+      setFinanceLoading: (loading) => set({ isFinanceLoading: loading }),
     }),
     {
       name: 'dapurmind-store',

@@ -14,6 +14,8 @@ import {
   Trophy,
   ArrowRight,
   Sparkles,
+  PenSquare,
+  Wallet,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -129,6 +131,20 @@ const quickActions: QuickAction[] = [
     titleKey: 'dashboard.findRecipes',
     descKey: 'dashboard.planDescRecipes',
     gradient: 'from-rose-500/10 to-rose-500/5',
+  },
+  {
+    screen: 'creator',
+    icon: PenSquare,
+    titleKey: 'dashboard.creatorRecipes',
+    descKey: 'dashboard.planDescCreator',
+    gradient: 'from-violet-500/10 to-violet-500/5',
+  },
+  {
+    screen: 'financial-planner',
+    icon: Wallet,
+    titleKey: 'dashboard.financialPlanner',
+    descKey: 'dashboard.planDescFinance',
+    gradient: 'from-teal-500/10 to-teal-500/5',
   },
 ];
 
