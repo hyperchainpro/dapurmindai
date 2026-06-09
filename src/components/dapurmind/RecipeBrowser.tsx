@@ -508,15 +508,7 @@ export function RecipeBrowser() {
             /* Local recipes */
             filteredRecipes.length > 0 ? (
               <>
-                <motion.div
-                  className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: 0.06 } },
-                  }}
-                >
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
                   {paginatedRecipes.map((recipe) => (
                     <RecipeCard
                       key={recipe.id}
@@ -526,7 +518,7 @@ export function RecipeBrowser() {
                       onToggleFavorite={(e) => handleToggleFavorite(e, recipe.id)}
                     />
                   ))}
-                </motion.div>
+                </div>
                 {hasMore && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -601,15 +593,7 @@ export function RecipeBrowser() {
                 </Button>
               </motion.div>
             ) : apiMeals.length > 0 ? (
-              <motion.div
-                className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.06 } },
-                }}
-              >
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
                 {apiMeals.map((meal) => (
                   <ApiRecipeCard
                     key={meal.id}
@@ -619,7 +603,7 @@ export function RecipeBrowser() {
                     onToggleFavorite={(e) => handleToggleFavorite(e, meal.id)}
                   />
                 ))}
-              </motion.div>
+              </div>
             ) : (
               <EmptyState
                 onReset={() => {
@@ -669,22 +653,11 @@ function RecipeCard({
   const localImagePath = (isWestern ? `/recipes/western/${recipe.id}.jpg` : `/recipes/${recipe.id}.jpg`);
 
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 24, filter: 'blur(3px)' },
-        visible: {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
-        },
-      }}
-    >
+    <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-300">
       <ClickSpark color="emerald" count={6}>
-        <motion.div
+        <div
           onClick={onClick}
-          whileTap={{ scale: 0.97 }}
-          className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 "
+          className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 active:scale-[0.97]"
         >
           {/* Image */}
           <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
@@ -741,24 +714,17 @@ function RecipeCard({
             )}
 
             {/* Favorite button */}
-            <motion.button
+            <button
               onClick={onToggleFavorite}
-              whileTap={{ scale: 0.7 }}
-              className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-colors hover:bg-white dark:bg-black/40 dark:hover:bg-black/60"
+              className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white active:scale-90 dark:bg-black/40 dark:hover:bg-black/60"
               aria-label={isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
             >
-              <motion.div
-                initial={false}
-                animate={{ scale: isFavorite ? [1, 1.3, 1] : 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Heart
-                  className={`h-3.5 w-3.5 transition-colors ${
-                    isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-500 dark:text-gray-400'
-                  }`}
-                />
-              </motion.div>
-            </motion.button>
+              <Heart
+                className={`h-3.5 w-3.5 transition-colors ${
+                  isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-500 dark:text-gray-400'
+                }`}
+              />
+            </button>
 
             {/* Difficulty badge */}
             <span
@@ -791,9 +757,9 @@ function RecipeCard({
               </span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </ClickSpark>
-    </motion.div>
+    </div>
   );
 }
 
@@ -811,21 +777,10 @@ function ApiRecipeCard({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 24, filter: 'blur(3px)' },
-        visible: {
-          opacity: 1,
-          y: 0,
-          filter: 'blur(0px)',
-          transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
-        },
-      }}
-    >
-      <motion.div
+    <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-300">
+      <div
         onClick={onClick}
-        whileTap={{ scale: 0.97 }}
-        className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8"
+        className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8 active:scale-[0.97]"
       >
         {/* Real image from API */}
         <div className="relative h-28 overflow-hidden bg-muted/30">
@@ -856,17 +811,16 @@ function ApiRecipeCard({
           )}
 
           {/* Favorite */}
-          <motion.button
+          <button
             onClick={onToggleFavorite}
-            whileTap={{ scale: 0.7 }}
-            className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-colors hover:bg-white dark:bg-black/40 dark:hover:bg-black/60"
+            className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white active:scale-90 dark:bg-black/40 dark:hover:bg-black/60"
           >
             <Heart
               className={`h-3.5 w-3.5 transition-colors ${
                 isFavorite ? 'fill-rose-500 text-rose-500' : 'text-gray-500 dark:text-gray-400'
               }`}
             />
-          </motion.button>
+          </button>
         </div>
 
         {/* Info */}
@@ -881,8 +835,8 @@ function ApiRecipeCard({
             </Badge>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
