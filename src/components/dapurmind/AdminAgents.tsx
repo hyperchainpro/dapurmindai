@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import type { AIAgent } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -157,7 +158,7 @@ export function AdminAgents() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/agents');
+      const res = await adminFetch('/api/admin/agents');
       const json = await res.json();
       if (!res.ok) throw new Error('Gagal memuat');
       setAgents(json.agents ?? []);
@@ -169,7 +170,7 @@ export function AdminAgents() {
 
     // Fetch stats for token overview
     try {
-      const statsRes = await fetch('/api/admin/stats?period=14d');
+      const statsRes = await adminFetch('/api/admin/stats?period=14d');
       const statsJson = await statsRes.json();
       if (statsJson.success) {
         const ai = statsJson.data.ai;
@@ -202,7 +203,7 @@ export function AdminAgents() {
   // ── Set default ──
   const handleSetDefault = async (agent: AIAgent) => {
     try {
-      const res = await fetch(`/api/admin/agents/${agent.id}`, {
+      const res = await adminFetch(`/api/admin/agents/${agent.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isDefault: true }),
@@ -223,7 +224,7 @@ export function AdminAgents() {
     }
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/agents', {
+      const res = await adminFetch('/api/admin/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

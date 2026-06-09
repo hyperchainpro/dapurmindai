@@ -10,6 +10,9 @@ const JWT_SECRET = new TextEncoder().encode(
 
 const TOKEN_EXPIRY_HOURS = 24 * 7; // 7 days
 
+// Hardcoded admin secret (matches AdminLogin.tsx credentials)
+const ADMIN_API_KEY = 'dapurmind-admin-key-2025';
+
 /* ── Password Helpers ──────────────────────────────────── */
 
 export async function hashPassword(password: string): Promise<string> {
@@ -122,6 +125,13 @@ export async function requireAuth(req: Request): Promise<{ userId: string; role:
 }
 
 export async function requireAdmin(req: Request): Promise<{ userId: string; role: string }> {
+  // 1. Check for admin API key header (client-side admin login)
+  const adminKey = req.headers.get('x-admin-key');
+  if (adminKey === ADMIN_API_KEY) {
+    return { userId: 'admin-system', role: 'superadmin' };
+  }
+
+  // 2. Fall back to JWT session-based auth
   const user = await requireAuth(req);
   if (user.role !== 'admin' && user.role !== 'superadmin') {
     throw new AuthError('Forbidden: Admin access required', 403);

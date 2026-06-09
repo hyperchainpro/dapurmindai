@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import type { AdminUser } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,7 +123,7 @@ export function AdminUsers() {
       if (roleFilter) params.set('role', roleFilter);
       if (statusFilter) params.set('status', statusFilter);
 
-      const res = await fetch(`/api/admin/users?${params}`);
+      const res = await adminFetch(`/api/admin/users?${params}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Gagal memuat');
 
@@ -131,8 +132,8 @@ export function AdminUsers() {
 
       // Fetch summary stats separately (page=1, limit=1 to get totals)
       const [activeRes, newRes] = await Promise.all([
-        fetch('/api/admin/users?status=active&limit=1'),
-        fetch('/api/admin/users?limit=1'),
+        adminFetch('/api/admin/users?status=active&limit=1'),
+        adminFetch('/api/admin/users?limit=1'),
       ]);
       const activeJson = await activeRes.json();
       setActiveUsers(activeJson.pagination?.total ?? 0);
@@ -160,7 +161,7 @@ export function AdminUsers() {
     if (!editingUser) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/users/${editingUser.id}`, {
+      const res = await adminFetch(`/api/admin/users/${editingUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -184,7 +185,7 @@ export function AdminUsers() {
   // ── Toggle active ──
   const toggleActive = async (user: AdminUser) => {
     try {
-      const res = await fetch(`/api/admin/users/${user.id}`, {
+      const res = await adminFetch(`/api/admin/users/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !user.isActive }),
@@ -202,7 +203,7 @@ export function AdminUsers() {
     if (!deleteTarget) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/users/${deleteTarget.id}`, {
+      const res = await adminFetch(`/api/admin/users/${deleteTarget.id}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Delete gagal');

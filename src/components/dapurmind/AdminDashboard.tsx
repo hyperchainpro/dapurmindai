@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { adminFetch } from '@/lib/admin-fetch';
 import {
   Users,
   Bot,
@@ -141,7 +142,7 @@ export function AdminDashboard() {
   // ── Fetch stats ──
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/stats');
+      const res = await adminFetch('/api/admin/stats');
       if (!res.ok) throw new Error('Gagal');
       const json = await res.json();
       if (json.success && json.data) {

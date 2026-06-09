@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import type { SystemSetting } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,7 +94,7 @@ export function AdminSettings() {
   const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/settings');
+      const res = await adminFetch('/api/admin/settings');
       const json = await res.json();
       if (!res.ok) throw new Error('Gagal memuat');
       setSettings(json.data ?? []);
@@ -133,7 +134,7 @@ export function AdminSettings() {
         setSaving(false);
         return;
       }
-      const res = await fetch('/api/admin/settings', {
+      const res = await adminFetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: updatePayload }),
