@@ -21,6 +21,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { recipes } from '@/lib/recipes';
 import type { AppScreen, Recipe } from '@/types';
 import { AFFILIATE_MARKETPLACES } from '@/lib/affiliate';
+import { AdSlot } from '@/components/dapurmind/AdSlot';
 
 /* ── Section Error Boundary ─────────────────────────────────────
  *  Catches errors in non-critical sections without killing the
@@ -315,6 +316,9 @@ function DashboardInner() {
         </motion.div>
       </SectionBoundary>
 
+      {/* Ad: after recipes */}
+      <AdSlot position="dashboard-after-recipes" />
+
       {/* ── Quick Actions (Plain CSS Grid — NO BentoGrid) ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
         <div className="grid grid-cols-2 gap-2">
@@ -392,6 +396,9 @@ function DashboardInner() {
         </motion.div>
       </SectionBoundary>
 
+      {/* Ad: after actions */}
+      <AdSlot position="dashboard-after-actions" />
+
       {/* ── Latest Meal Plan ──────────────────────────────── */}
       {latestPlan && (
         <SectionBoundary>
@@ -431,6 +438,9 @@ function DashboardInner() {
           </motion.div>
         </SectionBoundary>
       )}
+
+      {/* Ad: before stats */}
+      <AdSlot position="dashboard-before-stats" />
 
       {/* ── Stats Section (Plain CSS Grid — NO BentoGrid/NumberTicker) ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">

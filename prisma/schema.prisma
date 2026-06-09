@@ -187,6 +187,24 @@ model CreatorProfile {
   @@map("creator_profiles")
 }
 
+// ── Ad Placements ──────────────────────────────────────────────
+
+model AdPlacement {
+  id            String   @id @default(cuid())
+  name          String
+  position      String
+  scriptContent String   @default("")
+  platform      String   @default("custom")
+  isActive      Boolean  @default(true)
+  maxWidth      String   @default("100%")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([position])
+  @@index([isActive])
+  @@map("ad_placements")
+}
+
 // ── Financial Planner Feature ─────────────────────────────────
 
 model FinanceRecord {

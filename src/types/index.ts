@@ -131,6 +131,7 @@ export type AppScreen =
   | 'admin-users'
   | 'admin-agents'
   | 'admin-settings'
+  | 'admin-ads'
   | 'favorites'
   | 'creator'
   | 'financial-planner'

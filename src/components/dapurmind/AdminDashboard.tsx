@@ -8,6 +8,7 @@ import {
   Bot,
   Settings,
   BarChart3,
+  Megaphone,
   Link2,
   LogOut,
   Shield,
@@ -104,6 +105,14 @@ const ADMIN_MODULES: AdminModule[] = [
     icon: <Settings className="h-6 w-6" />,
     gradient: 'from-rose-500 to-pink-500',
     iconBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400',
+  },
+  {
+    id: 'admin-ads',
+    title: 'Manajemen Iklan',
+    description: 'Google AdSense & custom ad scripts',
+    icon: <Megaphone className="h-6 w-6" />,
+    gradient: 'from-violet-500 to-purple-500',
+    iconBg: 'bg-violet-500/15 text-violet-600 dark:text-violet-400',
   },
 ];
 

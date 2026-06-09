@@ -20,6 +20,7 @@ import {
 import { Marquee } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
+import { AdSlot } from '@/components/dapurmind/AdSlot';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
@@ -495,6 +496,7 @@ export function RecipeBrowser() {
         )}
 
         {/* ── Featured Marquee ── */}
+        <AdSlot position="recipes-after-search" />
         <section className="py-3">
           <Marquee speed={35} pauseOnHover gap={12}>
             {FEATURED_TAGS.map((tag, i) => (
@@ -668,6 +670,9 @@ export function RecipeBrowser() {
             )
           )}
         </section>
+
+        {/* Ad: after grid */}
+        <AdSlot position="recipes-after-grid" />
 
         {/* Results count */}
         <div className="px-4 pt-4 pb-2 text-center">

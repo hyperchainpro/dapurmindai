@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Marquee } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
+import { AdSlot } from '@/components/dapurmind/AdSlot';
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -319,6 +320,7 @@ export default function ExplorePage() {
         </section>
 
         {/* ── Recipe Grid (Instagram-style) ─────────── */}
+        <AdSlot position="explore-before-grid" />
         <section className="px-3 pt-2">
           {loading && recipes.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-20">
@@ -385,6 +387,9 @@ export default function ExplorePage() {
             </>
           )}
         </section>
+
+        {/* Ad: after grid */}
+        <AdSlot position="explore-after-grid" />
 
         {/* ── Recipe Detail Modal (Instagram-style) ── */}
         <AnimatePresence>
