@@ -405,7 +405,7 @@ function RecipeDetailContent({
           <span className="text-6xl">🍽️</span>
         </Bounce>
         <p className="text-sm text-muted-foreground">Resep tidak ditemukan</p>
-        <Button onClick={goBack} className="rounded-full">
+        <Button onClick={goBack} className="rounded-full nm-raised">
           Kembali
         </Button>
       </div>
@@ -545,6 +545,20 @@ function RecipeDetailContent({
               {/* Gradient overlay for readability */}
               {!showEmoji && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              )}
+
+              {/* YouTube button if available */}
+              {recipe.youtubeUrl && (
+                <motion.a
+                  href={recipe.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileTap={{ scale: 0.9 }}
+                  className="absolute bottom-6 right-4 z-30 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
+                >
+                  <Play className="h-3 w-3" />
+                  Lihat Video
+                </motion.a>
               )}
 
               {/* Fade overlay at bottom */}
@@ -1010,7 +1024,7 @@ function RecipeDetailContent({
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={handleAddToShoppingList}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-2.5 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl nm-accent py-2.5 text-sm font-semibold transition-all hover:opacity-90"
           >
             <ShoppingCart className="h-4 w-4" />
             Tambah ke Daftar Belanja
@@ -1019,7 +1033,7 @@ function RecipeDetailContent({
           {/* Share */}
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/30 text-muted-foreground transition-colors hover:bg-muted/60"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl nm-raised text-muted-foreground transition-all hover:text-foreground"
             aria-label="Bagikan resep"
           >
             <Share2 className="h-5 w-5" />
@@ -1049,7 +1063,7 @@ export function RecipeDetail() {
           <span className="text-6xl">🍽️</span>
         </Bounce>
         <p className="text-sm text-muted-foreground">Resep tidak ditemukan</p>
-        <Button onClick={goBack} className="rounded-full">
+        <Button onClick={goBack} className="rounded-full nm-raised">
           Kembali
         </Button>
       </div>

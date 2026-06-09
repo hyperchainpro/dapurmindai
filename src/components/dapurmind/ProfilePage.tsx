@@ -118,6 +118,8 @@ export function ProfilePage() {
   const [showAllergyDialog, setShowAllergyDialog] = useState(false);
   const [newAllergy, setNewAllergy] = useState('');
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false);
+  const [tempBudget, setTempBudget] = useState('');
 
   const unlockedCount = useMemo(
     () => achievements.filter((a) => a.unlockedAt).length,
@@ -179,6 +181,21 @@ export function ProfilePage() {
       window.location.reload();
     }
   }, []);
+
+  const handleSaveBudget = useCallback(() => {
+    if (user && tempBudget) {
+      const parsed = parseInt(tempBudget.replace(/\D/g, ''), 10);
+      if (parsed > 0) {
+        setUser({ ...user, weeklyBudget: parsed });
+      }
+    }
+    setShowBudgetDialog(false);
+  }, [user, tempBudget, setUser]);
+
+  const handleStartEditBudget = useCallback(() => {
+    setTempBudget(String(user?.weeklyBudget ?? 300000));
+    setShowBudgetDialog(true);
+  }, [user]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -284,7 +301,7 @@ export function ProfilePage() {
                       <Button
                         size="sm"
                         onClick={handleSaveName}
-                        className="h-8 rounded-lg bg-emerald-500 px-3 text-xs hover:bg-emerald-600"
+                        className="h-8 nm-raised rounded-lg bg-emerald-500 px-3 text-xs hover:bg-emerald-600"
                       >
                         {t('profile.save')}
                       </Button>
@@ -379,6 +396,7 @@ export function ProfilePage() {
               label={t('profile.weeklyBudget')}
               value={formatRupiah(user?.weeklyBudget ?? 300000)}
               icon="💰"
+              onEdit={handleStartEditBudget}
             />
 
             {/* Taste Preferences */}
@@ -641,6 +659,59 @@ export function ProfilePage() {
         </DialogContent>
       </Dialog>
 
+      {/* ── Budget Dialog ────────────────────────────── */}
+      <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
+        <DialogContent className="rounded-2xl sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-lg">💰</span>
+              {t('profile.weeklyBudget')}
+            </DialogTitle>
+            <DialogDescription>
+              Masukkan budget mingguan untuk perencanaan belanja.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Jumlah (Rp)</label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                value={tempBudget}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, '');
+                  setTempBudget(raw);
+                }}
+                placeholder="300000"
+                className="mt-1 rounded-xl border-border/50 bg-muted/30 text-sm"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveBudget()}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {tempBudget ? formatRupiah(parseInt(tempBudget.replace(/\D/g, ''), 10) || 0) : 'Rp 0'}
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowBudgetDialog(false)}
+              className="flex-1 rounded-full"
+            >
+              {t('profile.cancel')}
+            </Button>
+            <Button
+              onClick={handleSaveBudget}
+              disabled={!tempBudget || parseInt(tempBudget.replace(/\D/g, ''), 10) <= 0}
+              className="nm-raised flex-1 rounded-full bg-emerald-500 px-4 hover:bg-emerald-600"
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              {t('profile.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ── Reset Dialog ────────────────────────────── */}
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
@@ -675,7 +746,7 @@ export function ProfilePage() {
             <Button
               variant="destructive"
               onClick={handleResetData}
-              className="flex-1 rounded-full"
+              className="nm-raised flex-1 rounded-full"
             >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               {t('profile.yesDelete')}

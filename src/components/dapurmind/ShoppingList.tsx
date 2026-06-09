@@ -253,7 +253,7 @@ export function ShoppingList() {
           <motion.div variants={fadeUp}>
             <Button
               onClick={() => setScreen('chat')}
-              className="gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
+              className="nm-raised gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
             >
               <Sparkles className="h-4 w-4" />
               Buat Rencana Menu
@@ -451,7 +451,7 @@ export function ShoppingList() {
               whileTap={{ scale: 0.97 }}
               onClick={() => setShowBuyAllDialog(true)}
               disabled={uncheckedItems.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="nm-raised flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ShoppingBag className="h-4 w-4" />
               Beli Semua Bahan
@@ -505,7 +505,7 @@ export function ShoppingList() {
             <Button
               variant="destructive"
               onClick={() => showDeleteDialog && handleDeleteItem(showDeleteDialog)}
-              className="flex-1 rounded-full"
+              className="nm-raised flex-1 rounded-full"
             >
               Hapus
             </Button>
@@ -570,7 +570,7 @@ export function ShoppingList() {
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleMultiPlatformBuy}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-semibold text-white shadow-md shadow-amber-500/25 transition-all hover:from-amber-600 hover:to-orange-600"
+                className="nm-raised flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-semibold text-white shadow-md shadow-amber-500/25 transition-all hover:from-amber-600 hover:to-orange-600"
               >
                 <ShoppingBag className="h-4 w-4" />
                 Beli Semua (Multi-Platform)

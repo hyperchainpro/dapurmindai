@@ -193,7 +193,7 @@ function ScreenRouter() {
 
   // User auth guard: redirect to login if not authenticated (skip auth screens & splash)
   React.useEffect(() => {
-    const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding'];
+    const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
     const isAuthScreen = authScreens.includes(currentScreen);
     if (!isLoggedIn && !isAuthScreen) {
       setScreen('login');

@@ -295,7 +295,7 @@ export function FinancialPlannerPage() {
           <div><label className="text-xs font-medium text-muted-foreground">{t('finance.amount')}</label><Input type="number" value={savAmt} onChange={(e) => setSavAmt(e.target.value)} placeholder="50000" className="mt-1" /></div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => { setDlgSavings(null); setSavAmt(''); }} className="flex-1 rounded-full">{t('common.cancel')}</Button>
-            <Button onClick={addSavings} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!savAmt || Number(savAmt) <= 0}>{t('finance.save')}</Button>
+            <Button onClick={addSavings} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!savAmt || Number(savAmt) <= 0}>{t('finance.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -308,7 +308,7 @@ export function FinancialPlannerPage() {
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setDlgDelete(null)} className="flex-1 rounded-full">{t('common.cancel')}</Button>
-            <Button variant="destructive" onClick={handleDelete} className="flex-1 rounded-full">{t('finance.delete')}</Button>
+            <Button variant="destructive" onClick={handleDelete} className="nm-raised flex-1 rounded-full">{t('finance.delete')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -499,7 +499,7 @@ function RecordFormDialog({ open, onClose, recType, setRecType, recAmt, setRecAm
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
-          <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!recAmt || !recCat}>{t('finance.save')}</Button>
+          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!recAmt || !recCat}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -522,7 +522,7 @@ function BudgetFormDialog({ open, onClose, cat, setCat, limit, setLimit, period,
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
-          <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!cat || !limit}>{t('finance.save')}</Button>
+          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!cat || !limit}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -550,7 +550,7 @@ function GoalFormDialog({ open, onClose, title, setTitle, target, setTarget, sav
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
-          <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!title || !target}>{t('finance.save')}</Button>
+          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!title || !target}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       cookTime: 30,
       prepTime: 15,
       servings: 2,
-      calories: 0,
+      calories: Math.round(200 + Math.random() * 400),
       ingredients,
       steps,
       tags: [
