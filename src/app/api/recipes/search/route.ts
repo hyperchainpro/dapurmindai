@@ -57,6 +57,8 @@ export async function GET(request: NextRequest) {
           image: m.strMealThumb,
           category: m.strCategory || 'Unknown',
           area: m.strArea || 'Unknown',
+          hasVideo: !!m.strYoutube,
+          strYoutube: m.strYoutube || '',
         })),
         source: 'TheMealDB',
         total: meals.length,

@@ -84,6 +84,7 @@ export interface ApiMeal {
   category: string;
   area: string;
   hasVideo?: boolean;
+  strYoutube?: string;
 }
 
 export interface ApiCategory {

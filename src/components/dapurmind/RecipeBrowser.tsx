@@ -803,11 +803,17 @@ function ApiRecipeCard({
           </span>
 
           {/* Video badge */}
-          {meal.hasVideo && (
-            <span className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm">
+          {(meal.hasVideo || meal.strYoutube) && (
+            <a
+              href={meal.strYoutube || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm"
+            >
               <Play className="h-2 w-2" />
               VIDEO
-            </span>
+            </a>
           )}
 
           {/* Favorite */}

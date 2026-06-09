@@ -4,8 +4,8 @@ const THEMEALDB_BASE = 'https://www.themealdb.com/api/json/v1/1';
 
 export async function GET() {
   try {
-    // Get 6 random meals at once
-    const promises = Array.from({ length: 6 }, () =>
+    // Get 12 random meals at once for better "Semua" coverage
+    const promises = Array.from({ length: 12 }, () =>
       fetch(`${THEMEALDB_BASE}/random.php`, {
         signal: AbortSignal.timeout(15000),
       })
@@ -17,10 +17,16 @@ export async function GET() {
 
     const results = await Promise.allSettled(promises);
     const meals: Record<string, string>[] = [];
+    const seenIds = new Set<string>();
 
     for (const result of results) {
       if (result.status === 'fulfilled' && result.value.meals?.[0]) {
-        meals.push(result.value.meals[0]);
+        const meal = result.value.meals[0];
+        // Deduplicate by idMeal
+        if (!seenIds.has(meal.idMeal)) {
+          seenIds.add(meal.idMeal);
+          meals.push(meal);
+        }
       }
     }
 
@@ -32,6 +38,7 @@ export async function GET() {
       category: meal.strCategory || 'Unknown',
       area: meal.strArea || 'Unknown',
       hasVideo: !!meal.strYoutube,
+      strYoutube: meal.strYoutube || '',
     }));
 
     return NextResponse.json({
