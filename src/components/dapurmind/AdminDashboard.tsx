@@ -261,7 +261,7 @@ export function AdminDashboard() {
               className="rounded-2xl"
             >
               <div className="grid grid-cols-3 gap-2 p-1">
-                <Bounce delay={0.05} intensity={1.2}>
+                <Bounce delay={0.05} intensity={1}>
                   <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-3 text-center">
                     <div className="flex justify-center mb-1.5">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15">
@@ -277,7 +277,7 @@ export function AdminDashboard() {
                   </div>
                 </Bounce>
 
-                <Bounce delay={0.1} intensity={1.2}>
+                <Bounce delay={0.1} intensity={1}>
                   <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-3 text-center">
                     <div className="flex justify-center mb-1.5">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/15">
@@ -293,7 +293,7 @@ export function AdminDashboard() {
                   </div>
                 </Bounce>
 
-                <Bounce delay={0.15} intensity={1.2}>
+                <Bounce delay={0.15} intensity={1}>
                   <div className="rounded-xl border border-border/40 bg-card/80 backdrop-blur-sm p-3 text-center">
                     <div className="flex justify-center mb-1.5">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15">
@@ -351,7 +351,7 @@ export function AdminDashboard() {
             className="space-y-3"
           >
             {ADMIN_MODULES.map((mod, idx) => (
-              <Bounce key={mod.id} delay={idx * 0.06} intensity={1.5} hover>
+              <Bounce key={mod.id} delay={idx * 0.06} intensity={2} hover>
                 <motion.button
                   variants={scaleIn}
                   whileTap={{ scale: 0.97 }}
