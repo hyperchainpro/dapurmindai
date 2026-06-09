@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play, ChevronDown } from 'lucide-react';
+import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play, ChevronDown, Compass } from 'lucide-react';
 import type { Recipe, RecipeCategory } from '@/types';
 
 /* ── Constants ──────────────────────────────────────────────── */
@@ -259,32 +259,6 @@ export function RecipeBrowser() {
                 {mode === 'api' ? 'Global' : 'Nusantara'}
               </h1>
               <div className="flex items-center gap-1.5">
-                {/* Mode Toggle */}
-                <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-0.5">
-                  <button
-                    onClick={() => setMode('local')}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
-                      mode === 'local'
-                        ? 'nm-raised-sm bg-emerald-500 text-white'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Wifi className="h-2.5 w-2.5" />
-                    Lokal
-                  </button>
-                  <button
-                    onClick={() => setMode('api')}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
-                      mode === 'api'
-                        ? 'nm-raised-sm bg-blue-500 text-white'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Globe2 className="h-2.5 w-2.5" />
-                    Global
-                  </button>
-                </div>
-
                 {/* Filter button (local mode only) */}
                 {mode === 'local' && filteredRecipes.length > 0 && (
                   <Button
@@ -343,6 +317,41 @@ export function RecipeBrowser() {
                   <X className="h-4 w-4" />
                 </button>
               )}
+            </div>
+
+            {/* Mode Toggle: Lokal / Global / Explore */}
+            <div className="flex items-center gap-2 pt-0.5">
+              <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-0.5">
+                <button
+                  onClick={() => setMode('local')}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    mode === 'local'
+                      ? 'nm-raised-sm bg-emerald-500 text-white'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Wifi className="h-3 w-3" />
+                  Lokal
+                </button>
+                <button
+                  onClick={() => setMode('api')}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    mode === 'api'
+                      ? 'nm-raised-sm bg-blue-500 text-white'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Globe2 className="h-3 w-3" />
+                  Global
+                </button>
+              </div>
+              <button
+                onClick={() => setScreen('creator')}
+                className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-medium text-white transition-all hover:bg-amber-600 active:scale-95"
+              >
+                <Compass className="h-3 w-3" />
+                Explore
+              </button>
             </div>
           </div>
 
