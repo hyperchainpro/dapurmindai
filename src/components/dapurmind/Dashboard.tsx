@@ -290,7 +290,7 @@ function DashboardInner() {
               key={action.screen}
               whileTap={{ scale: 0.96 }}
               onClick={() => handleNavigate(action.screen)}
-              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/40 bg-card p-3 transition-colors hover:border-border/80 active:scale-[0.98]"
+              className="flex cursor-pointer flex-col gap-2 rounded-xl nm-raised bg-card p-3 transition-colors active:scale-[0.98]"
             >
               <div className={`flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient}`}>
                 <action.icon className="h-[18px] w-[18px] text-emerald-600 dark:text-emerald-400" />
@@ -313,7 +313,7 @@ function DashboardInner() {
             onClick={() => handleNavigate('marketplace')}
             className="w-full text-left"
           >
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10 border border-emerald-200/50 dark:border-emerald-500/20">
+            <div className="relative overflow-hidden rounded-2xl nm-raised bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-lg shadow-emerald-500/25">
                   <ShoppingCart className="h-6 w-6" />
@@ -369,7 +369,7 @@ function DashboardInner() {
             </div>
             <button
               onClick={() => setScreen('recipes')}
-              className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+              className="flex items-center gap-1 rounded-lg nm-raised-sm px-2.5 py-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
             >
               {t('dashboard.viewAll')}
               <ArrowRight className="h-3 w-3" />
@@ -393,7 +393,7 @@ function DashboardInner() {
               <ChefHat className="h-4 w-4 text-emerald-500" />
               <h2 className="text-base font-semibold">{t('dashboard.weeklyPlan')}</h2>
             </div>
-            <div className="rounded-2xl border border-emerald-200/50 dark:border-emerald-500/20 bg-card p-4">
+            <div className="rounded-2xl nm-raised bg-card p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">
@@ -455,21 +455,21 @@ function DashboardInner() {
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
         <h2 className="mb-3 text-base font-semibold">{t('dashboard.stats')}</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+          <div className="flex flex-col items-center justify-center rounded-xl nm-raised bg-card py-4 text-center">
             <span className="text-xl mb-1">❤️</span>
             <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
               {favoriteRecipes.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.savedRecipes')}</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+          <div className="flex flex-col items-center justify-center rounded-xl nm-raised bg-card py-4 text-center">
             <span className="text-xl mb-1">📋</span>
             <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
               {mealPlans.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.menuPlanned')}</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+          <div className="flex flex-col items-center justify-center rounded-xl nm-raised bg-card py-4 text-center">
             <span className="text-xl mb-1">🛒</span>
             <p className="text-xl font-bold text-sky-600 dark:text-sky-400">
               {shoppingItems.length}
