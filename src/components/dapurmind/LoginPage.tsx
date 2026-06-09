@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye,
@@ -42,6 +42,20 @@ export function LoginPage() {
   const [captchaValue, setCaptchaValue] = useState('');
   const [captchaValid, setCaptchaValid] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
+
+  // Secret admin access: tap logo 5 times quickly
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleLogoTap = useCallback(() => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 5) {
+      tapCountRef.current = 0;
+      setScreen('admin-login');
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 1500);
+  }, [setScreen]);
 
   const handleLogin = useCallback(async () => {
     setError('');
@@ -140,7 +154,10 @@ export function LoginPage() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-center text-center"
         >
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20">
+          <div
+            onClick={handleLogoTap}
+            className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20 cursor-default select-none"
+          >
             <ChefHat className="h-8 w-8 text-white" />
           </div>
 
