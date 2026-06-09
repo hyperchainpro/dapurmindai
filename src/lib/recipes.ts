@@ -38,7 +38,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['nasi', 'goreng', 'kecap', 'cepat saji', 'populer'],
     rating: 4.9,
-    youtubeUrl: 'https://www.youtube.com/watch?v=RLzC7W0zc8Q',
+    youtubeUrl: 'https://www.youtube.com/watch?v=V8xOJVq43As',
   },
   {
     id: 'mie-goreng',
@@ -76,7 +76,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['mie', 'goreng', 'kecap', 'cepat saji', 'populer'],
     rating: 4.7,
-    youtubeUrl: 'https://www.youtube.com/watch?v=pWBrMKm6XtE',
+    youtubeUrl: 'https://www.youtube.com/watch?v=OryuZ9ZSjZo',
   },
   {
     id: 'ayam-goreng',
@@ -115,7 +115,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['ayam', 'goreng', 'kremes', 'kuning', 'populer'],
     rating: 4.8,
-    youtubeUrl: 'https://www.youtube.com/watch?v=RQx0VNq5LBw',
+    youtubeUrl: 'https://www.youtube.com/watch?v=Yw1ByGbEnNg',
   },
   {
     id: 'soto-ayam',
@@ -160,7 +160,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['soto', 'ayam', 'kuah', 'kuning', 'hangat'],
     rating: 4.8,
-    youtubeUrl: 'https://www.youtube.com/watch?v=WswQ9RV3jL4',
+    youtubeUrl: 'https://www.youtube.com/watch?v=I6KKPcDV5PQ',
   },
   {
     id: 'rendang',
@@ -204,7 +204,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['rendang', 'daging sapi', 'Padang', 'rempah', 'Lebaran'],
     rating: 5.0,
-    youtubeUrl: 'https://www.youtube.com/watch?v=jn6JY5FxSbE',
+    youtubeUrl: 'https://www.youtube.com/watch?v=DMcFqtm1lfY',
   },
   {
     id: 'gado-gado',
@@ -245,7 +245,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['gado-gado', 'kacang', 'sayuran', 'sehat', 'vegetarian-option'],
     rating: 4.6,
-    youtubeUrl: 'https://www.youtube.com/watch?v=kXWsrV3LjMU',
+    youtubeUrl: 'https://www.youtube.com/watch?v=Z10XpoJBxUE',
   },
   {
     id: 'nasi-padang',
@@ -285,7 +285,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['Padang', 'nasi', 'komplit', 'rendang', 'ayam pop'],
     rating: 4.9,
-    youtubeUrl: 'https://www.youtube.com/watch?v=R8E4GCi5wDU',
+    youtubeUrl: 'https://www.youtube.com/watch?v=4AnRfHEupsY',
   },
   {
     id: 'bakso',
@@ -328,7 +328,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['bakso', 'sapi', 'kuah', 'hangat', 'populer'],
     rating: 4.7,
-    youtubeUrl: 'https://www.youtube.com/watch?v=KpMxlb0ED3o',
+    youtubeUrl: 'https://www.youtube.com/watch?v=BJpGEtyVCII',
   },
   {
     id: 'sate-ayam',
@@ -366,7 +366,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['sate', 'ayam', 'Madura', 'kacang', 'panggang'],
     rating: 4.9,
-    youtubeUrl: 'https://www.youtube.com/watch?v=easIgRCQ7I0',
+    youtubeUrl: 'https://www.youtube.com/watch?v=Vh__EYZzPwg',
   },
   {
     id: 'nasi-uduk',
@@ -447,7 +447,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['bubur', 'ayam', 'sarapan', 'hangat', 'kuah'],
     rating: 4.7,
-    youtubeUrl: 'https://www.youtube.com/watch?v=fNH7giPUGKc',
+    youtubeUrl: 'https://www.youtube.com/watch?v=Mt03AY4x3D8',
   },
   {
     id: 'perkedel',
@@ -691,7 +691,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['klepon', 'ketan', 'gula merah', 'jajan pasar', 'tradisional'],
     rating: 4.8,
-    youtubeUrl: 'https://www.youtube.com/watch?v=e7dLpCKLz7E',
+    youtubeUrl: 'https://www.youtube.com/watch?v=yfYaf615wB0',
   },
   {
     id: 'pisang-goreng',
@@ -765,7 +765,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['martabak', 'manis', 'coklat', 'keju', 'malam'],
     rating: 4.9,
-    youtubeUrl: 'https://www.youtube.com/watch?v=TKQiMY3XrGk',
+    youtubeUrl: 'https://www.youtube.com/watch?v=DCGZ2IVmFJE',
   },
   {
     id: 'pempek',
@@ -996,7 +996,7 @@ export const recipes: Recipe[] = [
     ],
     tags: ['opor', 'ayam', 'santan', 'Lebaran', 'kuning'],
     rating: 4.8,
-    youtubeUrl: 'https://www.youtube.com/watch?v=zIBGPkL_8VM',
+    youtubeUrl: 'https://www.youtube.com/watch?v=AMegomagooQ',
   },
   ...westernRecipes,
 ];
