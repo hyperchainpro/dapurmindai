@@ -11,7 +11,6 @@ import {
   ShoppingCart,
   Clock,
   ChefHat,
-  Trophy,
   ArrowRight,
   Sparkles,
   PenSquare,
@@ -65,17 +64,7 @@ function formatDate(locale: string): string {
   });
 }
 
-function formatRelativeDate(dateStr?: string, t?: (key: string, params?: Record<string, string | number>) => string): string {
-  if (!dateStr) return '';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (t) {
-    if (days === 0) return t('common.today');
-    if (days === 1) return t('common.yesterday');
-    if (days < 7) return t('common.daysAgo', { count: days });
-  }
-  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-}
+/* ── Stagger container ──────────────────────────────────────── */
 
 const difficultyColor: Record<string, string> = {
   Mudah: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400',
@@ -203,7 +192,6 @@ function DashboardInner() {
   const mealPlans = useAppStore((s) => s.mealPlans);
   const shoppingItems = useAppStore((s) => s.shoppingItems);
   const favoriteRecipes = useAppStore((s) => s.favoriteRecipes);
-  const achievements = useAppStore((s) => s.achievements);
   const isDark = useAppStore((s) => s.isDark);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const { t, language } = useTranslation();
@@ -214,15 +202,6 @@ function DashboardInner() {
   );
 
   const latestPlan = useMemo(() => mealPlans[0] ?? null, [mealPlans]);
-
-  const unlockedAchievements = useMemo(
-    () =>
-      achievements
-        .filter((a) => a.unlockedAt)
-        .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
-        .slice(0, 3),
-    [achievements],
-  );
 
   const handleRecipeClick = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
@@ -420,32 +399,6 @@ function DashboardInner() {
                 {t('dashboard.viewDetail')}
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
-            </div>
-          </motion.div>
-        </SectionBoundary>
-      )}
-
-      {/* ── Achievements Preview ──────────────────────────── */}
-      {unlockedAchievements.length > 0 && (
-        <SectionBoundary>
-          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-            <div className="mb-3 flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-500" />
-              <h2 className="text-base font-semibold">{t('dashboard.achievements')}</h2>
-            </div>
-            <div className="space-y-2">
-              {unlockedAchievements.map((a) => (
-                <div key={a.id} className="flex items-center gap-3 rounded-xl nm-raised-sm px-4 py-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-500/15">
-                    {a.icon}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{a.title}</p>
-                    <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt, t)}</p>
-                  </div>
-                  <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
-                </div>
-              ))}
             </div>
           </motion.div>
         </SectionBoundary>
