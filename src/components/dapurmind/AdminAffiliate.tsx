@@ -4,6 +4,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import {
   ArrowLeft,
+  Shield,
+  BarChart3,
   Settings,
   Plus,
   Trash2,
@@ -487,11 +489,19 @@ export function AdminAffiliate() {
             <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={() => setScreen('admin-dashboard')}
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+                aria-label="Dashboard"
+              >
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setScreen('admin-analytics')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
-                aria-label="Pengaturan analitik"
+                aria-label="Analitik"
               >
-                <Settings className="h-5 w-5 text-muted-foreground" />
+                <BarChart3 className="h-5 w-5 text-muted-foreground" />
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.9 }}

@@ -256,6 +256,14 @@ export function AdminUsers() {
             <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={() => setScreen('admin-dashboard')}
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+                aria-label="Dashboard"
+              >
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setScreen('admin-settings')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                 aria-label="Pengaturan"

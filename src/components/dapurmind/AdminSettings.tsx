@@ -4,13 +4,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
+  Shield,
+  BarChart3,
   Settings,
   LogOut,
   Save,
   RefreshCw,
   Loader2,
   Globe,
-  Shield,
   Bot,
   Bell,
   CheckCircle2,
@@ -238,11 +239,19 @@ export function AdminSettings() {
             <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={() => setScreen('admin-dashboard')}
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+                aria-label="Dashboard"
+              >
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setScreen('admin-analytics')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
                 aria-label="Analitik"
               >
-                <Settings className="h-5 w-5 text-muted-foreground" />
+                <BarChart3 className="h-5 w-5 text-muted-foreground" />
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.9 }}

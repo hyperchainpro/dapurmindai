@@ -8,6 +8,8 @@ import {
   Eye,
   MousePointerClick,
   ArrowLeft,
+  Link2,
+  LogOut,
   Calendar,
   RefreshCw,
   ExternalLink,
@@ -540,7 +542,7 @@ export function AdminAnalytics() {
             variant="ghost"
             size="icon"
             className="rounded-xl h-10 w-10 flex-shrink-0"
-            onClick={goBack}
+            onClick={() => setScreen('admin-dashboard')}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -549,24 +551,45 @@ export function AdminAnalytics() {
           </span>
         </div>
 
-        <motion.div
-          animate={{ rotate: isRefreshing ? 360 : 0 }}
-          transition={{
-            duration: 0.8,
-            ease: 'linear',
-            repeat: isRefreshing ? Infinity : 0,
-          }}
-        >
+        <div className="flex items-center gap-1">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             className="rounded-xl h-9 w-9 flex-shrink-0"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
+            onClick={() => setScreen('admin-affiliate' as AppScreen)}
           >
-            <RefreshCw className="h-4 w-4" />
+            <Link2 className="h-4 w-4 text-muted-foreground" />
           </Button>
-        </motion.div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-xl h-9 w-9 flex-shrink-0"
+            onClick={() => {
+              useAppStore.getState().setAdminLoggedIn(false);
+              useAppStore.getState().setScreen('dashboard');
+            }}
+          >
+            <LogOut className="h-4 w-4 text-red-500" />
+          </Button>
+          <motion.div
+            animate={{ rotate: isRefreshing ? 360 : 0 }}
+            transition={{
+              duration: 0.8,
+              ease: 'linear',
+              repeat: isRefreshing ? Infinity : 0,
+            }}
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl h-9 w-9 flex-shrink-0"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* ── Period Selector ──────────────────────── */}

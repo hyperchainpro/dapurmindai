@@ -51,7 +51,7 @@ export function AdminLogin() {
 
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       setAdminLoggedIn(true);
-      setScreen('admin-affiliate');
+      setScreen('admin-dashboard');
     } else {
       setError('Username atau password salah');
     }

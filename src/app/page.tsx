@@ -175,6 +175,10 @@ const AdminSettings = dynamic(
   () => import('@/components/dapurmind/AdminSettings').then(m => ({ default: m.default })),
   { ssr: false, loading: loadingComponent }
 );
+const AdminDashboard = dynamic(
+  () => import('@/components/dapurmind/AdminDashboard').then(m => ({ default: m.default })),
+  { ssr: false, loading: loadingComponent }
+);
 
 /* ── Screen wrapper with error boundary ──────────────────────── */
 
@@ -198,14 +202,14 @@ function ScreenRouter() {
 
   // Auth guard: redirect to admin-login if not authenticated
   React.useEffect(() => {
-    if (['admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'].includes(currentScreen) && !isAdminLoggedIn) {
+    if (['admin-dashboard', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'].includes(currentScreen) && !isAdminLoggedIn) {
       setScreen('admin-login');
     }
   }, [currentScreen, isAdminLoggedIn, setScreen]);
 
   // User auth guard: redirect to login if not authenticated (skip auth screens & splash)
   React.useEffect(() => {
-    const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'];
+    const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-dashboard', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'];
     const isAuthScreen = authScreens.includes(currentScreen);
     if (!isLoggedIn && !isAuthScreen) {
       setScreen('login');
@@ -319,6 +323,13 @@ function ScreenRouter() {
           </ScreenWrapper>
         </motion.div>
       )}
+      {currentScreen === 'admin-dashboard' && (
+        <motion.div key="admin-dashboard" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <ScreenWrapper screen="AdminDashboard">
+            <AdminDashboard />
+          </ScreenWrapper>
+        </motion.div>
+      )}
       {currentScreen === 'admin-affiliate' && (
         <motion.div key="admin-affiliate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <ScreenWrapper screen="AdminAffiliate">
@@ -383,7 +394,7 @@ function ScreenRouter() {
 
 export default function Home() {
   const currentScreen = useAppStore((s) => s.currentScreen);
-  const hideNavScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'];
+  const hideNavScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-dashboard', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings'];
   const showNav = !hideNavScreens.includes(currentScreen);
   const [hydrated, setHydrated] = React.useState(false);
 
