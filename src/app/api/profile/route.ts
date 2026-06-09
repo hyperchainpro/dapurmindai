@@ -1,106 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir, unlink, stat } from 'fs/promises';
+import { db } from '@/lib/db';
+import { requireAuth, logActivity, AuthError } from '@/lib/auth-server';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
-/* ── User store (shared with auth) ───────────────────────── */
-
-interface StoredUser {
-  id: string;
-  username: string;
-  email: string;
-  name: string;
-  password: string;
-  createdAt: string;
-  isOnboarded: boolean;
-  avatar?: string;
-  language?: string;
-}
-
-declare global {
-  var __dapurmind_users: StoredUser[] | undefined;
-}
-
-function getUsers(): StoredUser[] {
-  if (!globalThis.__dapurmind_users) {
-    globalThis.__dapurmind_users = [];
-  }
-  return globalThis.__dapurmind_users;
-}
-
 /* ── Allowed file types ──────────────────────────────────── */
 
-const ALLOWED_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-]);
-
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const ALLOWED_EXTENSIONS: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/png': '.png',
   'image/webp': '.webp',
   'image/gif': '.gif',
 };
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-/* ── POST /api/profile ───────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   POST /api/profile — Upload avatar (requires auth)
+   ═══════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+
     const formData = await request.formData();
     const file = formData.get('avatar') as File | null;
-    const userId = formData.get('userId') as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'File avatar tidak ditemukan.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File avatar tidak ditemukan.' }, { status: 400 });
     }
 
-    if (!userId || typeof userId !== 'string') {
-      return NextResponse.json(
-        { error: 'User ID diperlukan.' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file type
     if (!ALLOWED_TYPES.has(file.type)) {
       return NextResponse.json(
-        {
-          error:
-            'Format file tidak didukung. Gunakan format JPEG, PNG, WebP, atau GIF.',
-        },
+        { error: 'Format file tidak didukung. Gunakan format JPEG, PNG, WebP, atau GIF.' },
         { status: 400 }
       );
     }
 
-    // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        {
-          error: 'Ukuran file terlalu besar. Maksimal 5MB.',
-        },
+        { error: 'Ukuran file terlalu besar. Maksimal 5MB.' },
         { status: 400 }
       );
     }
 
-    // Find user
-    const users = getUsers();
-    const userIndex = users.findIndex((u) => u.id === userId);
+    // Get current user
+    const user = await db.user.findUnique({
+      where: { id: auth.userId },
+      select: { avatar: true },
+    });
 
-    if (userIndex === -1) {
-      return NextResponse.json(
-        { error: 'Pengguna tidak ditemukan.' },
-        { status: 404 }
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'Pengguna tidak ditemukan.' }, { status: 404 });
     }
-
-    const user = users[userIndex];
 
     // Ensure avatars directory exists
     const avatarsDir = join(process.cwd(), 'public', 'avatars');
@@ -122,17 +75,22 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const ext = ALLOWED_EXTENSIONS[file.type] || '.jpg';
-    const filename = `avatar-${userId}-${Date.now()}${ext}`;
+    const filename = `avatar-${auth.userId}-${Date.now()}${ext}`;
     const filePath = join(avatarsDir, filename);
 
-    // Convert File to Buffer and save
+    // Save file
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // Update user's avatar field
+    // Update user avatar
     const avatarUrl = `/avatars/${filename}`;
-    users[userIndex].avatar = avatarUrl;
+    await db.user.update({
+      where: { id: auth.userId },
+      data: { avatar: avatarUrl },
+    });
+
+    await logActivity(auth.userId, 'profile.update_avatar', 'User', `Avatar updated: ${avatarUrl}`, request);
 
     return NextResponse.json({
       success: true,
@@ -141,17 +99,81 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Profile API] Error:', error);
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
     }
-
     return NextResponse.json(
       { error: 'Terjadi kesalahan server saat mengunggah avatar.' },
       { status: 500 }
     );
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PUT /api/profile — Update profile data (requires auth)
+   ═══════════════════════════════════════════════════════════ */
+
+export async function PUT(request: NextRequest) {
+  try {
+    const auth = await requireAuth(request);
+    const body = await request.json();
+    const { name, language } = body;
+
+    const updateData: Record<string, unknown> = {};
+    if (name !== undefined) updateData.name = name;
+    if (language !== undefined) updateData.language = language;
+
+    const user = await db.user.update({
+      where: { id: auth.userId },
+      data: updateData,
+    });
+
+    await logActivity(auth.userId, 'profile.update', 'User', `Profile updated`, request);
+
+    const { password: _, ...safeUser } = user;
+    return NextResponse.json({ success: true, user: safeUser });
+  } catch (error) {
+    console.error('[Profile API] PUT Error:', error);
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GET /api/profile — Get current user profile (requires auth)
+   ═══════════════════════════════════════════════════════════ */
+
+export async function GET(request: NextRequest) {
+  try {
+    const auth = await requireAuth(request);
+
+    const user = await db.user.findUnique({
+      where: { id: auth.userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        avatar: true,
+        language: true,
+        role: true,
+        lastLoginAt: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'Pengguna tidak ditemukan.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, user });
+  } catch (error) {
+    console.error('[Profile API] GET Error:', error);
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

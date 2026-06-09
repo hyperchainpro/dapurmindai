@@ -12,23 +12,28 @@ export async function GET(request: NextRequest) {
     if (list === 'all') {
       const profiles = await db.creatorProfile.findMany({
         where: { isActive: true },
-        include: {
-          user: {
-            select: {
-              creatorRecipes: {
-                where: { isActive: true, isPublished: true },
-                select: { id: true },
-              },
-            },
-          },
-        },
         orderBy: { createdAt: 'desc' },
       });
 
+      // Get published recipe counts for all profile users
+      const userIds = profiles.map(p => p.userId);
+      const recipeCounts = userIds.length > 0
+        ? await db.creatorRecipe.groupBy({
+            by: ['userId'],
+            where: {
+              userId: { in: userIds },
+              isActive: true,
+              isPublished: true,
+            },
+            _count: { id: true },
+          })
+        : [];
+
+      const countMap = new Map(recipeCounts.map(r => [r.userId, r._count.id]));
+
       const mapped = profiles.map((p) => ({
         ...p,
-        publishedRecipeCount: p.user.creatorRecipes.length,
-        user: undefined,
+        publishedRecipeCount: countMap.get(p.userId) || 0,
       }));
 
       return NextResponse.json({ success: true, data: { profiles: mapped } });

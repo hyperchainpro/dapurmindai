@@ -8,14 +8,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '7d'; // 7d, 30d, 90d
 
-    // Calculate time range
-    const now = Math.floor(Date.now() / 1000);
-    const periodSeconds: Record<string, number> = {
-      '7d': 7 * 24 * 3600,
-      '30d': 30 * 24 * 3600,
-      '90d': 90 * 24 * 3600,
-    };
-    const since = now - (periodSeconds[period] || periodSeconds['7d']);
+    // Calculate time range using DateTime (PostgreSQL compatible)
+    const now = new Date();
+    const periodDays: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 };
+    const days = periodDays[period] || 7;
+    const since = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
     // Fetch all data in parallel
     const [
@@ -47,12 +44,12 @@ export async function GET(request: NextRequest) {
         _count: true,
       }),
 
-      // Clicks by day (last N days)
+      // Clicks by day (PostgreSQL syntax)
       db.$queryRaw<Array<{ day: string; count: bigint }>>`
-        SELECT DATE(clickedAt / 86400, 'unixepoch') as day, COUNT(*) as count
-        FROM ClickLog
-        WHERE clickedAt >= ${since}
-        GROUP BY day
+        SELECT DATE(clicked_at) as day, COUNT(*)::bigint as count
+        FROM click_logs
+        WHERE clicked_at >= ${since}
+        GROUP BY DATE(clicked_at)
         ORDER BY day DESC
       `,
 
@@ -66,14 +63,14 @@ export async function GET(request: NextRequest) {
       }),
 
       // Account count
-      db.affiliateAccount.count(),
+      db.affiliateAccount.count({ where: { deletedAt: null } }),
 
       // Link count
-      db.productLink.count(),
+      db.productLink.count({ where: { deletedAt: null } }),
 
       // Active platforms
       db.affiliateAccount.findMany({
-        where: { isActive: true },
+        where: { isActive: true, deletedAt: null },
         select: { platform: true },
       }),
     ]);

@@ -1,39 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { hashPassword, verifyPassword, createToken, createSession, getAuthUser, logActivity, AuthError } from '@/lib/auth-server';
 
-/* ── Simple in-memory user store (for demo) ─────────── */
-// In production, use a database. We use a global to persist across hot reloads.
-
-interface StoredUser {
-  id: string;
-  username: string;
-  email: string;
-  name: string;
-  password: string;
-  createdAt: string;
-  isOnboarded: boolean;
-  avatar?: string;
-  language?: string;
-}
-
-declare global {
-  var __dapurmind_users: StoredUser[] | undefined;
-}
-
-function getUsers(): StoredUser[] {
-  if (!globalThis.__dapurmind_users) {
-    globalThis.__dapurmind_users = [];
-  }
-  return globalThis.__dapurmind_users;
-}
-
-/* ── POST /api/auth/register ──────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   POST /api/auth/register
+   ═══════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, username, email, password } = body;
 
-    // Basic validation
+    // Validation
     if (!name || !username || !email || !password) {
       return NextResponse.json(
         { error: 'Semua field wajib diisi' },
@@ -42,17 +20,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (typeof name !== 'string' || name.trim().length < 2) {
-      return NextResponse.json(
-        { error: 'Nama minimal 2 karakter' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nama minimal 2 karakter' }, { status: 400 });
     }
 
     if (typeof username !== 'string' || username.trim().length < 3) {
-      return NextResponse.json(
-        { error: 'Username minimal 3 karakter' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username minimal 3 karakter' }, { status: 400 });
     }
 
     if (!/^[a-zA-Z0-9._]+$/.test(username.trim())) {
@@ -63,67 +35,71 @@ export async function POST(request: NextRequest) {
     }
 
     if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json(
-        { error: 'Format email tidak valid' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Format email tidak valid' }, { status: 400 });
     }
 
     if (typeof password !== 'string' || password.length < 6) {
-      return NextResponse.json(
-        { error: 'Password minimal 6 karakter' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Password minimal 6 karakter' }, { status: 400 });
     }
 
-    const users = getUsers();
     const normalizedUsername = username.trim().toLowerCase();
     const normalizedEmail = email.trim().toLowerCase();
 
     // Check uniqueness
-    const existingUsername = users.find((u) => u.username === normalizedUsername);
-    if (existingUsername) {
-      return NextResponse.json(
-        { error: 'Username sudah digunakan' },
-        { status: 409 }
-      );
+    const existingUser = await db.user.findFirst({
+      where: {
+        OR: [
+          { username: normalizedUsername },
+          { email: normalizedEmail },
+        ],
+        deletedAt: null,
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.username === normalizedUsername) {
+        return NextResponse.json({ error: 'Username sudah digunakan' }, { status: 409 });
+      }
+      return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 409 });
     }
 
-    const existingEmail = users.find((u) => u.email === normalizedEmail);
-    if (existingEmail) {
-      return NextResponse.json(
-        { error: 'Email sudah terdaftar' },
-        { status: 409 }
-      );
-    }
+    // Hash password
+    const hashedPassword = await hashPassword(password);
 
-    // Create user (password stored as plain text for demo - in production, use bcrypt)
-    const newUser: StoredUser = {
-      id: crypto.randomUUID(),
-      username: normalizedUsername,
-      email: normalizedEmail,
-      name: name.trim(),
-      password: password,
-      createdAt: new Date().toISOString(),
-      isOnboarded: false,
-    };
+    // Create user
+    const user = await db.user.create({
+      data: {
+        username: normalizedUsername,
+        email: normalizedEmail,
+        name: name.trim(),
+        password: hashedPassword,
+        language: 'id',
+        role: 'user',
+      },
+    });
 
-    users.push(newUser);
+    // Create session
+    const token = await createToken({ userId: user.id, role: user.role });
+    await createSession(user.id, token, request);
 
-    // Return user without password
-    const { password: _, ...safeUser } = newUser;
+    // Log activity
+    await logActivity(user.id, 'user.register', 'User', `New user registered: ${normalizedUsername}`, request);
+
+    const { password: _, ...safeUser } = user;
 
     return NextResponse.json(
       {
         message: 'Registrasi berhasil',
         user: safeUser,
+        token,
       },
       { status: 201 }
     );
-  } catch {
-    return NextResponse.json(
-      { error: 'Terjadi kesalahan server' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('[Auth Register] Error:', error);
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
   }
 }
