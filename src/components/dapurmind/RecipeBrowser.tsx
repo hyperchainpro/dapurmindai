@@ -286,15 +286,16 @@ export function RecipeBrowser() {
                     Reset
                   </Button>
                 )}
-                {/* Refresh button (API mode) */}
+                {/* Filter button (API mode) */}
                 {mode === 'api' && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={refreshApi}
+                    onClick={() => setShowFilter(!showFilter)}
                     className="rounded-full text-xs"
                   >
-                    <RefreshCw className="h-3.5 w-3.5" />
+                    <Sparkles className="mr-1 h-3.5 w-3.5" />
+                    Filter
                   </Button>
                 )}
               </div>
@@ -355,8 +356,8 @@ export function RecipeBrowser() {
             </div>
           </div>
 
-          {/* Filter Panel (local mode only) */}
-          {mode === 'local' && (
+          {/* Filter Panel */}
+          {(mode === 'local' || mode === 'api') && (
             <AnimatePresence>
               {showFilter && (
                 <motion.div
@@ -367,7 +368,36 @@ export function RecipeBrowser() {
                   className="overflow-hidden border-t border-border/30"
                 >
                   <div className="space-y-4 px-4 py-3">
-                    {/* Max Cook Time */}
+                    {/* Category filter (API mode) */}
+                    {mode === 'api' && (
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground">
+                          <Globe2 className="mr-1 inline h-3 w-3" />
+                          Kategori Masakan Dunia
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {API_CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => {
+                                setApiCategory(apiCategory === cat ? 'Semua' : cat);
+                                setSearchQuery('');
+                              }}
+                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                                apiCategory === cat
+                                  ? 'nm-raised-sm bg-blue-500 text-white'
+                                  : 'nm-btn text-muted-foreground'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Max Cook Time (local mode) */}
+                    {mode === 'local' && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-medium text-muted-foreground">
@@ -391,8 +421,10 @@ export function RecipeBrowser() {
                         <span>3 jam</span>
                       </div>
                     </div>
+                    )}
 
-                    {/* Difficulty Filter */}
+                    {/* Difficulty Filter (local mode) */}
+                    {mode === 'local' && (
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground">
                         <ChefHat className="mr-1 inline h-3 w-3" />
@@ -416,8 +448,10 @@ export function RecipeBrowser() {
                         ))}
                       </div>
                     </div>
+                    )}
 
-                    {hasActiveFilters && (
+                    {/* Clear filter buttons */}
+                    {mode === 'local' && hasActiveFilters && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -426,6 +460,17 @@ export function RecipeBrowser() {
                       >
                         <X className="mr-1 h-3 w-3" />
                         Hapus semua filter
+                      </Button>
+                    )}
+                    {mode === 'api' && apiCategory !== 'Semua' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setApiCategory('Semua'); setSearchQuery(''); }}
+                        className="w-full text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="mr-1 h-3 w-3" />
+                        Reset filter kategori
                       </Button>
                     )}
                   </div>
