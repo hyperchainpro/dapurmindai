@@ -15,9 +15,6 @@ import {
   Sparkles,
   PenSquare,
   Wallet,
-  Wifi,
-  Globe2,
-  Compass,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -292,34 +289,31 @@ function DashboardInner() {
         </div>
       </motion.div>
 
-      {/* ── Lokal / Global / Explore Buttons ── */}
-      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
-        <div className="flex items-center justify-center gap-2.5">
-          <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-1">
+      {/* ── Featured Recipe Carousel ──────────────────────── */}
+      <SectionBoundary>
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h2 className="text-base font-semibold">{t('dashboard.popularRecipes')}</h2>
+            </div>
             <button
               onClick={() => setScreen('recipes')}
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all bg-emerald-600 text-white nm-raised-sm active:scale-95"
+              className="flex items-center gap-1 rounded-lg nm-raised-sm px-2.5 py-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
             >
-              <Wifi className="h-3.5 w-3.5" />
-              Lokal
-            </button>
-            <button
-              onClick={() => { setScreen('recipes'); }}
-              className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all text-muted-foreground/70 hover:text-foreground"
-            >
-              <Globe2 className="h-3.5 w-3.5" />
-              Global
+              {t('dashboard.viewAll')}
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
-          <button
-            onClick={() => setScreen('explore')}
-            className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700 active:scale-95"
-          >
-            <Compass className="h-3.5 w-3.5" />
-            Explore
-          </button>
-        </div>
-      </motion.div>
+          <div className="scroll-strip mx-1">
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 pt-0.5 px-1 snap-x snap-mandatory">
+              {featuredRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </SectionBoundary>
 
       {/* ── Quick Actions (Plain CSS Grid — NO BentoGrid) ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
@@ -395,32 +389,6 @@ function DashboardInner() {
               </div>
             </div>
           </button>
-        </motion.div>
-      </SectionBoundary>
-
-      {/* ── Featured Recipe Carousel ──────────────────────── */}
-      <SectionBoundary>
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <h2 className="text-base font-semibold">{t('dashboard.popularRecipes')}</h2>
-            </div>
-            <button
-              onClick={() => setScreen('recipes')}
-              className="flex items-center gap-1 rounded-lg nm-raised-sm px-2.5 py-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-            >
-              {t('dashboard.viewAll')}
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
-          <div className="scroll-strip mx-1">
-            <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 pt-0.5 px-1 snap-x snap-mandatory">
-              {featuredRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
-              ))}
-            </div>
-          </div>
         </motion.div>
       </SectionBoundary>
 
