@@ -127,6 +127,9 @@ export type AppScreen =
   | 'admin-login'
   | 'admin-affiliate'
   | 'admin-analytics'
+  | 'admin-users'
+  | 'admin-agents'
+  | 'admin-settings'
   | 'favorites'
   | 'creator'
   | 'financial-planner';
@@ -255,4 +258,78 @@ export interface FinanceGoal {
   savedAmount: number;
   deadline: string;
   icon: string;
+}
+
+export interface RecurringTransaction {
+  id: string;
+  userId: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  description: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  nextDate: string;
+  endDate?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface FinanceReport {
+  spendingByCategory: Record<string, number>;
+  incomeVsExpenseByMonth: Array<{ month: string; income: number; expense: number }>;
+  dailySpending: Array<{ date: string; amount: number }>;
+  topCategories: Array<{ category: string; amount: number; percentage: number }>;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  transactionCount: number;
+}
+
+/* ── Admin Types ────────────────────────────────────── */
+
+export interface AdminUser {
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  role: string;
+  isActive: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+  _count?: {
+    creatorRecipes: number;
+    financeRecords: number;
+    sessions: number;
+    activityLogs: number;
+  };
+}
+
+export interface AIAgent {
+  id: string;
+  name: string;
+  provider: string;
+  model: string;
+  apiBaseUrl?: string;
+  maxTokens: number;
+  usedTokens: number;
+  totalRequests: number;
+  failedRequests: number;
+  isActive: boolean;
+  isDefault: boolean;
+  description?: string;
+  purpose: string;
+  lastUsedAt?: string;
+  lastError?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: string;
+  type: string;
+  group: string;
+  isPublic: boolean;
 }

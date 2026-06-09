@@ -6,6 +6,7 @@ import {
   ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet, Trash2, Edit3,
   Utensils, Car, ShoppingBag, Receipt, Heart, Gamepad2, GraduationCap,
   MoreHorizontal, PiggyBank, CalendarDays, TrendingUp, Target, CircleDollarSign,
+  Bot, Send, Sparkles,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -20,6 +21,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FinanceReportTab } from './FinanceReportTab';
+import { FinanceRecurringTab } from './FinanceRecurringTab';
 
 /* ── Helpers & Constants ────────────────────────────────────────── */
 
@@ -80,7 +83,14 @@ export function FinancialPlannerPage() {
   const setLoading = useAppStore((s) => s.setFinanceLoading);
   const userId = authUser?.id;
 
-  const [activeTab, setActiveTab] = useState<'records' | 'budgets' | 'goals'>('records');
+  const [activeTab, setActiveTab] = useState<'records' | 'budgets' | 'goals' | 'report' | 'recurring'>('records');
+
+  // AI Advisor state
+  const [showAiDialog, setShowAiDialog] = useState(false);
+  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiHistory, setAiHistory] = useState<{ role: 'user' | 'ai'; content: string }[]>([]);
 
   // Dialog open states
   const [dlgRecord, setDlgRecord] = useState(false);
@@ -223,6 +233,33 @@ export function FinancialPlannerPage() {
     setDlgDelete(null);
   };
 
+  /* ── AI Advisor ─────────────────────────────────── */
+  const handleAiSend = async () => {
+    if (!aiQuestion.trim() || !userId || aiLoading) return;
+    const q = aiQuestion.trim();
+    setAiQuestion('');
+    setAiHistory((prev) => [...prev, { role: 'user', content: q }]);
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/finance/ai-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, question: q }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const answer = json.data?.response ?? json.response ?? json.data?.answer ?? 'Maaf, saya tidak bisa menjawab saat ini.';
+        setAiHistory((prev) => [...prev, { role: 'ai', content: answer }]);
+      } else {
+        setAiHistory((prev) => [...prev, { role: 'ai', content: 'Maaf, terjadi kesalahan. Coba lagi nanti.' }]);
+      }
+    } catch {
+      setAiHistory((prev) => [...prev, { role: 'ai', content: 'Maaf, terjadi kesalahan koneksi. Coba lagi nanti.' }]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   /* ── Render ───────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
@@ -262,10 +299,10 @@ export function FinancialPlannerPage() {
         {/* ── Tab Bar ────────────────────────────────── */}
         <div className="mx-4 mt-4">
           <div className="flex rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-1">
-            {(['records', 'budgets', 'goals'] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-all ${activeTab === tab ? 'bg-emerald-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
-                {tab === 'records' ? t('finance.records') : tab === 'budgets' ? t('finance.budgets') : t('finance.goals')}
+            {(['records', 'budgets', 'goals', 'report', 'recurring'] as const).map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab as any)}
+                className={`flex-1 rounded-lg py-2 text-[10px] sm:text-xs font-semibold transition-all ${activeTab === tab ? 'bg-emerald-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                {tab === 'records' ? t('finance.records') : tab === 'budgets' ? t('finance.budgets') : tab === 'goals' ? t('finance.goals') : tab === 'report' ? 'Laporan' : 'Berulang'}
               </button>
             ))}
           </div>
@@ -277,6 +314,8 @@ export function FinancialPlannerPage() {
             {activeTab === 'records' && <RecordsSection grouped={grouped} loading={loading} onAdd={() => { resetRec(); setDlgRecord(true); }} onEdit={openEditRec} onDelete={(id) => setDlgDelete({ type: 'record', id })} />}
             {activeTab === 'budgets' && <BudgetsSection budgets={budgetsWithSpent} loading={loading} onAdd={() => { resetBud(); setDlgBudget(true); }} onEdit={openEditBud} onDelete={(id) => setDlgDelete({ type: 'budget', id })} />}
             {activeTab === 'goals' && <GoalsSection goals={goals} loading={loading} onAdd={() => { resetGo(); setDlgGoal(true); }} onEdit={openEditGo} onDelete={(id) => setDlgDelete({ type: 'goal', id })} onAddSavings={(g) => { setDlgSavings(g); setSavAmt(''); }} />}
+            {activeTab === 'report' && userId && <FinanceReportTab userId={userId} />}
+            {activeTab === 'recurring' && userId && <FinanceRecurringTab userId={userId} />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -310,6 +349,111 @@ export function FinancialPlannerPage() {
             <Button variant="outline" onClick={() => setDlgDelete(null)} className="flex-1 rounded-full">{t('common.cancel')}</Button>
             <Button variant="destructive" onClick={handleDelete} className="nm-raised flex-1 rounded-full">{t('finance.delete')}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── AI Financial Advisor Floating Button + Dialog ── */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowAiDialog(true)}
+        className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-shadow"
+        aria-label="AI Financial Advisor"
+      >
+        <Sparkles className="h-5 w-5" />
+      </motion.button>
+
+      <Dialog open={showAiDialog} onOpenChange={setShowAiDialog}>
+        <DialogContent className="rounded-2xl sm:max-w-md max-h-[80vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-4 pt-4 pb-2">
+            <DialogTitle className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600">
+                <Bot className="h-4 w-4 text-white" />
+              </div>
+              AI Financial Advisor
+            </DialogTitle>
+            <DialogDescription>Tanya tentang keuanganmu dan dapatkan saran cerdas</DialogDescription>
+          </DialogHeader>
+
+          {/* Chat history */}
+          <div className="flex-1 overflow-y-auto scroll-compact px-4 py-2 space-y-3 min-h-0 max-h-60">
+            {aiHistory.length === 0 && !aiLoading && (
+              <div className="flex flex-col items-center gap-2 py-6 text-center">
+                <div className="text-4xl">🤖</div>
+                <p className="text-xs text-muted-foreground">Tanyakan apa saja tentang keuanganmu</p>
+              </div>
+            )}
+            {aiHistory.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-emerald-600 text-white rounded-br-md'
+                      : 'bg-muted rounded-bl-md'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              </motion.div>
+            ))}
+            {aiLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+                  <div className="flex gap-1.5 items-center">
+                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Suggestions */}
+          {aiHistory.length === 0 && !aiLoading && (
+            <div className="px-4 pb-2 flex gap-2 overflow-x-auto scroll-strip-sm">
+              {['Tips hemat belanja minggu ini', 'Analisa pengeluaran saya', 'Rencana tabungan untuk liburan'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setAiQuestion(s)}
+                  className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input area */}
+          <div className="border-t px-4 py-3 flex items-end gap-2">
+            <textarea
+              value={aiQuestion}
+              onChange={(e) => setAiQuestion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAiSend();
+                }
+              }}
+              placeholder="Ketik pertanyaan tentang keuangan..."
+              className="flex-1 resize-none rounded-xl border border-emerald-200/50 bg-muted/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[40px] max-h-[80px] dark:border-emerald-800/50"
+              rows={1}
+              disabled={aiLoading}
+            />
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleAiSend}
+              disabled={!aiQuestion.trim() || aiLoading}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <Send className="h-4 w-4" />
+            </motion.button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

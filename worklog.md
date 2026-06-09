@@ -191,3 +191,136 @@ Stage Summary:
 - 25+ buttons across 12 files now use consistent neumorphism styling (nm-btn-primary, nm-raised, nm-raised-sm)
 - Admin users logging in via regular login page are correctly redirected to admin panel
 - TypeScript compilation passes (only tmp/ group errors from external build artifacts)
+---
+Task ID: 2-a
+Agent: Main Agent
+Task: Create 9 backend API route files for new models (Notification, RecurringTransaction, RecipeRating, AiTokenAlert)
+
+Work Log:
+- Created /src/app/api/finance/report/route.ts (GET): Finance dashboard chart data endpoint. Accepts userId and period (7d/30d/90d). Returns spendingByCategory, incomeVsExpenseByMonth, dailySpending, topCategories, totals, balance, transactionCount. Uses parallel Prisma aggregate, groupBy, and raw SQL queries on FinanceRecord.
+- Created /src/app/api/finance/recurring/route.ts (GET/POST/PUT/DELETE): Full CRUD for RecurringTransaction. GET lists by userId with optional isActive filter. POST validates type (income/expense), frequency (daily/weekly/monthly/yearly), amount. PUT supports toggling isActive. DELETE soft-deletes with ownership check.
+- Created /src/app/api/finance/ai-advice/route.ts (POST): AI financial advisor endpoint. Accepts userId, question, optional context. Fetches recent transactions, active budgets, goals, and 30-day income/expense summary. Builds Indonesian-language system prompt with user finance context. Uses getAIResponse with purpose 'chat'. Returns { response: string }.
+- Created /src/app/api/creator/analytics/route.ts (GET): Creator dashboard analytics. Accepts userId. Returns totalRecipes, publishedRecipes, draftRecipes, totalLikes, avgRating, recipesByCategory, recentActivity (last 10 recipes), likesOverTime (30 days). Parallel queries on CreatorRecipe and RecipeRating.
+- Created /src/app/api/creator/ratings/route.ts (GET/POST/PUT/DELETE): Full CRUD for RecipeRating. GET filters by recipeId or userId. POST enforces 1-5 rating, checks duplicate (unique recipeId+userId, returns 409). PUT validates ownership, rating range. DELETE soft-deletes.
+- Created /src/app/api/admin/ai-tokens/route.ts (GET): Admin-only comprehensive AI token monitoring. Returns agents list with successRate, totalUsedTokens, totalRequests, totalFailed, avgLatencyMs, dailyUsage (30 days), usageByFeature map, active alerts (triggered+unresolved), top 10 users by token usage. Uses requireAdmin + logActivity.
+- Created /src/app/api/admin/ai-tokens/alerts/route.ts (GET/POST/PUT): Admin-only alert management. GET lists all alerts with optional ?active=true filter. POST creates new alert with thresholdType validation (total_tokens/daily_tokens/error_rate). PUT resolves alert by setting resolvedAt and clearing isTriggered.
+- Created /src/app/api/notifications/route.ts (GET/PUT): User notification management. GET lists notifications with userId, optional unreadOnly, limit, offset. Returns paginated results with total count. PUT marks specific ids as read or markAll as read for a user.
+- Created /src/app/api/admin/notifications/route.ts (GET/POST): Admin notification management. GET lists all notifications with user info, pagination, filter by userId/category. POST sends notification to one or multiple users, validates type (info/warning/success/error) and category (general/finance/creator/ai/system).
+- All files follow existing patterns: NextRequest/NextResponse, db from @/lib/db, requireAdmin/logActivity/AuthError from @/lib/auth-server, PostgreSQL raw SQL with double-quoted camelCase columns.
+- Ran db:push (schema already in sync), lint passes (only pre-existing errors in scripts/tmp files).
+
+Stage Summary:
+- 9 new API route files created across 4 feature areas (finance, creator, admin, notifications)
+- 3 finance endpoints: report chart data, recurring CRUD, AI advice
+- 2 creator endpoints: analytics dashboard, ratings CRUD
+- 2 admin AI endpoints: token monitoring, alert management
+- 2 notification endpoints: user notifications, admin send/view
+- All use consistent patterns with existing codebase, proper error handling, input validation
+- Database schema already in sync, no migration needed
+---
+Task ID: 2-b
+Agent: Main Agent
+Task: Enhance Financial Planner frontend - add Report tab, Recurring tab, AI Advisor
+
+Work Log:
+- Created `src/components/dapurmind/FinanceReportTab.tsx`: Full financial report dashboard with:
+  - Period selector (7 Hari / 30 Hari / 90 Hari)
+  - 4 summary cards: Total Pemasukan (green), Total Pengeluaran (red), Saldo (teal), Jumlah Transaksi (amber)
+  - Pie chart (recharts) for spending category distribution with legend
+  - Horizontal bar chart with animated CSS bars for per-category spending breakdown
+  - BarChart (recharts) for Income vs Expense monthly comparison (6 months)
+  - Top Kategori Pengeluaran ranked list with progress bars and medal emojis
+  - Tren Pengeluaran Harian mini bar chart (last 14 days) with animated bars
+  - Uses same framer-motion patterns (fadeUp, stagger) and emerald theme styling (nm-raised, glass cards)
+- Created `src/components/dapurmind/FinanceRecurringTab.tsx`: Recurring transaction management with:
+  - Fetches from `/api/finance/recurring?userId=${userId}`
+  - Groups items by frequency (Mingguan/Bulanan/Tahunan) with colored badges
+  - Each item shows: category icon, description, amount, frequency badge, next date, active toggle (Switch)
+  - Add button opens dialog with form: type toggle, category select, amount, description, frequency select, next date, optional end date
+  - Edit and delete support with proper dialogs
+  - Active/inactive toggle per item
+- Updated `src/components/dapurmind/FinancialPlannerPage.tsx`:
+  - Extended tab bar from 3 to 5 tabs: records, budgets, goals, report, berulang
+  - Added imports for FinanceReportTab, FinanceRecurringTab, Bot, Send, Sparkles icons
+  - Added AI Financial Advisor floating button (fixed bottom-right, emerald gradient, Sparkles icon)
+  - Added AI Advisor dialog with: chat-like message bubbles, 3 pre-loaded suggestion pills, textarea input, Enter to send, animated typing dots
+  - Added handleAiSend function that POSTs to `/api/finance/ai-advice` with user's finance context
+- Created backend API routes:
+  - `src/app/api/finance/report/route.ts` (GET): Returns report data for period (7d/30d/90d) with category breakdown, monthly comparison, daily trend
+  - `src/app/api/finance/recurring/route.ts` (GET/POST/PUT/DELETE): Full CRUD for RecurringTransaction with Indonesian↔English frequency mapping
+  - `src/app/api/finance/ai-advice/route.ts` (POST): AI advisor using z-ai-web-dev-sdk with user's 30-day finance context in system prompt, fallback responses
+
+Stage Summary:
+- 2 new frontend tab components created (FinanceReportTab, FinanceRecurringTab)
+- FinancialPlannerPage enhanced: 5 tabs, AI Advisor floating button + chat dialog
+- 3 backend API routes created/updated (report, recurring, ai-advice)
+- Report tab features: pie chart, bar charts, horizontal bars, daily trends, top categories
+- Recurring tab features: grouped list, add/edit/delete dialogs, active toggle
+- AI Advisor: chat interface with pre-loaded suggestions, context-aware responses
+- All new code follows existing patterns: emerald theme, nm-raised, framer-motion animations
+- Lint passes (no new errors from changes)
+---
+Task ID: 2-c
+Agent: Main Agent
+Task: Enhance Creator page + build Admin Users, Admin Agents, Admin Settings panels
+
+Work Log:
+
+PART 1 - Enhance Creator Page (src/components/dapurmind/CreatorPage.tsx):
+- 1A: Added Creator Profile Editor at top of "my" tab showing avatar, displayName, bio, stats (total recipes, likes, followers). "Edit" button opens profile dialog with avatar/displayName/bio fields. Fetches from `/api/creator/profile?userId=${userId}`, saves via POST to `/api/creator/profile`.
+- 1B: Added search bar, category filter pills (horizontal scroll), difficulty filter dropdown (Mudah/Sedang/Susah), sort by (Terbaru/Populer) to community tab. Filters applied client-side via useMemo. Reset button clears all filters.
+- 1C: Added star rating display for each community recipe card. Fetches ratings from `/api/creator/ratings?recipeId=${recipe.id}` on mount. Shows ★ 4.5 (N) with filled/empty star icons.
+- 1D: Added recipe detail dialog when tapping community recipe. Shows full info (hero image, name, description, category, difficulty, time, servings), like button, star rating section, ingredients list with bullet points, numbered steps list, and tags.
+
+PART 2 - Admin Panel Pages:
+- 2A: Created `src/components/dapurmind/AdminUsers.tsx` — Admin user management with:
+  - Header with back button, title "Manajemen Pengguna", settings and logout buttons
+  - Stats row: Total Pengguna, Pengguna Aktif, Bulan Ini
+  - Search input + role filter (user/admin/superadmin) + status filter (active/inactive)
+  - User cards showing: avatar, name, username, email, role badge (color-coded), status indicator, registration date, last login
+  - Action buttons per card: Edit (opens dialog), Toggle active/inactive, Delete (confirm dialog)
+  - Edit dialog: name, email, role selector, isActive toggle
+  - Pagination with prev/next buttons
+  - Uses stagger/fadeUp animations and nm-raised emerald theme styling
+- 2B: Created `src/components/dapurmind/AdminAgents.tsx` — AI Agent & Token Monitor with:
+  - Header with back button, title "AI Agent & Token Monitor"
+  - 4 token overview cards: Token Terpakai, Total Permintaan, Tingkat Keberhasilan (%), Agent Aktif
+  - Alert banner for active token alerts
+  - Agent list with per-agent cards: name, provider badge (color-coded), model, token progress bar (red >80%), requests count, failed count, success rate, last used, last error, status indicator, "Set Default" button
+  - Token Usage Trend: CSS-only bar chart showing 14 days of daily usage
+  - Usage by Feature: chat/meal-plan/zero-waste breakdown with progress bars
+  - Add Agent dialog: name, provider select, model, apiKey (masked), apiBaseUrl, maxTokens, purpose, description
+- 2C: Created `src/components/dapurmind/AdminSettings.tsx` — System settings page with:
+  - Header with back button, title "Pengaturan Sistem"
+  - Settings grouped by: Umum (General), Keamanan (Security), AI, Notifikasi (Notification)
+  - Each group has gradient icon header, settings count badge, "Simpan" button
+  - Each setting row shows: label (human-readable), key (monospace), input based on type (Switch for boolean, Select for predefined options, number Input, text Input)
+  - Save per group via PUT to `/api/admin/settings`
+  - Group-specific color gradients for icons (emerald for general, red for security, violet for AI, amber for notifications)
+
+PART 3 - Types and Store Updates:
+- 3A: Updated `src/types/index.ts`:
+  - Added 'admin-users', 'admin-agents', 'admin-settings' to AppScreen union type
+  - Added RecurringTransaction interface
+  - Added FinanceReport interface
+  - Added AdminUser interface (for admin user management)
+  - Added AIAgent interface (for admin agent management)
+  - Added SystemSetting interface (for admin settings)
+- 3B: Updated `src/hooks/useAppState.ts`:
+  - Added RecurringTransaction to imports
+  - Added recurringTransactions array and CRUD methods (set, add, remove) to AppState interface
+  - Implemented in store: recurringTransactions: [], setRecurringTransactions, addRecurringTransaction, removeRecurringTransaction
+- 3C: Updated `src/app/page.tsx`:
+  - Added dynamic imports for AdminUsers, AdminAgents, AdminSettings components
+  - Added screen rendering cases for admin-users, admin-agents, admin-settings with AnimatePresence transitions
+  - Updated admin auth guard to include new admin screens
+  - Updated authScreens exclusion array to include new admin screens
+  - Updated hideNavScreens array to hide bottom nav on new admin screens
+
+Stage Summary:
+- CreatorPage enhanced with profile editor, community search/filter, ratings, and recipe detail view
+- 3 new admin panel pages created: AdminUsers, AdminAgents, AdminSettings
+- Types extended with 5 new interfaces and 3 new AppScreen values
+- Zustand store extended with recurringTransactions support
+- Main router updated with 3 new admin screens and proper auth guards
+- Lint passes: no new errors from changes (only pre-existing warnings in FinancialPlannerPage and errors in scripts/tmp)

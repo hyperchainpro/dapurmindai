@@ -25,16 +25,18 @@ model User {
   updatedAt   DateTime  @updatedAt
 
   // Relations
-  posts            Post[]
-  creatorProfile   CreatorProfile?
-  creatorRecipes   CreatorRecipe[]
-  financeRecords   FinanceRecord[]
-  financeBudgets   FinanceBudget[]
-  financeGoals     FinanceGoal[]
-  sessions         Session[]
-  activityLogs     ActivityLog[]
-  clickLogs        ClickLog[]
-  aiAgentUsageLogs AiAgentUsageLog[]
+  posts                 Post[]
+  creatorProfile        CreatorProfile?
+  creatorRecipes        CreatorRecipe[]
+  financeRecords        FinanceRecord[]
+  financeBudgets        FinanceBudget[]
+  financeGoals          FinanceGoal[]
+  recurringTransactions  RecurringTransaction[]
+  sessions              Session[]
+  activityLogs          ActivityLog[]
+  clickLogs             ClickLog[]
+  aiAgentUsageLogs      AiAgentUsageLog[]
+  notifications         Notification[]
 
   @@index([username])
   @@index([email])
@@ -330,4 +332,92 @@ model SystemSetting {
   createdAt DateTime @default(now())
 
   @@map("system_settings")
+}
+
+// ── Notification ─────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("info") // info, warning, success, error
+  category  String   @default("general") // general, finance, creator, ai, system
+  isRead    Boolean  @default(false)
+  link      String?  // optional deep link
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([category])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ── Recurring Transaction ───────────────────────────────────
+
+model RecurringTransaction {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String    // income, expense
+  category    String
+  amount      Float
+  description String    @default("")
+  frequency   String    // daily, weekly, monthly, yearly
+  nextDate    DateTime
+  endDate     DateTime?
+  isActive    Boolean   @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([frequency])
+  @@index([nextDate])
+  @@map("recurring_transactions")
+}
+
+// ── Recipe Rating / Comment ──────────────────────────────────
+
+model RecipeRating {
+  id        String   @id @default(cuid())
+  recipeId  String
+  userId    String
+  rating    Int      // 1-5
+  comment   String   @default("")
+  isActive  Boolean  @default(true)
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([recipeId, userId])
+  @@index([recipeId])
+  @@index([userId])
+  @@map("recipe_ratings")
+}
+
+// ── AI Token Quota / Alert ───────────────────────────────────
+
+model AiTokenAlert {
+  id            String   @id @default(cuid())
+  agentId       String?
+  thresholdType String   // total_tokens, daily_tokens, error_rate
+  thresholdValue Float
+  isTriggered   Boolean  @default(false)
+  triggeredAt   DateTime?
+  resolvedAt    DateTime?
+  message       String   @default("")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([agentId])
+  @@index([isTriggered])
+  @@map("ai_token_alerts")
 }

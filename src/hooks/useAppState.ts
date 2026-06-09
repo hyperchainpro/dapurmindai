@@ -17,6 +17,7 @@ import type {
   FinanceRecord,
   FinanceBudget,
   FinanceGoal,
+  RecurringTransaction,
 } from '@/types';
 
 interface AppState {
@@ -121,6 +122,7 @@ interface AppState {
   financeRecords: FinanceRecord[];
   financeBudgets: FinanceBudget[];
   financeGoals: FinanceGoal[];
+  recurringTransactions: RecurringTransaction[];
   isFinanceLoading: boolean;
   setFinanceRecords: (records: FinanceRecord[]) => void;
   addFinanceRecord: (record: FinanceRecord) => void;
@@ -134,6 +136,9 @@ interface AppState {
   addFinanceGoal: (goal: FinanceGoal) => void;
   updateFinanceGoal: (id: string, updates: Partial<FinanceGoal>) => void;
   removeFinanceGoal: (id: string) => void;
+  setRecurringTransactions: (items: RecurringTransaction[]) => void;
+  addRecurringTransaction: (item: RecurringTransaction) => void;
+  removeRecurringTransaction: (id: string) => void;
   setFinanceLoading: (loading: boolean) => void;
 }
 
@@ -409,6 +414,16 @@ export const useAppStore = create<AppState>()(
       removeFinanceGoal: (id) =>
         set((state) => ({
           financeGoals: state.financeGoals.filter((g) => g.id !== id),
+        })),
+      recurringTransactions: [],
+      setRecurringTransactions: (items) => set({ recurringTransactions: items }),
+      addRecurringTransaction: (item) =>
+        set((state) => ({
+          recurringTransactions: [...state.recurringTransactions, item],
+        })),
+      removeRecurringTransaction: (id) =>
+        set((state) => ({
+          recurringTransactions: state.recurringTransactions.filter((t) => t.id !== id),
         })),
       setFinanceLoading: (loading) => set({ isFinanceLoading: loading }),
     }),
