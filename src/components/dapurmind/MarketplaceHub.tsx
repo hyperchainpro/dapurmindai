@@ -573,7 +573,7 @@ export function MarketplaceHub() {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleSearchAllMarketplaces}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 items-center gap-1 rounded-lg bg-emerald-500 px-2 text-[10px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 items-center gap-1 rounded-lg nm-btn-primary px-2 text-[10px] font-semibold text-white transition-colors"
             >
               <Globe className="h-3 w-3" />
               Semua
@@ -764,7 +764,7 @@ export function MarketplaceHub() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllTokopedia}
                   disabled={filteredItems.length === 0}
-                  className="flex w-full items-center gap-3 rounded-xl border border-green-200/60 bg-green-50/50 p-3 text-left transition-all hover:shadow-md dark:border-green-800/30 dark:bg-green-500/5 disabled:opacity-40 disabled:pointer-events-none"
+                  className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-all disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-2xl shadow-sm">
                     🛒
@@ -785,7 +785,7 @@ export function MarketplaceHub() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllShopee}
                   disabled={filteredItems.length === 0}
-                  className="flex w-full items-center gap-3 rounded-xl border border-orange-200/60 bg-orange-50/50 p-3 text-left transition-all hover:shadow-md dark:border-orange-800/30 dark:bg-orange-500/5 disabled:opacity-40 disabled:pointer-events-none"
+                  className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-all disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-2xl shadow-sm">
                     🧡
@@ -806,7 +806,7 @@ export function MarketplaceHub() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleBuyAllMulti}
                   disabled={filteredItems.length === 0}
-                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-200/60 bg-emerald-50/50 p-3 text-left transition-all hover:shadow-md dark:border-emerald-800/30 dark:bg-emerald-500/5 disabled:opacity-40 disabled:pointer-events-none"
+                  className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-all disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-sm">
                     <Globe className="h-5 w-5" />

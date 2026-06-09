@@ -548,13 +548,27 @@ function RecipeDetailContent({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               )}
 
+              {/* YouTube button */}
+              {recipe.youtubeUrl && (
+                <motion.a
+                  href={recipe.youtubeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileTap={{ scale: 0.9 }}
+                  className="absolute bottom-6 right-4 z-30 flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg"
+                >
+                  <Play className="h-3 w-3" />
+                  Lihat Video
+                </motion.a>
+              )}
+
               {/* Fade overlay at bottom */}
               <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-background" />
             </div>
           )}
 
           {/* Recipe info */}
-          <div className="relative z-10 -mt-3 px-5 pt-1">
+          <div className="relative z-10 px-5 pt-4">
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -597,7 +611,7 @@ function RecipeDetailContent({
             <StatChip icon="⏱️" label="Persiapan" value={`${recipe.prepTime} menit`} />
             <StatChip icon="🔥" label="Memasak" value={`${recipe.cookTime} menit`} />
             <StatChip icon="👥" label="Porsi" value={`${recipe.servings} porsi`} />
-            {recipe.calories && (
+            {(recipe.calories ?? 0) > 0 && (
               <StatChip icon="⚡" label="Kalori" value={`${recipe.calories} kkal`} />
             )}
             </div>

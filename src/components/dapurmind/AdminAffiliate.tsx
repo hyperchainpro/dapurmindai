@@ -170,7 +170,7 @@ function SwipeableAccountCard({ account, onEdit, onDelete }: SwipeableAccountCar
                     e.stopPropagation();
                     onEdit(account);
                   }}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/50 transition-colors hover:bg-accent"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl nm-raised-sm transition-colors hover:bg-accent"
                   aria-label="Edit akun"
                 >
                   <Edit3 className="h-4 w-4 text-muted-foreground" />

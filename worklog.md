@@ -160,3 +160,34 @@ Work Log:
 
 Stage Summary:
 - Admin login now correctly redirects to admin-affiliate page instead of user dashboard
+---
+Task ID: 15
+Agent: Main Agent
+Task: Fix YouTube Video Button + UI Positioning + Calories + Neumorphism Buttons + Admin Redirect
+
+Work Log:
+- Task 1: Added YouTube "Lihat Video" button to LOCAL recipe hero section in RecipeDetail.tsx (lines 551-563). Button renders only when recipe.youtubeUrl exists, positioned at bottom-right with z-30. API recipe button left unchanged.
+- Task 2: Fixed recipe info positioning in RecipeDetail.tsx — changed `-mt-3 px-5 pt-1` to `px-5 pt-4` (removed negative margin, added positive padding) on the recipe info div (line 571) to prevent text overlap with hero content.
+- Task 3: Verified ALL recipe files have calories fields (western.ts: 371, recipes.ts: 26, other files all match). Changed calorie display condition from `{recipe.calories && (...)}` to `{(recipe.calories ?? 0) > 0 && (...)}` for robustness (line 614).
+- Task 4: Verified budget editing already works in ProfilePage.tsx (showBudgetDialog, tempBudget state, handleSaveBudget, Dialog all exist). No changes needed.
+- Task 5: Applied neumorphism button styles across 12 component files:
+  - LoginPage.tsx: Login button → nm-btn-primary
+  - AdminLogin.tsx: Login button → nm-btn-primary
+  - RegisterPage.tsx: Back button → nm-raised-sm, Register button → nm-btn-primary
+  - ForgotPasswordPage.tsx: Back button → nm-raised-sm, Verify button → nm-btn-primary, Reset button → nm-btn-primary
+  - ChatInterface.tsx: "Simpan Rencana" button → nm-btn-primary, Send button → nm-btn-primary
+  - MealPlanDetail.tsx: Back button → nm-raised-sm, Meal entry cards → nm-raised, "Buat Rencana Menu" → nm-btn-primary, "Buat Daftar Belanja" → nm-btn-primary
+  - ProfilePage.tsx: Edit name button → nm-raised-sm, Preference edit button → nm-raised-sm
+  - MarketplaceHub.tsx: Search button → nm-btn-primary, Buy all Tokopedia/Shopee/Multi → nm-raised
+  - AdminAffiliate.tsx: Edit account button → nm-raised-sm
+  - ShoppingList.tsx: Marketplace buy buttons in dialog → nm-raised
+  - Excluded: image-overlay buttons (back/favorite on hero), input helper buttons (password toggle), tab/toggle/segmented controls, category pills, small inline action buttons
+- Task 6: Added admin role check in LoginPage.tsx after login success (lines 89-97). If loggedInUser.role === 'admin', redirects to 'admin-affiliate' screen instead of dashboard or onboarding.
+
+Stage Summary:
+- Local recipes now show YouTube button when youtubeUrl exists (13 recipes in recipes.ts have URLs)
+- Recipe detail page no longer has overlapping text from negative margin
+- Calorie display is robust against 0/undefined values
+- 25+ buttons across 12 files now use consistent neumorphism styling (nm-btn-primary, nm-raised, nm-raised-sm)
+- Admin users logging in via regular login page are correctly redirected to admin panel
+- TypeScript compilation passes (only tmp/ group errors from external build artifacts)

@@ -163,7 +163,7 @@ export function ForgotPasswordPage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setScreen('login')}
-          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-card shadow-sm transition-colors hover:bg-accent"
+          className="absolute top-4 left-4 z-20 flex h-9 w-9 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-accent"
           aria-label="Kembali"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -236,7 +236,7 @@ export function ForgotPasswordPage() {
                 whileTap={{ scale: 0.97 }}
                 onClick={handleVerifyEmail}
                 disabled={isLoading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-sm font-semibold text-white shadow-lg shadow-amber-400/25 transition-all hover:from-amber-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -336,7 +336,7 @@ export function ForgotPasswordPage() {
                 whileTap={{ scale: 0.97 }}
                 onClick={handleResetPassword}
                 disabled={isLoading}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />

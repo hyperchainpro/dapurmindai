@@ -91,7 +91,7 @@ function DayCard({ day, index }: { day: MealDay; index: number }) {
                   {mealEntries.map((meal) => (
                     <ClickSpark key={meal.key} color="#10b981" count={6}>
                       <button
-                        className="flex w-full items-center gap-3 rounded-xl border border-border/50 bg-background/50 p-3 text-left transition-colors hover:border-emerald-500/30 hover:bg-emerald-500/5"
+                        className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-colors hover:border-emerald-500/30 hover:bg-emerald-500/5"
                         onClick={() => {
                           if (meal.data) {
                             setSelectedRecipe(meal.data.recipe);
@@ -198,7 +198,7 @@ export function MealPlanDetail() {
         </p>
         <button
           onClick={() => setScreen('chat')}
-          className="mt-4 rounded-xl bg-emerald-500 px-6 py-3 font-medium text-white transition-colors hover:bg-emerald-600"
+          className="mt-4 rounded-xl nm-btn-primary px-6 py-3 font-medium text-white transition-all"
         >
           <span className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
@@ -216,7 +216,7 @@ export function MealPlanDetail() {
         <div className="flex items-center gap-3 px-4 py-3">
           <button
             onClick={goBack}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-background/80 transition-colors hover:bg-muted"
+            className="flex h-9 w-9 items-center justify-center rounded-xl nm-raised-sm transition-colors hover:bg-muted"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -256,7 +256,7 @@ export function MealPlanDetail() {
         <ClickSpark color="#f59e0b" count={10}>
           <button
             onClick={handleGenerateShopping}
-            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 font-semibold text-white shadow-nm-accent transition-all active:scale-[0.98]"
+            className="w-full rounded-xl nm-btn-primary py-3 font-semibold text-white transition-all active:scale-[0.98]"
           >
             <span className="flex items-center justify-center gap-2">
               <ShoppingCart className="h-5 w-5" />

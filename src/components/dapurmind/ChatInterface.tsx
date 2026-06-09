@@ -284,7 +284,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
             <ClickSpark color="emerald" count={6}>
               <button
                 onClick={() => message.mealPlan && onSavePlan?.(message.mealPlan)}
-                className="relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 active:scale-[0.97]"
+                className="relative flex items-center justify-center gap-2 rounded-xl nm-btn-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:scale-[0.97]"
               >
                 <BorderBeam
                   duration={4}
@@ -949,7 +949,7 @@ export function ChatInterface() {
                 whileHover={{ scale: 1.05 }}
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isAILoading}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-nm-accent transition-all disabled:opacity-40 disabled:shadow-none"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl nm-btn-primary shadow-nm-accent transition-all disabled:opacity-40 disabled:shadow-none"
                 aria-label="Kirim pesan"
               >
                 <motion.div

@@ -545,7 +545,7 @@ export function ShoppingList() {
                   <button
                     key={mp.id}
                     onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-                    className="flex w-full items-center gap-3 rounded-xl border border-border/50 p-3 text-left transition-colors hover:bg-muted/50"
+                    className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-colors hover:bg-muted/50"
                   >
                     <span className={`flex h-9 w-9 items-center justify-center rounded-lg text-lg ${mp.bgColor}`}>
                       {mp.logo}

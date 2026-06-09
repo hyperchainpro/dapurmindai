@@ -320,7 +320,7 @@ export function ProfilePage() {
                       <motion.button
                         whileTap={{ scale: 0.9 }}
                         onClick={handleStartEditName}
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/60 transition-colors hover:bg-muted"
+                        className="flex h-7 w-7 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-muted"
                         aria-label="Edit nama"
                       >
                         <Pencil className="h-3 w-3 text-muted-foreground" />
@@ -786,7 +786,7 @@ function PreferenceCard({
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onEdit}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/60 transition-colors hover:bg-muted"
+          className="flex h-7 w-7 items-center justify-center rounded-full nm-raised-sm transition-colors hover:bg-muted"
           aria-label={`Edit ${label}`}
         >
           <Pencil className="h-3 w-3 text-muted-foreground" />

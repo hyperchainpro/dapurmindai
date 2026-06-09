@@ -86,8 +86,16 @@ export function LoginPage() {
         setLanguage(loggedInUser.language);
       }
 
-      // If user hasn't completed onboarding, go to onboarding
-      if (!loggedInUser.isOnboarded) {
+      // If user has admin role, redirect to admin panel
+      if (loggedInUser.role === 'admin') {
+        updateOnboarding({
+          id: loggedInUser.id,
+          name: loggedInUser.name,
+          username: loggedInUser.username,
+          email: loggedInUser.email,
+        });
+        setScreen('admin-affiliate');
+      } else if (!loggedInUser.isOnboarded) {
         updateOnboarding({
           id: loggedInUser.id,
           name: loggedInUser.name,
@@ -241,7 +249,7 @@ export function LoginPage() {
             whileTap={{ scale: 0.97 }}
             onClick={handleLogin}
             disabled={isLoading}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl nm-btn-primary text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
