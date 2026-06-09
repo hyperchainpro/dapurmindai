@@ -105,7 +105,7 @@ function BentoGridItem({
   return (
     <div
       className={cn(
-        'group relative overflow-hidden rounded-xl border border-border/40 bg-card p-4 transition-colors hover:border-border/80',
+        'group relative rounded-xl border border-border/40 bg-card p-4 transition-colors hover:border-border/80',
         className
       )}
       style={{

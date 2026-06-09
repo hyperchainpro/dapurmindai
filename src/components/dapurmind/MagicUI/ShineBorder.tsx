@@ -66,7 +66,7 @@ function ShineBorder({
         style={{
           borderRadius: Math.max(0, borderRadius - borderWidth),
           margin: borderWidth,
-          height: 'calc(100% - 2px)', // slight offset for clean edges
+          minHeight: 0,
         }}
       >
         {children}

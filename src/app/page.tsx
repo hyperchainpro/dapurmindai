@@ -108,33 +108,25 @@ function ScreenRouter() {
   const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
   const setScreen = useAppStore((s) => s.setScreen);
-  const [hydrated, setHydrated] = React.useState(false);
-
-  // Wait for Zustand hydration before applying guards
-  React.useEffect(() => {
-    setHydrated(true);
-  }, []);
 
   // Auth guard: redirect to admin-login if not authenticated
   React.useEffect(() => {
-    if (!hydrated) return;
     if ((currentScreen === 'admin-affiliate' || currentScreen === 'admin-analytics') && !isAdminLoggedIn) {
       setScreen('admin-login');
     }
-  }, [currentScreen, isAdminLoggedIn, hydrated, setScreen]);
+  }, [currentScreen, isAdminLoggedIn, setScreen]);
 
   // User auth guard: redirect to login if not authenticated (skip auth screens & splash)
   React.useEffect(() => {
-    if (!hydrated) return;
     const authScreens: AppScreen[] = ['splash', 'login', 'register', 'forgot-password', 'onboarding'];
     const isAuthScreen = authScreens.includes(currentScreen);
     if (!isLoggedIn && !isAuthScreen) {
       setScreen('login');
     }
-  }, [currentScreen, isLoggedIn, hydrated, setScreen]);
+  }, [currentScreen, isLoggedIn, setScreen]);
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync">
       {currentScreen === 'splash' && (
         <motion.div key="splash" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
           <Suspense fallback={<ScreenLoader />}><SplashScreen /></Suspense>
@@ -245,6 +237,29 @@ export default function Home() {
   const currentScreen = useAppStore((s) => s.currentScreen);
   const hideNavScreens = ['splash', 'login', 'register', 'forgot-password', 'onboarding', 'admin-login', 'admin-affiliate', 'admin-analytics'];
   const showNav = !hideNavScreens.includes(currentScreen);
+  const [hydrated, setHydrated] = React.useState(false);
+
+  // Wait for Zustand PERSIST rehydration before rendering anything
+  // This prevents screen flicker (splash → login → dashboard race condition)
+  React.useEffect(() => {
+    const unsub = useAppStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    if (useAppStore.persist.hasHydrated()) {
+      setHydrated(true);
+    }
+    return unsub;
+  }, []);
+
+  if (!hydrated) {
+    return (
+      <main className="relative">
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative">

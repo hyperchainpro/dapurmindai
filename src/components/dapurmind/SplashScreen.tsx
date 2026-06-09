@@ -69,7 +69,7 @@ export default function SplashScreen() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, []);
+  }, [isLoggedIn, setScreen, firstLaunch]);
 
   const handleExitComplete = () => {
     if (!isVisible && !hasRedirected.current) {
