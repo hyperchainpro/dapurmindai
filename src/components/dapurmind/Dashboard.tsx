@@ -375,10 +375,12 @@ function DashboardInner() {
               <ArrowRight className="h-3 w-3" />
             </button>
           </div>
-          <div className="flex gap-2.5 overflow-x-auto pb-2 py-1 no-scrollbar snap-x snap-mandatory">
-            {featuredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
-            ))}
+          <div className="scroll-strip mx-1">
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 pt-0.5 px-1 snap-x snap-mandatory">
+              {featuredRecipes.map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
+              ))}
+            </div>
           </div>
         </motion.div>
       </SectionBoundary>

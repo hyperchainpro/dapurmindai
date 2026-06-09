@@ -458,8 +458,8 @@ export function RecipeBrowser() {
         </section>
 
         {/* ── Category Tabs ── */}
-        <section className="px-4">
-          <div ref={scrollRef} className="flex gap-1 overflow-x-auto pb-1 scrollbar-none shadow-sm rounded-lg">
+        <div className="scroll-strip-sm mx-4">
+          <div ref={scrollRef} className="flex gap-1 overflow-x-auto no-scrollbar py-1 px-1">
             {(mode === 'api' ? API_CATEGORIES : CATEGORIES).map((cat) => {
               const catLabel = typeof cat === 'string' ? cat : cat.label;
               const catValue = typeof cat === 'string' ? cat : cat.value;
@@ -500,7 +500,7 @@ export function RecipeBrowser() {
               );
             })}
           </div>
-        </section>
+        </div>
 
         {/* ── Recipe Grid ── */}
         <section className="px-4 pt-3">

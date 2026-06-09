@@ -689,7 +689,7 @@ export function AdminAffiliate() {
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
-          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
+          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4 pr-12">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-amber-500 text-white">
@@ -705,7 +705,7 @@ export function AdminAffiliate() {
             </DialogHeader>
           </div>
 
-          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5">
+          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5 scroll-compact scroll-elevated mx-1">
             {/* Platform Selector */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold">Platform</Label>
@@ -825,7 +825,7 @@ export function AdminAffiliate() {
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
-          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
+          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4 pr-12">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
@@ -841,7 +841,7 @@ export function AdminAffiliate() {
             </DialogHeader>
           </div>
 
-          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5">
+          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5 scroll-compact scroll-elevated mx-1">
             {/* Active Status Toggle */}
             <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-4">
               <div className="flex items-center gap-3">

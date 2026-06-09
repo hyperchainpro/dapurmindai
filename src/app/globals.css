@@ -355,6 +355,13 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 
   /* ── Safe area insets ── */
   .safe-bottom {
@@ -381,26 +388,207 @@
     background: var(--nm-bg);
   }
 
+  /* ── Compact scrollbar (thin, subtle, for all scrollable areas) ── */
+  .scroll-compact {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(163, 177, 198, 0.4) transparent;
+  }
+  .scroll-compact::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scroll-compact::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+  .scroll-compact::-webkit-scrollbar-thumb {
+    background: rgba(163, 177, 198, 0.5);
+    border-radius: 10px;
+  }
+  .scroll-compact::-webkit-scrollbar-thumb:hover {
+    background: rgba(163, 177, 198, 0.7);
+  }
+  .dark .scroll-compact {
+    scrollbar-color: rgba(100, 116, 139, 0.4) transparent;
+  }
+  .dark .scroll-compact::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.5);
+  }
+  .dark .scroll-compact::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.7);
+  }
+
+  /* ── Horizontal scroll strip with shadow edges ── */
+  .scroll-h {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scroll-h::-webkit-scrollbar {
+    display: none;
+  }
+  .scroll-h-wrap {
+    position: relative;
+  }
+  .scroll-h-wrap::before,
+  .scroll-h-wrap::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    width: 18px;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .scroll-h-wrap::before {
+    left: 0;
+    background: linear-gradient(to right, var(--nm-bg) 30%, transparent);
+    box-shadow: -3px 0 10px -2px var(--nm-shadow-dark);
+    border-radius: 8px 0 0 8px;
+  }
+  .scroll-h-wrap::after {
+    right: 0;
+    background: linear-gradient(to left, var(--nm-bg) 30%, transparent);
+    box-shadow: 3px 0 10px -2px var(--nm-shadow-dark);
+    border-radius: 0 8px 8px 0;
+  }
+  .scroll-h-wrap.has-scroll-left::before { opacity: 1; }
+  .scroll-h-wrap.has-scroll-right::after { opacity: 1; }
+
+  /* ── Universal horizontal scroll strip with shadow (for pages without JS scroll detection) ── */
+  .scroll-strip {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.06),
+      0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--nm-bg);
+    padding: 6px 0;
+  }
+  .scroll-strip::before,
+  .scroll-strip::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 20px;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .scroll-strip::before {
+    left: 0;
+    background: linear-gradient(to right, var(--nm-bg) 40%, transparent);
+    box-shadow: -3px 0 12px -3px var(--nm-shadow-dark);
+    border-radius: 10px 0 0 10px;
+    opacity: 1;
+  }
+  .scroll-strip::after {
+    right: 0;
+    background: linear-gradient(to left, var(--nm-bg) 40%, transparent);
+    box-shadow: 3px 0 12px -3px var(--nm-shadow-dark);
+    border-radius: 0 10px 10px 0;
+    opacity: 1;
+  }
+  .dark .scroll-strip {
+    box-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.25),
+      0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ── Compact scroll strip (smaller, tighter padding) ── */
+  .scroll-strip-sm {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      0 1px 6px rgba(0, 0, 0, 0.03);
+    background: var(--nm-bg);
+    padding: 4px 0;
+  }
+  .scroll-strip-sm::before,
+  .scroll-strip-sm::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 16px;
+    z-index: 5;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .scroll-strip-sm::before {
+    left: 0;
+    background: linear-gradient(to right, var(--nm-bg) 40%, transparent);
+    box-shadow: -2px 0 8px -2px var(--nm-shadow-dark);
+    border-radius: 8px 0 0 8px;
+    opacity: 1;
+  }
+  .scroll-strip-sm::after {
+    right: 0;
+    background: linear-gradient(to left, var(--nm-bg) 40%, transparent);
+    box-shadow: 2px 0 8px -2px var(--nm-shadow-dark);
+    border-radius: 0 8px 8px 0;
+    opacity: 1;
+  }
+  .dark .scroll-strip-sm {
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.20),
+      0 1px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  /* ── Vertical scroll container with subtle inner shadow ── */
+  .scroll-v-shadow {
+    box-shadow:
+      inset 0 4px 8px -4px var(--nm-shadow-dark),
+      inset 0 -4px 8px -4px var(--nm-shadow-dark);
+    border-radius: 12px;
+  }
+
+  /* ── Scroll container outer shadow (elevation effect) ── */
+  .scroll-elevated {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.07),
+      0 4px 16px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+  }
+  .dark .scroll-elevated {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.25),
+      0 4px 16px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
   /* ── Scroll card shadow utility ── */
   .scroll-card-shadow {
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.06),
-      0 1px 2px rgba(0, 0, 0, 0.04);
+      0 1px 3px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
   }
   .scroll-card-shadow:hover {
     box-shadow:
-      0 4px 6px rgba(0, 0, 0, 0.07),
-      0 2px 4px rgba(0, 0, 0, 0.05);
+      0 4px 12px rgba(0, 0, 0, 0.10),
+      0 2px 6px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+    transition: all 0.25s ease;
   }
   .dark .scroll-card-shadow {
     box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.3),
-      0 1px 2px rgba(0, 0, 0, 0.2);
+      0 2px 6px rgba(0, 0, 0, 0.35),
+      0 4px 12px rgba(0, 0, 0, 0.20);
   }
   .dark .scroll-card-shadow:hover {
     box-shadow:
-      0 4px 6px rgba(0, 0, 0, 0.35),
-      0 2px 4px rgba(0, 0, 0, 0.25);
+      0 4px 16px rgba(0, 0, 0, 0.40),
+      0 2px 8px rgba(0, 0, 0, 0.30);
   }
 }
 

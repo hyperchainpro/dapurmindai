@@ -76,7 +76,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <ThemeProvider>
-          <div className="mx-auto max-w-lg h-screen relative overflow-x-hidden overflow-y-auto">
+          <div className="mx-auto max-w-lg h-screen relative overflow-x-hidden overflow-y-auto scroll-compact scroll-elevated">
             {children}
           </div>
         </ThemeProvider>

@@ -289,7 +289,7 @@ export function AffiliatePicker({
         </div>
 
         {/* Marketplace List */}
-        <div className="overflow-y-auto max-h-[50vh] px-4 py-3 no-scrollbar">
+        <div className="overflow-y-auto max-h-[50vh] px-4 py-3 scroll-compact scroll-elevated mx-2">
           <motion.div
             variants={stagger}
             initial="hidden"

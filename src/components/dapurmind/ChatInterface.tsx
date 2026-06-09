@@ -910,7 +910,8 @@ export function ChatInterface() {
       >
         <div className="mx-auto max-w-lg px-4 pt-3 pb-2">
           {/* Quick suggestion chips */}
-          <div className="mb-2.5 flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+          <div className="scroll-strip-sm mb-2.5">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 px-2">
             {quickSuggestions.map((suggestion) => (
               <motion.button
                 key={suggestion.label}
@@ -923,6 +924,7 @@ export function ChatInterface() {
                 <span>{suggestion.label}</span>
               </motion.button>
             ))}
+            </div>
           </div>
 
           {/* Input row */}

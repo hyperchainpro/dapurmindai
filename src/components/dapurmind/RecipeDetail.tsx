@@ -591,13 +591,15 @@ function RecipeDetailContent({
 
         {/* ── Quick Stats Bar ───────────────────────── */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="scroll-strip-sm">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 px-2">
             <StatChip icon="⏱️" label="Persiapan" value={`${recipe.prepTime} menit`} />
             <StatChip icon="🔥" label="Memasak" value={`${recipe.cookTime} menit`} />
             <StatChip icon="👥" label="Porsi" value={`${recipe.servings} porsi`} />
             {recipe.calories && (
               <StatChip icon="⚡" label="Kalori" value={`${recipe.calories} kkal`} />
             )}
+            </div>
           </div>
         </motion.section>
 

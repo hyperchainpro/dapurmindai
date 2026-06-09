@@ -1102,7 +1102,8 @@ function ResultCard({
               <ExternalLink className="h-3 w-3" />
               Beli Bahan Tambahan
             </p>
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+            <div className="scroll-strip-sm">
+              <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1 px-2">
               {AFFILIATE_MARKETPLACES.slice(0, 4).map((mp) => (
                 <motion.button
                   key={mp.id}
@@ -1127,6 +1128,7 @@ function ResultCard({
                   </span>
                 </motion.button>
               ))}
+              </div>
             </div>
           </div>
         )}

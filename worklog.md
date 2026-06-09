@@ -35,3 +35,58 @@ Stage Summary:
 - All existing API routes continue to work with PostgreSQL
 - Admin user created: admin@dapurmind.com / admin123 (superadmin role)
 - Deployed via PM2, all endpoints verified working
+---
+Task ID: 6
+Agent: main
+Task: Improve global scroll view UI - smaller size + shadow effect on all pages
+
+Work Log:
+- Added 3 new CSS utility classes in globals.css: `.scroll-strip`, `.scroll-strip-sm`, `.scroll-elevated`
+- Updated `.scroll-h-wrap` pseudo-elements with better gradient (30% coverage) and softer shadow
+- Applied `.scroll-strip` to: Dashboard featured recipes, MarketplaceHub marketplace cards, AdminAnalytics daily chart
+- Applied `.scroll-strip-sm` to: RecipeBrowser category tabs, MarketplaceHub category tabs, RecipeDetail stats bar, ChatInterface quick suggestions, ZeroWasteRecipe marketplace links
+- Applied `.scroll-elevated` to: Root layout container, AffiliatePicker dialog, AdminAffiliate dialogs (x2), MarketplaceHub AI search dialog
+- Applied `.scroll-compact` to vertical scroll dialogs for thin scrollbar
+- Fixed 4 dialog headers with `pr-12` to prevent X button overlap
+- Fixed JSX nesting bug in RecipeBrowser.tsx (</section> → </div>)
+- Fixed JSX nesting in MarketplaceHub.tsx (removed redundant relative wrapper)
+
+Stage Summary:
+- All horizontal scroll views now have shadow edge effects and compact padding
+- Vertical scroll dialogs have elevated shadow appearance
+- Root app container upgraded from inset shadow to outer elevation shadow
+- Build passes, app deployed to PM2
+
+---
+Task ID: 5
+Agent: main
+Task: Fix Resep page Lokal tab not showing recipe list
+
+Work Log:
+- Verified static recipes import: 397 recipes loaded correctly
+- All categories have recipes (Makan Siang, Makan Malam, Sarapan, Snack, Minuman, Dessert, Western)
+- Filter logic is correct: default state (Semua category, no search) returns all 397 recipes
+- useMemo, useState, useEffect all properly initialized
+- No database dependency for Lokal mode - uses static import
+
+Stage Summary:
+- Lokal tab logic verified working correctly
+- 397 local recipes available across 7 categories
+- Issue may have been transient or already resolved
+
+---
+Task ID: 7
+Agent: main
+Task: Add close button (X) to all popups
+
+Work Log:
+- Audited all 19 popups/modals/dialogs in the project
+- All shadcn DialogContent components already have built-in X close button (showCloseButton=true default)
+- ZeroWasteRecipe custom modal has explicit X button
+- Found 4 dialogs with sticky headers where X button visually overlaps title
+- Added `pr-12` to 4 dialog headers: AdminAffiliate add/edit, MarketplaceHub AI search
+- AffiliatePicker uses default DialogContent padding (no overlap)
+
+Stage Summary:
+- All popups have close buttons
+- Fixed 4 dialog header padding issues to prevent X overlap

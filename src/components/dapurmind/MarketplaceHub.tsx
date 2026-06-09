@@ -583,8 +583,8 @@ export function MarketplaceHub() {
 
         {/* ── Category Tabs ──────────────────────────────── */}
         <div className="mt-3 px-4">
-          <div className="relative">
-            <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
+            <div className="scroll-strip-sm">
+              <div className="flex gap-1 overflow-x-auto no-scrollbar py-1 px-2">
               {CATEGORY_TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -610,8 +610,8 @@ export function MarketplaceHub() {
                   )}
                 </button>
               ))}
+              </div>
             </div>
-          </div>
         </div>
 
         {/* ── Featured Marketplaces ─────────────────────── */}
@@ -650,10 +650,10 @@ export function MarketplaceHub() {
           </div>
 
           {/* Horizontal scroll cards */}
-          <div className="overflow-x-auto no-scrollbar">
+          <div className="scroll-strip mx-3">
             <motion.div
               variants={stagger}
-              className="flex gap-3 px-4 pb-2"
+              className="flex gap-3 px-4 pb-1 pt-0.5"
             >
               {AFFILIATE_MARKETPLACES.map((mp) => (
                 <motion.div key={mp.id} variants={fadeUp}>
@@ -960,7 +960,7 @@ export function MarketplaceHub() {
       <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
         <DialogContent className="max-h-[80vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           {/* Header */}
-          <div className="sticky top-0 z-10 border-b border-border/40 bg-card px-5 pt-5 pb-4">
+          <div className="sticky top-0 z-10 border-b border-border/40 bg-card px-5 pt-5 pb-4 pr-12">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
@@ -979,7 +979,7 @@ export function MarketplaceHub() {
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto max-h-[50vh] px-4 py-3">
+          <div className="overflow-y-auto max-h-[50vh] px-4 py-3 scroll-compact scroll-elevated mx-1">
             <AnimatePresence mode="wait">
               {isAILinkLoading ? (
                 <motion.div

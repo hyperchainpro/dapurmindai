@@ -788,26 +788,24 @@ export function AdminAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <motion.div
-                variants={stagger}
-                initial="hidden"
-                animate="visible"
-                className="flex items-end gap-1.5 overflow-x-auto pb-1"
-                style={{
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'rgba(16,185,129,0.3) transparent',
-                }}
-              >
-                {analytics.clicksByDay.map((day, i) => (
-                  <DailyBar
-                    key={day.date}
-                    date={day.date}
-                    count={day.count}
-                    maxCount={maxDailyCount}
-                    index={i}
-                  />
-                ))}
-              </motion.div>
+              <div className="scroll-strip">
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="visible"
+                  className="flex items-end gap-1.5 overflow-x-auto no-scrollbar py-1 px-2"
+                >
+                  {analytics.clicksByDay.map((day, i) => (
+                    <DailyBar
+                      key={day.date}
+                      date={day.date}
+                      count={day.count}
+                      maxCount={maxDailyCount}
+                      index={i}
+                    />
+                  ))}
+                </motion.div>
+              </div>
 
               {/* Summary line */}
               <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
