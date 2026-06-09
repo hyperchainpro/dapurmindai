@@ -320,36 +320,36 @@ export function RecipeBrowser() {
             </div>
 
             {/* Mode Toggle: Lokal / Global / Explore */}
-            <div className="flex items-center gap-2 pt-0.5">
-              <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-0.5">
+            <div className="flex items-center justify-center gap-2.5 pt-1">
+              <div className="flex items-center rounded-full border border-border/60 bg-muted/40 p-1">
                 <button
                   onClick={() => setMode('local')}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'local'
                       ? 'nm-raised-sm bg-emerald-500 text-white'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Wifi className="h-3 w-3" />
+                  <Wifi className="h-3.5 w-3.5" />
                   Lokal
                 </button>
                 <button
                   onClick={() => setMode('api')}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'api'
                       ? 'nm-raised-sm bg-blue-500 text-white'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Globe2 className="h-3 w-3" />
+                  <Globe2 className="h-3.5 w-3.5" />
                   Global
                 </button>
               </div>
               <button
                 onClick={() => setScreen('creator')}
-                className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-medium text-white transition-all hover:bg-amber-600 active:scale-95"
+                className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-600 active:scale-95"
               >
-                <Compass className="h-3 w-3" />
+                <Compass className="h-3.5 w-3.5" />
                 Explore
               </button>
             </div>
