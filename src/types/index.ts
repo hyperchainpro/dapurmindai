@@ -133,7 +133,8 @@ export type AppScreen =
   | 'admin-settings'
   | 'favorites'
   | 'creator'
-  | 'financial-planner';
+  | 'financial-planner'
+  | 'explore';
 
 /* ── Auth Types ────────────────────────────────────── */
 

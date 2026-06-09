@@ -346,7 +346,7 @@ export function RecipeBrowser() {
                 </button>
               </div>
               <button
-                onClick={() => setScreen('creator')}
+                onClick={() => setScreen('explore')}
                 className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-600 active:scale-95"
               >
                 <Compass className="h-3.5 w-3.5" />

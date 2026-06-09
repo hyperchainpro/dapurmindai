@@ -175,6 +175,10 @@ const AdminSettings = dynamic(
   () => import('@/components/dapurmind/AdminSettings').then(m => ({ default: m.default })),
   { ssr: false, loading: loadingComponent }
 );
+const ExplorePage = dynamic(
+  () => import('@/components/dapurmind/ExplorePage').then(m => ({ default: m.default })),
+  { ssr: false, loading: loadingComponent }
+);
 const AdminDashboard = dynamic(
   () => import('@/components/dapurmind/AdminDashboard').then(m => ({ default: m.default })),
   { ssr: false, loading: loadingComponent }
@@ -383,6 +387,13 @@ function ScreenRouter() {
         <motion.div key="financial-planner" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <ScreenWrapper screen="Keuangan">
             <FinancialPlannerPage />
+          </ScreenWrapper>
+        </motion.div>
+      )}
+      {currentScreen === 'explore' && (
+        <motion.div key="explore" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <ScreenWrapper screen="Explore">
+            <ExplorePage />
           </ScreenWrapper>
         </motion.div>
       )}
