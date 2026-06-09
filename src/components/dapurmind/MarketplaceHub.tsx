@@ -152,7 +152,7 @@ function MarketplaceHCard({
     <motion.div
       whileTap={{ scale: 0.97 }}
       onClick={handleOpen}
-      className={`relative w-[200px] shrink-0 cursor-pointer overflow-hidden rounded-2xl nm-raised p-4 text-left transition-shadow hover:shadow-lg ${marketplace.bgColor}`}
+      className={`relative w-[180px] shrink-0 cursor-pointer overflow-hidden rounded-2xl nm-raised p-3 text-left transition-shadow hover:shadow-lg shadow-sm ${marketplace.bgColor}`}
     >
       {/* Top pick badge */}
       {isTopPick && (
@@ -165,13 +165,13 @@ function MarketplaceHCard({
       )}
 
       {/* Logo */}
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl text-3xl shadow-sm">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-2xl shadow-sm">
         {marketplace.logo}
       </div>
 
       {/* Info */}
-      <h3 className="text-sm font-bold text-foreground truncate">{marketplace.name}</h3>
-      <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{marketplace.tagline}</p>
+      <h3 className="text-[13px] font-bold text-foreground truncate">{marketplace.name}</h3>
+      <p className="mt-0.5 text-[10px] text-muted-foreground truncate">{marketplace.tagline}</p>
 
       {/* Rating */}
       <div className="mt-2">
@@ -223,17 +223,17 @@ function ProductCard({
 
   return (
     <motion.div variants={fadeUp} className="group">
-      <div className="rounded-xl nm-raised p-3 transition-all hover:border-border hover:shadow-sm">
+      <div className="rounded-xl nm-raised p-3 transition-all hover:border-border hover:shadow-md shadow-sm">
         <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-sm`}>
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-sm`}>
             <span className="text-lg">{icon}</span>
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] font-semibold text-foreground truncate">{item.name}</p>
+            <p className="text-[11px] text-muted-foreground">
               {item.amount} {item.unit}
             </p>
 

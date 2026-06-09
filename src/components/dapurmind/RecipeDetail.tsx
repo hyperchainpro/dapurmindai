@@ -1084,7 +1084,7 @@ function StatChip({
   value: string;
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 rounded-xl border border-border/30 bg-card px-3.5 py-2.5 shadow-sm">
+    <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/30 bg-card px-2.5 py-2 shadow-sm">
       <span className="text-base">{icon}</span>
       <div>
         <p className="text-[10px] text-muted-foreground">{label}</p>

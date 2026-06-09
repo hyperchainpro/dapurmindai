@@ -459,7 +459,7 @@ export function RecipeBrowser() {
 
         {/* ── Category Tabs ── */}
         <section className="px-4">
-          <div ref={scrollRef} className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
+          <div ref={scrollRef} className="flex gap-1 overflow-x-auto pb-1 scrollbar-none shadow-sm rounded-lg">
             {(mode === 'api' ? API_CATEGORIES : CATEGORIES).map((cat) => {
               const catLabel = typeof cat === 'string' ? cat : cat.label;
               const catValue = typeof cat === 'string' ? cat : cat.value;
@@ -508,7 +508,7 @@ export function RecipeBrowser() {
             /* Local recipes */
             filteredRecipes.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   {paginatedRecipes.map((recipe) => (
                     <RecipeCard
                       key={recipe.id}
@@ -593,7 +593,7 @@ export function RecipeBrowser() {
                 </Button>
               </motion.div>
             ) : apiMeals.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 {apiMeals.map((meal) => (
                   <ApiRecipeCard
                     key={meal.id}
@@ -657,10 +657,10 @@ function RecipeCard({
       <ClickSpark color="emerald" count={6}>
         <div
           onClick={onClick}
-          className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 active:scale-[0.97]"
+          className="group cursor-pointer overflow-hidden rounded-xl nm-raised shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 active:scale-[0.97]"
         >
           {/* Image */}
-          <div className={`relative flex h-28 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
+          <div className={`relative flex h-24 items-center justify-center bg-gradient-to-br ${bgColor} overflow-hidden`}>
             {hasRealImage ? (
               <img
                 src={recipe.image}
@@ -735,16 +735,16 @@ function RecipeCard({
           </div>
 
           {/* Info */}
-          <div className="space-y-1.5 p-2.5">
-            <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
+          <div className="space-y-1 p-2">
+            <h3 className="line-clamp-2 text-[12px] font-semibold leading-snug text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
               {recipe.name}
             </h3>
             <div className="flex items-center justify-between gap-1">
-              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground">
                 <Clock className="h-2.5 w-2.5" />
                 {recipe.cookTime + recipe.prepTime} mnt
               </span>
-              <span className="inline-flex items-center gap-0.5 text-[10px]">
+              <span className="inline-flex items-center gap-0.5 text-[9px]">
                 <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                 <span className="font-medium text-amber-600 dark:text-amber-400">
                   {recipe.rating.toFixed(1)}
@@ -752,7 +752,7 @@ function RecipeCard({
               </span>
             </div>
             <div className="pt-0.5">
-              <span className="inline-flex items-center rounded-md bg-muted/60 px-1.5 py-0.5 text-[9px] text-muted-foreground">
+              <span className="inline-flex items-center rounded-md bg-muted/60 px-1 py-0.5 text-[8px] text-muted-foreground">
                 {recipe.category}
               </span>
             </div>
@@ -780,10 +780,10 @@ function ApiRecipeCard({
     <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-300">
       <div
         onClick={onClick}
-        className="group cursor-pointer overflow-hidden rounded-xl nm-raised transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8 active:scale-[0.97]"
+        className="group cursor-pointer overflow-hidden rounded-xl nm-raised shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/8 active:scale-[0.97]"
       >
         {/* Real image from API */}
-        <div className="relative h-28 overflow-hidden bg-muted/30">
+        <div className="relative h-24 overflow-hidden bg-muted/30">
           {meal.image ? (
             <img
               src={meal.image}
@@ -824,8 +824,8 @@ function ApiRecipeCard({
         </div>
 
         {/* Info */}
-        <div className="space-y-1.5 p-2.5">
-          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300">
+        <div className="space-y-1 p-2">
+          <h3 className="line-clamp-2 text-[12px] font-semibold leading-snug text-foreground group-hover:text-blue-700 dark:group-hover:text-blue-300">
             {meal.name}
           </h3>
           <div className="flex items-center justify-between gap-1">

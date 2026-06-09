@@ -44,12 +44,12 @@ function FavoriteCard({
     <motion.div
       variants={fadeUp}
       whileTap={{ scale: 0.97 }}
-      className="overflow-hidden rounded-2xl nm-raised"
+      className="overflow-hidden rounded-2xl nm-raised shadow-sm hover:shadow-md transition-shadow"
     >
       <div onClick={onClick} className="cursor-pointer">
         {/* Emoji image area */}
-        <div className="relative flex h-32 items-center justify-center bg-[var(--nm-bg)]">
-          <span className="text-5xl">{recipe.image}</span>
+        <div className="relative flex h-24 items-center justify-center bg-[var(--nm-bg)]">
+          <span className="text-4xl">{recipe.image}</span>
           {/* Unfavorite button */}
           <motion.button
             whileTap={{ scale: 0.85 }}
@@ -63,10 +63,10 @@ function FavoriteCard({
             <Heart className="h-4 w-4 text-rose-500 fill-rose-500" />
           </motion.button>
         </div>
-        <div className="p-3">
-          <h4 className="text-sm font-semibold leading-tight truncate">{recipe.name}</h4>
+        <div className="p-2.5">
+          <h4 className="text-[13px] font-semibold leading-tight truncate">{recipe.name}</h4>
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <Clock className="h-3 w-3" />
               {recipe.cookTime} {t('recipes.min')}
             </span>
@@ -140,7 +140,7 @@ export function FavoritePage() {
         {/* ── Content ───────────────────────────────── */}
         <div className="px-4 pt-4">
           {favoriteRecipesData.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               {favoriteRecipesData.map((recipe) => (
                 <FavoriteCard
                   key={recipe.id}

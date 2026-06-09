@@ -431,9 +431,9 @@ export function CreatorPage() {
                     variants={fadeUp}
                     className="overflow-hidden rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80"
                   >
-                    <div className="flex gap-3 p-3">
+                    <div className="flex gap-3 p-2.5">
                       {/* Emoji thumbnail */}
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20">
                         <span className="text-3xl">{recipe.image || '🍛'}</span>
                       </div>
 
@@ -584,16 +584,16 @@ export function CreatorPage() {
                 variants={stagger}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-2 gap-3"
+                className="grid grid-cols-2 gap-2.5"
               >
                 {communityRecipes.map((recipe) => (
                   <motion.div
                     key={recipe.id}
                     variants={fadeUp}
-                    className="group overflow-hidden rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 dark:border-emerald-800/50 dark:bg-card/80"
+                    className="group overflow-hidden rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-emerald-800/50 dark:bg-card/80"
                   >
                     {/* Image */}
-                    <div className="relative flex h-28 items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20">
+                    <div className="relative flex h-24 items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20">
                       <span className="text-5xl">{recipe.image || '🍛'}</span>
                       <span className={`absolute bottom-2 left-2 rounded-md px-1.5 py-0.5 text-[9px] font-semibold ${DIFFICULTY_COLORS[recipe.difficulty] || ''}`}>
                         {recipe.difficulty}
@@ -608,8 +608,8 @@ export function CreatorPage() {
                       </motion.button>
                     </div>
                     {/* Info */}
-                    <div className="space-y-1.5 p-2.5">
-                      <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground">
+                    <div className="space-y-1 p-2">
+                      <h3 className="line-clamp-2 text-[12px] font-semibold leading-snug text-foreground">
                         {recipe.name}
                       </h3>
                       <p className="line-clamp-1 text-[10px] text-muted-foreground">

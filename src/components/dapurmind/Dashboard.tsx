@@ -169,15 +169,15 @@ function RecipeCard({ recipe, onClick, t }: { recipe: Recipe; onClick: () => voi
       whileHover={{ scale: 1.03 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={onClick}
-      className="min-w-[160px] max-w-[180px] cursor-pointer snap-start"
+      className="min-w-[140px] max-w-[160px] cursor-pointer snap-start"
     >
-      <div className="overflow-hidden rounded-2xl nm-raised">
+      <div className="overflow-hidden rounded-2xl nm-raised shadow-sm">
         {/* Emoji image area */}
-        <div className="flex h-28 items-center justify-center bg-[var(--nm-bg)]">
+        <div className="flex h-24 items-center justify-center bg-[var(--nm-bg)]">
           <span className="text-5xl">{recipe.image}</span>
         </div>
-        <div className="p-3">
-          <h4 className="text-sm font-semibold leading-tight truncate">{recipe.name}</h4>
+        <div className="p-2.5">
+          <h4 className="text-[13px] font-semibold leading-tight truncate">{recipe.name}</h4>
           <div className="mt-1.5 flex items-center gap-2">
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
               <Clock className="h-3 w-3" />
@@ -284,20 +284,20 @@ function DashboardInner() {
 
       {/* ── Quick Actions (Plain CSS Grid — NO BentoGrid) ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 gap-2">
           {quickActions.map((action) => (
             <motion.div
               key={action.screen}
               whileTap={{ scale: 0.96 }}
               onClick={() => handleNavigate(action.screen)}
-              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/40 bg-card p-3.5 transition-colors hover:border-border/80 active:scale-[0.98]"
+              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/40 bg-card p-3 transition-colors hover:border-border/80 active:scale-[0.98]"
             >
-              <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient}`}>
+              <div className={`flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient}`}>
                 <action.icon className="h-[18px] w-[18px] text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-[13px] font-semibold leading-tight">{t(action.titleKey)}</p>
-                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                <p className="text-[12px] font-semibold leading-tight">{t(action.titleKey)}</p>
+                <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">
                   {t(action.descKey)}
                 </p>
               </div>
@@ -375,7 +375,7 @@ function DashboardInner() {
               <ArrowRight className="h-3 w-3" />
             </button>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
+          <div className="flex gap-2.5 overflow-x-auto pb-2 py-1 no-scrollbar snap-x snap-mandatory">
             {featuredRecipes.map((recipe) => (
               <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
             ))}
@@ -452,24 +452,24 @@ function DashboardInner() {
       {/* ── Stats Section (Plain CSS Grid — NO BentoGrid/NumberTicker) ── */}
       <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
         <h2 className="mb-3 text-base font-semibold">{t('dashboard.stats')}</h2>
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
-            <span className="text-2xl mb-1">❤️</span>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+            <span className="text-xl mb-1">❤️</span>
+            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
               {favoriteRecipes.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.savedRecipes')}</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
-            <span className="text-2xl mb-1">📋</span>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+            <span className="text-xl mb-1">📋</span>
+            <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
               {mealPlans.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.menuPlanned')}</p>
           </div>
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
-            <span className="text-2xl mb-1">🛒</span>
-            <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-4 text-center">
+            <span className="text-xl mb-1">🛒</span>
+            <p className="text-xl font-bold text-sky-600 dark:text-sky-400">
               {shoppingItems.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.shoppingItems')}</p>

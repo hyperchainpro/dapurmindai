@@ -147,7 +147,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
         onMouseLeave={() => setShowActions(false)}
       >
         <div className="max-w-[82%] relative group">
-          <div className="rounded-2xl rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-3 shadow-md shadow-emerald-500/20">
+          <div className="rounded-2xl rounded-br-md bg-gradient-to-br from-emerald-500 to-teal-600 px-4 py-3 shadow-md shadow-emerald-500/20 shadow-sm">
             {isEditing ? (
               <div className="space-y-2">
                 <textarea
@@ -917,7 +917,7 @@ export function ChatInterface() {
                 whileTap={{ scale: 0.95 }}
                 whileHover={{ scale: 1.03 }}
                 onClick={() => handleSuggestion(suggestion.label)}
-                className="flex shrink-0 items-center gap-1.5 rounded-full nm-badge px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:opacity-80 active:opacity-70"
+                className="flex shrink-0 items-center gap-1.5 rounded-full nm-badge shadow-sm px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 transition-colors hover:opacity-80 active:opacity-70"
               >
                 <span>{suggestion.icon}</span>
                 <span>{suggestion.label}</span>
