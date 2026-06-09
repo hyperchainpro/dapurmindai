@@ -265,7 +265,7 @@ export function RecipeBrowser() {
                     onClick={() => setMode('local')}
                     className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                       mode === 'local'
-                        ? 'bg-emerald-500 text-white shadow-sm'
+                        ? 'nm-raised-sm bg-emerald-500 text-white'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -276,7 +276,7 @@ export function RecipeBrowser() {
                     onClick={() => setMode('api')}
                     className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium transition-all ${
                       mode === 'api'
-                        ? 'bg-blue-500 text-white shadow-sm'
+                        ? 'nm-raised-sm bg-blue-500 text-white'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >

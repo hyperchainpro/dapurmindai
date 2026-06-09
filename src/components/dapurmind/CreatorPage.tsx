@@ -1057,7 +1057,7 @@ export function CreatorPage() {
               </div>
               <Switch checked={form.isPublished} onCheckedChange={(v) => updateForm('isPublished', v)} />
             </div>
-            <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+            <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl nm-btn-primary">
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {t('creator.save')}
             </Button>
@@ -1080,7 +1080,7 @@ export function CreatorPage() {
               <Button variant="outline" className="flex-1 rounded-xl border-emerald-200/50 text-sm hover:bg-emerald-50 dark:border-emerald-800/50 dark:hover:bg-emerald-900/20" onClick={() => setDeleteOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button variant="destructive" className="flex-1 rounded-xl bg-rose-600 text-sm text-white hover:bg-rose-700" onClick={handleDelete}>
+              <Button variant="destructive" className="flex-1 rounded-xl nm-raised-sm bg-rose-600 text-sm text-white hover:bg-rose-700" onClick={handleDelete}>
                 {t('creator.delete')}
               </Button>
             </div>
@@ -1132,7 +1132,7 @@ export function CreatorPage() {
                 className="rounded-xl border-emerald-200/50 bg-white/60 text-sm focus-visible:ring-emerald-400/50 dark:border-emerald-800/50 dark:bg-card/60"
               />
             </div>
-            <Button onClick={handleSaveProfile} disabled={profileSaving} className="w-full rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">
+            <Button onClick={handleSaveProfile} disabled={profileSaving} className="w-full rounded-xl nm-btn-primary">
               {profileSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Simpan Profil
             </Button>

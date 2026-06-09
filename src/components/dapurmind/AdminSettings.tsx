@@ -260,7 +260,7 @@ export function AdminSettings() {
                   useAppStore.getState().setAdminLoggedIn(false);
                   useAppStore.getState().setScreen('dashboard');
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised-sm bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10"
                 aria-label="Logout admin"
               >
                 <LogOut className="h-5 w-5 text-red-500" />
@@ -309,7 +309,7 @@ export function AdminSettings() {
                   size="sm"
                   disabled={saving}
                   onClick={() => saveGroup(group)}
-                  className="gap-1 rounded-xl bg-emerald-500 px-3 text-xs text-white hover:bg-emerald-600"
+                  className="gap-1 rounded-xl nm-btn-primary px-3 text-xs"
                 >
                   {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                   Simpan
@@ -364,7 +364,7 @@ export function AdminSettings() {
               variant="ghost"
               size="sm"
               onClick={fetchSettings}
-              className="gap-1.5 rounded-full text-xs text-muted-foreground"
+              className="gap-1.5 rounded-full nm-raised-sm text-xs text-muted-foreground"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Refresh

@@ -315,7 +315,7 @@ export function AdminAgents() {
                   useAppStore.getState().setAdminLoggedIn(false);
                   useAppStore.getState().setScreen('dashboard');
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised-sm bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10"
                 aria-label="Logout admin"
               >
                 <LogOut className="h-5 w-5 text-red-500" />
@@ -397,7 +397,7 @@ export function AdminAgents() {
               </div>
               <button
                 onClick={() => setAddOpen(true)}
-                className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+                className="flex items-center gap-1 rounded-lg nm-raised-sm px-2 py-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Tambah
@@ -498,7 +498,7 @@ export function AdminAgents() {
                 variant="ghost"
                 size="sm"
                 onClick={fetchAll}
-                className="gap-1.5 rounded-full text-xs text-muted-foreground"
+                className="gap-1.5 rounded-full nm-raised-sm text-xs text-muted-foreground"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Refresh
@@ -565,7 +565,7 @@ export function AdminAgents() {
             </div>
             <Button
               onClick={() => setAddOpen(true)}
-              className="mt-2 gap-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600"
+              className="mt-2 gap-2 rounded-xl nm-btn-primary"
             >
               <Plus className="h-4 w-4" />
               Tambah Agent
@@ -702,7 +702,7 @@ export function AdminAgents() {
             <Button
               onClick={handleAddAgent}
               disabled={saving || !addName.trim() || !addModel.trim()}
-              className="w-full gap-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50"
+              className="w-full gap-2 rounded-xl nm-btn-primary disabled:opacity-50"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Tambah Agent

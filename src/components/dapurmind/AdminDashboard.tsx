@@ -221,7 +221,7 @@ export function AdminDashboard() {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleLogout}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+              className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised-sm bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10"
               aria-label="Logout admin"
             >
               <LogOut className="h-5 w-5 text-red-500" />
@@ -239,7 +239,7 @@ export function AdminDashboard() {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleRefresh}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 rounded-lg nm-raised-sm px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -356,7 +356,7 @@ export function AdminDashboard() {
                   variants={scaleIn}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => navigateTo(mod.id)}
-                  className="w-full overflow-hidden rounded-xl border border-border/50 bg-card/90 backdrop-blur-sm transition-all hover:shadow-md hover:border-emerald-300/50 dark:hover:border-emerald-700/50 text-left"
+                  className="w-full overflow-hidden rounded-xl nm-raised bg-card/90 backdrop-blur-sm transition-all hover:shadow-md text-left"
                 >
                   <div className="p-4">
                     <div className="flex items-center gap-3">

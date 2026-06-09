@@ -352,7 +352,7 @@ function AIChatFollowUp({
             size="icon"
             onClick={handleSend}
             disabled={isSending || !inputMessage.trim()}
-            className="h-9 w-9 shrink-0 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+            className="h-9 w-9 shrink-0 rounded-lg nm-raised-sm bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
           >
             <Send className="h-4 w-4 text-white" />
           </Button>
@@ -720,7 +720,7 @@ export function ZeroWasteRecipe() {
               <Button
                 onClick={handleSearch}
                 disabled={isLoading || allIngredients.length === 0}
-                className="relative h-12 w-full overflow-hidden rounded-xl bg-emerald-600 text-base font-semibold text-white shadow-nm-accent hover:bg-emerald-700 disabled:opacity-50"
+                className="relative h-12 w-full overflow-hidden rounded-xl nm-btn-primary text-base font-semibold disabled:opacity-50"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -1066,7 +1066,7 @@ function ResultCard({
             <Button
               size="sm"
               onClick={handleViewRecipe}
-              className="w-full rounded-lg bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-700"
+              className="w-full rounded-lg nm-raised-sm bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-700"
             >
               <ChefHat className="mr-1.5 h-3.5 w-3.5" />
               Lihat Resep

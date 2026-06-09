@@ -680,7 +680,7 @@ function ShoppingItemRow({
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onAffiliate}
-          className="flex h-7 items-center gap-1 rounded-full bg-emerald-50 px-2.5 text-[10px] font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+          className="flex h-7 items-center gap-1 rounded-full nm-raised-sm bg-emerald-50 px-2.5 text-[10px] font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
         >
           Beli
           <ExternalLink className="h-2.5 w-2.5" />

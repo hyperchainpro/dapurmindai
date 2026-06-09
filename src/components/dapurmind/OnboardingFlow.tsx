@@ -639,7 +639,7 @@ export default function OnboardingFlow() {
             className={`flex items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-medium transition-all ${
               isDark
                 ? 'bg-white/10 text-white hover:bg-white/20'
-                : 'nm-raised-sm text-foreground'
+                : 'nm-raised-sm bg-emerald-500 text-white'
             }`}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -656,7 +656,7 @@ export default function OnboardingFlow() {
           className={`flex items-center gap-1.5 rounded-xl px-6 py-3 text-sm font-semibold transition-all shadow-nm-accent disabled:opacity-40 disabled:cursor-not-allowed ${
             step === TOTAL_STEPS - 1
               ? 'bg-gradient-to-r from-emerald-500 to-amber-500 text-white'
-              : 'bg-emerald-500 text-white hover:bg-emerald-600'
+              : 'nm-btn-primary'
           }`}
         >
           {step === TOTAL_STEPS - 1 ? (

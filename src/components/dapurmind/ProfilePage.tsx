@@ -640,7 +640,7 @@ export function ProfilePage() {
                 onClick={handleAddAllergy}
                 disabled={!newAllergy.trim()}
                 size="sm"
-                className="rounded-xl bg-emerald-500 px-4 hover:bg-emerald-600"
+                className="rounded-xl nm-raised-sm bg-emerald-500 px-4 hover:bg-emerald-600"
               >
                 <Plus className="h-4 w-4" />
               </Button>

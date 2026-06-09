@@ -277,7 +277,7 @@ export function AdminUsers() {
                   useAppStore.getState().setAdminLoggedIn(false);
                   useAppStore.getState().setScreen('dashboard');
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised-sm bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10"
                 aria-label="Logout admin"
               >
                 <LogOut className="h-5 w-5 text-red-500" />
@@ -416,10 +416,10 @@ export function AdminUsers() {
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => toggleActive(user)}
-                          className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg nm-raised-sm transition-colors ${
                             user.isActive
-                              ? 'border-red-200 bg-red-50 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-900/20'
-                              : 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-900/20'
+                              ? 'bg-red-50 dark:bg-red-900/20'
+                              : 'bg-emerald-50 dark:bg-emerald-900/20'
                           }`}
                           aria-label={user.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                         >
@@ -432,7 +432,7 @@ export function AdminUsers() {
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() => { setDeleteTarget(user); setDeleteOpen(true); }}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 transition-colors hover:bg-rose-100 dark:border-rose-800/50 dark:bg-rose-900/20"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg nm-raised-sm bg-rose-50 transition-colors hover:bg-rose-100 dark:bg-rose-900/20"
                           aria-label="Hapus"
                         >
                           <Trash2 className="h-3.5 w-3.5 text-rose-500" />
@@ -452,7 +452,7 @@ export function AdminUsers() {
                   size="sm"
                   disabled={page <= 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="rounded-xl border-emerald-200/50 dark:border-emerald-800/50"
+                  className="rounded-xl nm-raised-sm border-emerald-200/50 dark:border-emerald-800/50"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -464,7 +464,7 @@ export function AdminUsers() {
                   size="sm"
                   disabled={page >= totalPages}
                   onClick={() => setPage(p => p + 1)}
-                  className="rounded-xl border-emerald-200/50 dark:border-emerald-800/50"
+                  className="rounded-xl nm-raised-sm border-emerald-200/50 dark:border-emerald-800/50"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -472,7 +472,7 @@ export function AdminUsers() {
                   variant="ghost"
                   size="sm"
                   onClick={fetchUsers}
-                  className="gap-1 rounded-full text-xs text-muted-foreground"
+                  className="gap-1 rounded-full nm-raised-sm text-xs text-muted-foreground"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   Refresh
@@ -566,7 +566,7 @@ export function AdminUsers() {
             <Button
               onClick={handleSaveEdit}
               disabled={saving}
-              className="w-full gap-2 rounded-xl bg-amber-500 text-white hover:bg-amber-600"
+              className="w-full gap-2 rounded-xl nm-raised bg-amber-500 text-white hover:bg-amber-600"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Simpan Perubahan
@@ -594,14 +594,14 @@ export function AdminUsers() {
           <div className="flex gap-2 px-5 pb-5">
             <Button
               variant="outline"
-              className="flex-1 rounded-xl border-emerald-200/50 dark:border-emerald-800/50"
+              className="flex-1 rounded-xl nm-raised-sm border-emerald-200/50 dark:border-emerald-800/50"
               onClick={() => setDeleteOpen(false)}
             >
               Batal
             </Button>
             <Button
               variant="destructive"
-              className="flex-1 rounded-xl bg-rose-600 text-white hover:bg-rose-700"
+              className="flex-1 rounded-xl nm-raised-sm bg-rose-600 text-white hover:bg-rose-700"
               disabled={saving}
               onClick={handleDelete}
             >

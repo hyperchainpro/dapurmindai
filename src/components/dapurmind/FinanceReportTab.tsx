@@ -154,7 +154,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
             onClick={() => setPeriod(p)}
             className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-all ${
               period === p
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'nm-raised-sm bg-emerald-600 text-white'
                 : 'bg-white/80 border border-emerald-200/50 text-muted-foreground hover:text-foreground dark:border-emerald-800/50 dark:bg-card/80'
             }`}
           >

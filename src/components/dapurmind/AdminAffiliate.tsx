@@ -509,7 +509,7 @@ export function AdminAffiliate() {
                   useAppStore.getState().setAdminLoggedIn(false);
                   useAppStore.getState().setScreen('dashboard');
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised-sm bg-red-50 text-red-500 transition-colors hover:bg-red-100 dark:bg-red-500/10"
                 aria-label="Logout admin"
               >
                 <LogOut className="h-5 w-5 text-red-500" />

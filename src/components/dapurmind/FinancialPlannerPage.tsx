@@ -301,7 +301,7 @@ export function FinancialPlannerPage() {
           <div className="flex rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-1">
             {(['records', 'budgets', 'goals', 'report', 'recurring'] as const).map((tab) => (
               <button key={tab} onClick={() => setActiveTab(tab as any)}
-                className={`flex-1 rounded-lg py-2 text-[10px] sm:text-xs font-semibold transition-all ${activeTab === tab ? 'bg-emerald-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
+                className={`flex-1 rounded-lg py-2 text-[10px] sm:text-xs font-semibold transition-all ${activeTab === tab ? 'nm-raised-sm bg-emerald-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}>
                 {tab === 'records' ? t('finance.records') : tab === 'budgets' ? t('finance.budgets') : tab === 'goals' ? t('finance.goals') : tab === 'report' ? 'Laporan' : 'Berulang'}
               </button>
             ))}
@@ -421,7 +421,7 @@ export function FinancialPlannerPage() {
                 <button
                   key={s}
                   onClick={() => setAiQuestion(s)}
-                  className="shrink-0 rounded-full border border-emerald-200/50 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                  className="shrink-0 rounded-full nm-raised-sm border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
                 >
                   {s}
                 </button>
@@ -449,7 +449,7 @@ export function FinancialPlannerPage() {
               whileTap={{ scale: 0.9 }}
               onClick={handleAiSend}
               disabled={!aiQuestion.trim() || aiLoading}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full nm-raised-sm bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Send className="h-4 w-4" />
             </motion.button>

@@ -170,7 +170,7 @@ function EmptyState() {
       <motion.div variants={fadeUp}>
         <Button
           onClick={() => setScreen('admin-affiliate' as AppScreen)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+          className="nm-btn-primary gap-2 rounded-xl"
         >
           <ExternalLink className="h-4 w-4" />
           Buka Hub Marketplace
@@ -512,7 +512,7 @@ export function AdminAnalytics() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl h-10 w-10 flex-shrink-0"
+            className="rounded-xl h-10 w-10 flex-shrink-0 nm-raised-sm"
             onClick={goBack}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -541,7 +541,7 @@ export function AdminAnalytics() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl h-10 w-10 flex-shrink-0"
+            className="rounded-xl h-10 w-10 flex-shrink-0 nm-raised-sm"
             onClick={() => setScreen('admin-dashboard')}
           >
             <ArrowLeft className="h-5 w-5" />
@@ -555,7 +555,7 @@ export function AdminAnalytics() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl h-9 w-9 flex-shrink-0"
+            className="rounded-xl h-9 w-9 flex-shrink-0 nm-raised-sm"
             onClick={() => setScreen('admin-affiliate' as AppScreen)}
           >
             <Link2 className="h-4 w-4 text-muted-foreground" />
@@ -563,7 +563,7 @@ export function AdminAnalytics() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-xl h-9 w-9 flex-shrink-0"
+            className="rounded-xl h-9 w-9 flex-shrink-0 nm-raised-sm bg-red-50"
             onClick={() => {
               useAppStore.getState().setAdminLoggedIn(false);
               useAppStore.getState().setScreen('dashboard');
@@ -582,7 +582,7 @@ export function AdminAnalytics() {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-xl h-9 w-9 flex-shrink-0"
+              className="rounded-xl h-9 w-9 flex-shrink-0 nm-raised-sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
