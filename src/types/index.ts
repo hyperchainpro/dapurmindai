@@ -31,6 +31,7 @@ export interface Recipe {
   tags: string[];
   rating: number;
   isFavorite?: boolean;
+  youtubeUrl?: string;
 }
 
 export interface Ingredient {

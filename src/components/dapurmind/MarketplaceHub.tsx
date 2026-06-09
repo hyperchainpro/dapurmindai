@@ -958,7 +958,7 @@ export function MarketplaceHub() {
 
       {/* ── AI Results Dialog ────────────────────────────── */}
       <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
-        <DialogContent className="max-h-[80vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+        <DialogContent className="max-h-[80vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           {/* Header */}
           <div className="sticky top-0 z-10 border-b border-border/40 bg-card px-5 pt-5 pb-4">
             <DialogHeader className="text-left">

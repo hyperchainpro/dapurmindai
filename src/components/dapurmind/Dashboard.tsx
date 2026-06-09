@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, Component, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import {
   Sun,
@@ -21,16 +21,29 @@ import { useAppStore } from '@/hooks/useAppState';
 import { useTranslation } from '@/hooks/useTranslation';
 import { recipes } from '@/lib/recipes';
 import type { AppScreen, Recipe } from '@/types';
-import {
-  BentoGrid,
-  BentoGridItem,
-  ShineBorder,
-  AnimatedList,
-  NumberTicker,
-  Marquee,
-} from '@/components/dapurmind/MagicUI';
-import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { AFFILIATE_MARKETPLACES } from '@/lib/affiliate';
+
+/* ── Section Error Boundary ─────────────────────────────────────
+ *  Catches errors in non-critical sections without killing the
+ *  entire Dashboard. The section simply disappears; buttons stay.
+ * ────────────────────────────────────────────────────────────── */
+
+class SectionBoundary extends Component<
+  { children: ReactNode; fallback?: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.warn('[SectionBoundary]', error.message);
+  }
+  render() {
+    if (this.state.hasError) return this.props.fallback || null;
+    return this.props.children;
+  }
+}
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 
@@ -80,12 +93,11 @@ const stagger = {
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+  hidden: { opacity: 0, y: 18 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 };
 
@@ -212,26 +224,6 @@ function DashboardInner() {
     [achievements],
   );
 
-  const achievementItems = useMemo(
-    () =>
-      unlockedAchievements.map((a) => ({
-        id: a.id,
-        content: (
-          <div className="flex items-center gap-3 rounded-xl nm-raised-sm px-4 py-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-500/15">
-              {a.icon}
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{a.title}</p>
-              <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt, t)}</p>
-            </div>
-            <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
-          </div>
-        ),
-      })),
-    [unlockedAchievements],
-  );
-
   const handleRecipeClick = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
     setScreen('recipe-detail');
@@ -250,22 +242,17 @@ function DashboardInner() {
   };
 
   return (
-    <motion.div
-      variants={stagger}
-      initial="hidden"
-      animate="visible"
-      className="min-h-screen px-4 pb-28 pt-4"
-    >
+    <div className="min-h-screen px-4 pb-28 pt-4">
       {/* ── Header ────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="mb-6">
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <p className="text-sm text-muted-foreground">{formatDate(language)}</p>
             <h1 className="mt-1 text-2xl font-bold leading-tight">
               {getGreeting(t)},{' '}
-              <GlowingText color="emerald" intensity={2}>
+              <span className="text-emerald-500 dark:text-emerald-400">
                 {user?.name || 'Chef'}
-              </GlowingText>
+              </span>
               <span>! 👋</span>
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -295,128 +282,116 @@ function DashboardInner() {
         </div>
       </motion.div>
 
-      {/* ── Quick Actions ─────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="mb-6">
-        <BentoGrid columns={{ default: 2, sm: 2, md: 2, lg: 4 }} gap={0.625}>
+      {/* ── Quick Actions (Plain CSS Grid — NO BentoGrid) ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
+        <div className="grid grid-cols-2 gap-2.5">
           {quickActions.map((action) => (
-            <BentoGridItem
+            <motion.div
               key={action.screen}
-              className="cursor-pointer nm-raised"
+              whileTap={{ scale: 0.96 }}
               onClick={() => handleNavigate(action.screen)}
+              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-border/40 bg-card p-3.5 transition-colors hover:border-border/80 active:scale-[0.98]"
             >
-              <motion.div whileTap={{ scale: 0.96 }} className="flex flex-col gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl nm-raised-sm">
-                  <action.icon className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{t(action.titleKey)}</p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                    {t(action.descKey)}
-                  </p>
-                </div>
-              </motion.div>
-            </BentoGridItem>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient}`}>
+                <action.icon className="h-[18px] w-[18px] text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold leading-tight">{t(action.titleKey)}</p>
+                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                  {t(action.descKey)}
+                </p>
+              </div>
+            </motion.div>
           ))}
-        </BentoGrid>
+        </div>
       </motion.div>
 
       {/* ── Affiliate Marketplace Banner ────────────────── */}
-      <motion.div variants={fadeUp} className="mb-6">
-        <ClickSpark color="#10b981" count={8}>
+      <SectionBoundary>
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
           <button
             onClick={() => handleNavigate('marketplace')}
             className="w-full text-left"
           >
-            <ShineBorder
-              borderRadius={16}
-              borderWidth={2}
-              duration={8}
-              color={['#10b981', '#f59e0b', '#10b981']}
-            >
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-lg shadow-emerald-500/25">
-                    <ShoppingCart className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <GlowingText color="emerald" intensity={1}>
-                      <h2 className="text-base font-bold">{t('dashboard.marketplaceHub')}</h2>
-                    </GlowingText>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {t('dashboard.marketplaceDesc', { count: AFFILIATE_MARKETPLACES.length })}
-                    </p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex -space-x-1">
-                        {AFFILIATE_MARKETPLACES.slice(0, 4).map((mp) => (
-                          <span
-                            key={mp.id}
-                            className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-background text-xs ${mp.bgColor}`}
-                          >
-                            {mp.logo}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">
-                        {t('dashboard.othersCount', { count: AFFILIATE_MARKETPLACES.length - 4 })}
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-emerald-500 shrink-0" />
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10 border border-emerald-200/50 dark:border-emerald-500/20">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-lg shadow-emerald-500/25">
+                  <ShoppingCart className="h-6 w-6" />
                 </div>
-                <div className="mt-3 overflow-hidden rounded-lg">
-                  <Marquee pauseOnHover className="[--duration:20s]">
-                    {['Gratis Ongkir Tokopedia Now', 'Cashback 10% Shopee Segar', 'Produk Organik Sayurbox', 'Promo Harian Blibli Mart', 'Harga Grosir LotteMart', '24 Jam Klik Indomaret'].map((deal) => (
-                      <span key={deal} className="mx-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-                        <Sparkles className="h-3 w-3" />
-                        {deal}
-                      </span>
-                    ))}
-                  </Marquee>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base font-bold text-emerald-700 dark:text-emerald-300">
+                    {t('dashboard.marketplaceHub')}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t('dashboard.marketplaceDesc', { count: AFFILIATE_MARKETPLACES.length })}
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex -space-x-1">
+                      {AFFILIATE_MARKETPLACES.slice(0, 4).map((mp) => (
+                        <span
+                          key={mp.id}
+                          className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-background text-xs ${mp.bgColor}`}
+                        >
+                          {mp.logo}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {t('dashboard.othersCount', { count: AFFILIATE_MARKETPLACES.length - 4 })}
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="h-5 w-5 text-emerald-500 shrink-0" />
+              </div>
+              {/* Promo marquee — simple CSS animation */}
+              <div className="mt-3 overflow-hidden rounded-lg">
+                <div className="flex animate-marquee whitespace-nowrap">
+                  {['Gratis Ongkir Tokopedia Now', 'Cashback 10% Shopee Segar', 'Produk Organik Sayurbox', 'Promo Harian Blibli Mart', 'Harga Grosir LotteMart', '24 Jam Klik Indomaret'].map((deal) => (
+                    <span key={deal} className="mx-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 shrink-0">
+                      <Sparkles className="h-3 w-3" />
+                      {deal}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </ShineBorder>
+            </div>
           </button>
-        </ClickSpark>
-      </motion.div>
+        </motion.div>
+      </SectionBoundary>
 
       {/* ── Featured Recipe Carousel ──────────────────────── */}
-      <motion.div variants={fadeUp} className="mb-6">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500" />
-            <h2 className="text-base font-semibold">{t('dashboard.popularRecipes')}</h2>
+      <SectionBoundary>
+        <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h2 className="text-base font-semibold">{t('dashboard.popularRecipes')}</h2>
+            </div>
+            <button
+              onClick={() => setScreen('recipes')}
+              className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+            >
+              {t('dashboard.viewAll')}
+              <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
-          <button
-            onClick={() => setScreen('recipes')}
-            className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-          >
-            {t('dashboard.viewAll')}
-            <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
-          {featuredRecipes.map((recipe, i) => (
-            <Bounce key={recipe.id} delay={i * 0.1} intensity={1}>
-              <RecipeCard recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
-            </Bounce>
-          ))}
-        </div>
-      </motion.div>
+          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
+            {featuredRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleRecipeClick(recipe)} t={t} />
+            ))}
+          </div>
+        </motion.div>
+      </SectionBoundary>
 
       {/* ── Latest Meal Plan ──────────────────────────────── */}
       {latestPlan && (
-        <motion.div variants={fadeUp} className="mb-6">
-          <div className="mb-3 flex items-center gap-2">
-            <ChefHat className="h-4 w-4 text-emerald-500" />
-            <h2 className="text-base font-semibold">{t('dashboard.weeklyPlan')}</h2>
-          </div>
-          <ShineBorder
-            borderRadius={16}
-            color={['#10b981', '#f59e0b', '#10b981']}
-            borderWidth={1.5}
-            duration={6}
-          >
-            <div className="rounded-2xl p-4">
+        <SectionBoundary>
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
+            <div className="mb-3 flex items-center gap-2">
+              <ChefHat className="h-4 w-4 text-emerald-500" />
+              <h2 className="text-base font-semibold">{t('dashboard.weeklyPlan')}</h2>
+            </div>
+            <div className="rounded-2xl border border-emerald-200/50 dark:border-emerald-500/20 bg-card p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">
@@ -444,49 +419,64 @@ function DashboardInner() {
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
-          </ShineBorder>
-        </motion.div>
+          </motion.div>
+        </SectionBoundary>
       )}
 
       {/* ── Achievements Preview ──────────────────────────── */}
       {unlockedAchievements.length > 0 && (
-        <motion.div variants={fadeUp} className="mb-6">
-          <div className="mb-3 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-amber-500" />
-            <h2 className="text-base font-semibold">{t('dashboard.achievements')}</h2>
-          </div>
-          <AnimatedList items={achievementItems} staggerDelay={0.12} animationDuration={0.45} />
-        </motion.div>
+        <SectionBoundary>
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
+            <div className="mb-3 flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-amber-500" />
+              <h2 className="text-base font-semibold">{t('dashboard.achievements')}</h2>
+            </div>
+            <div className="space-y-2">
+              {unlockedAchievements.map((a) => (
+                <div key={a.id} className="flex items-center gap-3 rounded-xl nm-raised-sm px-4 py-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-500/15">
+                    {a.icon}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{a.title}</p>
+                    <p className="text-xs text-muted-foreground">{formatRelativeDate(a.unlockedAt, t)}</p>
+                  </div>
+                  <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </SectionBoundary>
       )}
 
-      {/* ── Stats Section ─────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="mb-6">
+      {/* ── Stats Section (Plain CSS Grid — NO BentoGrid/NumberTicker) ── */}
+      <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-6">
         <h2 className="mb-3 text-base font-semibold">{t('dashboard.stats')}</h2>
-        <BentoGrid columns={{ default: 3, sm: 3, md: 3, lg: 3 }} gap={0.625}>
-          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
             <span className="text-2xl mb-1">❤️</span>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              <NumberTicker value={favoriteRecipes.length} duration={1.5} />
+              {favoriteRecipes.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.savedRecipes')}</p>
-          </BentoGridItem>
-          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+          </div>
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
             <span className="text-2xl mb-1">📋</span>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              <NumberTicker value={mealPlans.length} duration={1.5} />
+              {mealPlans.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.menuPlanned')}</p>
-          </BentoGridItem>
-          <BentoGridItem className="flex flex-col items-center justify-center py-5 text-center">
+          </div>
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border/40 bg-card py-5 text-center">
             <span className="text-2xl mb-1">🛒</span>
             <p className="text-2xl font-bold text-sky-600 dark:text-sky-400">
-              <NumberTicker value={shoppingItems.length} duration={1.5} />
+              {shoppingItems.length}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">{t('dashboard.shoppingItems')}</p>
-          </BentoGridItem>
-        </BentoGrid>
+          </div>
+        </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 

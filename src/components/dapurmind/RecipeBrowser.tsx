@@ -732,6 +732,14 @@ function RecipeCard({
               </span>
             )}
 
+            {/* Video badge */}
+            {recipe.youtubeUrl && (
+              <span className="absolute bottom-2 right-2 flex items-center gap-0.5 rounded-md bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm">
+                <Play className="h-2 w-2" />
+                VIDEO
+              </span>
+            )}
+
             {/* Favorite button */}
             <motion.button
               onClick={onToggleFavorite}

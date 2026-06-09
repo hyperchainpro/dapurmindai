@@ -688,7 +688,7 @@ export function AdminAffiliate() {
       {/* ── ADD DIALOG ───────────────────────────────────────── */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
@@ -824,7 +824,7 @@ export function AdminAffiliate() {
       {/* ── EDIT DIALOG ──────────────────────────────────────── */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
@@ -937,7 +937,7 @@ export function AdminAffiliate() {
       {/* ── DELETE DIALOG ────────────────────────────────────── */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">
+        <DialogContent className="rounded-2xl sm:max-w-sm gap-0">
           <div className="px-5 pt-5 pb-4">
             <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2 text-lg">
