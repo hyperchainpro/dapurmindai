@@ -1,9 +1,9 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, Component, ErrorInfo, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { BottomNav } from '@/components/dapurmind/BottomNav';
 import type { AppScreen } from '@/types';
@@ -18,88 +18,163 @@ function ScreenLoader() {
   );
 }
 
+/* ── Error Boundary ──────────────────────────────────────────── */
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  screenName: string;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ScreenErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error(`[ErrorBoundary:${this.props.screenName}]`, error, errorInfo);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center p-6">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-100 dark:bg-rose-500/15">
+              <AlertTriangle className="h-8 w-8 text-rose-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Terjadi kesalahan
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground max-w-[250px]">
+                Halaman {this.props.screenName} gagal dimuat. Silakan coba lagi.
+              </p>
+            </div>
+            <button
+              onClick={this.handleRetry}
+              className="flex items-center gap-2 rounded-xl nm-btn-primary px-5 py-2.5 text-sm font-medium text-white transition-colors"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /* ── Lazy-loaded screen components ──────────────────────────── */
+
+const loadingComponent = () => <ScreenLoader />;
 
 const SplashScreen = dynamic(
   () => import('@/components/dapurmind/SplashScreen'),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const LoginPage = dynamic(
   () => import('@/components/dapurmind/LoginPage').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const RegisterPage = dynamic(
   () => import('@/components/dapurmind/RegisterPage').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const ForgotPasswordPage = dynamic(
   () => import('@/components/dapurmind/ForgotPasswordPage').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const OnboardingFlow = dynamic(
   () => import('@/components/dapurmind/OnboardingFlow').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const Dashboard = dynamic(
   () => import('@/components/dapurmind/Dashboard').then(m => ({ default: m.Dashboard })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const ChatInterface = dynamic(
   () => import('@/components/dapurmind/ChatInterface').then(m => ({ default: m.ChatInterface })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const ZeroWasteRecipe = dynamic(
   () => import('@/components/dapurmind/ZeroWasteRecipe').then(m => ({ default: m.ZeroWasteRecipe })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const RecipeBrowser = dynamic(
   () => import('@/components/dapurmind/RecipeBrowser').then(m => ({ default: m.RecipeBrowser })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const ShoppingList = dynamic(
   () => import('@/components/dapurmind/ShoppingList').then(m => ({ default: m.ShoppingList })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const ProfilePage = dynamic(
   () => import('@/components/dapurmind/ProfilePage').then(m => ({ default: m.ProfilePage })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const RecipeDetail = dynamic(
   () => import('@/components/dapurmind/RecipeDetail').then(m => ({ default: m.RecipeDetail })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const MealPlanDetail = dynamic(
   () => import('@/components/dapurmind/MealPlanDetail').then(m => ({ default: m.MealPlanDetail })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const AdminLogin = dynamic(
   () => import('@/components/dapurmind/AdminLogin').then(m => ({ default: m.AdminLogin })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const MarketplaceHub = dynamic(
   () => import('@/components/dapurmind/MarketplaceHub').then(m => ({ default: m.MarketplaceHub })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const AdminAffiliate = dynamic(
   () => import('@/components/dapurmind/AdminAffiliate').then(m => ({ default: m.AdminAffiliate })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const AdminAnalytics = dynamic(
   () => import('@/components/dapurmind/AdminAnalytics').then(m => ({ default: m.AdminAnalytics })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const FavoritePage = dynamic(
   () => import('@/components/dapurmind/FavoritePage').then(m => ({ default: m.FavoritePage })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const CreatorPage = dynamic(
   () => import('@/components/dapurmind/CreatorPage').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
 const FinancialPlannerPage = dynamic(
   () => import('@/components/dapurmind/FinancialPlannerPage').then(m => ({ default: m.default })),
-  { ssr: false }
+  { ssr: false, loading: loadingComponent }
 );
+
+/* ── Screen wrapper with error boundary ──────────────────────── */
+
+function ScreenWrapper({ screen, children }: { screen: string; children: ReactNode }) {
+  return (
+    <ScreenErrorBoundary screenName={screen}>
+      <Suspense fallback={<ScreenLoader />}>
+        {children}
+      </Suspense>
+    </ScreenErrorBoundary>
+  );
+}
 
 /* ── Screen renderer ──────────────────────────────────────────── */
 
@@ -126,105 +201,145 @@ function ScreenRouter() {
   }, [currentScreen, isLoggedIn, setScreen]);
 
   return (
-    <AnimatePresence mode="sync">
+    <AnimatePresence mode="wait">
       {currentScreen === 'splash' && (
         <motion.div key="splash" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <Suspense fallback={<ScreenLoader />}><SplashScreen /></Suspense>
+          <ScreenWrapper screen="Splash">
+            <SplashScreen />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'login' && (
         <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <Suspense fallback={<ScreenLoader />}><LoginPage /></Suspense>
+          <ScreenWrapper screen="Login">
+            <LoginPage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'register' && (
         <motion.div key="register" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <Suspense fallback={<ScreenLoader />}><RegisterPage /></Suspense>
+          <ScreenWrapper screen="Register">
+            <RegisterPage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'forgot-password' && (
         <motion.div key="forgot-password" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <Suspense fallback={<ScreenLoader />}><ForgotPasswordPage /></Suspense>
+          <ScreenWrapper screen="ForgotPassword">
+            <ForgotPasswordPage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'onboarding' && (
         <motion.div key="onboarding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-          <Suspense fallback={<ScreenLoader />}><OnboardingFlow /></Suspense>
+          <ScreenWrapper screen="Onboarding">
+            <OnboardingFlow />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'dashboard' && (
         <motion.div key="dashboard" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><Dashboard /></Suspense>
+          <ScreenWrapper screen="Beranda">
+            <Dashboard />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'chat' && (
         <motion.div key="chat" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><ChatInterface /></Suspense>
+          <ScreenWrapper screen="Chat">
+            <ChatInterface />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'zero-waste' && (
         <motion.div key="zero-waste" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><ZeroWasteRecipe /></Suspense>
+          <ScreenWrapper screen="ZeroWaste">
+            <ZeroWasteRecipe />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'recipes' && (
         <motion.div key="recipes" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><RecipeBrowser /></Suspense>
+          <ScreenWrapper screen="Resep">
+            <RecipeBrowser />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'shopping' && (
         <motion.div key="shopping" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><ShoppingList /></Suspense>
+          <ScreenWrapper screen="Belanja">
+            <ShoppingList />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'profile' && (
         <motion.div key="profile" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><ProfilePage /></Suspense>
+          <ScreenWrapper screen="Profil">
+            <ProfilePage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'recipe-detail' && (
         <motion.div key="recipe-detail" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><RecipeDetail /></Suspense>
+          <ScreenWrapper screen="DetailResep">
+            <RecipeDetail />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'meal-plan-detail' && (
         <motion.div key="meal-plan-detail" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><MealPlanDetail /></Suspense>
+          <ScreenWrapper screen="DetailRencana">
+            <MealPlanDetail />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'marketplace' && (
         <motion.div key="marketplace" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><MarketplaceHub /></Suspense>
+          <ScreenWrapper screen="Marketplace">
+            <MarketplaceHub />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'admin-login' && (
         <motion.div key="admin-login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><AdminLogin /></Suspense>
+          <ScreenWrapper screen="AdminLogin">
+            <AdminLogin />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'admin-affiliate' && (
         <motion.div key="admin-affiliate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><AdminAffiliate /></Suspense>
+          <ScreenWrapper screen="AdminAffiliate">
+            <AdminAffiliate />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'admin-analytics' && (
         <motion.div key="admin-analytics" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><AdminAnalytics /></Suspense>
+          <ScreenWrapper screen="AdminAnalytics">
+            <AdminAnalytics />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'favorites' && (
         <motion.div key="favorites" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><FavoritePage /></Suspense>
+          <ScreenWrapper screen="Favorit">
+            <FavoritePage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'creator' && (
         <motion.div key="creator" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><CreatorPage /></Suspense>
+          <ScreenWrapper screen="Kreator">
+            <CreatorPage />
+          </ScreenWrapper>
         </motion.div>
       )}
       {currentScreen === 'financial-planner' && (
         <motion.div key="financial-planner" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-          <Suspense fallback={<ScreenLoader />}><FinancialPlannerPage /></Suspense>
+          <ScreenWrapper screen="Keuangan">
+            <FinancialPlannerPage />
+          </ScreenWrapper>
         </motion.div>
       )}
     </AnimatePresence>

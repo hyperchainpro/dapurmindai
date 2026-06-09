@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 type GlowColor =
@@ -74,53 +74,51 @@ export function GlowingText({
   const config = useMemo(() => glowColorMap[color], [color]);
   const multiplier = intensityMultiplier[intensity];
 
-  const animationStyle = useMemo(() => {
-    const steps = 20;
-    const keyframes: Record<string, string> = {};
+  const animationName = `glow-${color}-${intensity}`;
 
-    for (let i = 0; i <= steps; i++) {
-      const progress = (i / steps) * 100;
-      const pulse = Math.sin((i / steps) * Math.PI * 2) * 0.5 + 0.5;
-      const opacity = 0.4 + pulse * 0.6 * multiplier;
-      const blur = 1 + pulse * multiplier;
+  // Only inject <style> once per unique animation name using a document-level registry
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const id = `glow-style-${animationName}`;
+      if (!document.getElementById(id)) {
+        const steps = 20;
+        const keyframes: string[] = [];
 
-      keyframes[`${progress}%`] = `text-shadow: 0 0 ${blur * 4}px ${
-        color === "emerald"
-          ? "#34d399"
-          : color === "amber"
-            ? "#fbbf24"
-            : color === "rose"
-              ? "#fb7185"
-              : color === "violet"
-                ? "#a78bfa"
-                : color === "cyan"
-                  ? "#22d3ee"
-                  : color === "orange"
-                    ? "#fb923c"
-                    : color === "lime"
-                      ? "#a3e635"
-                      : "#f472b6"
-      } ${opacity.toFixed(2)};`;
+        for (let i = 0; i <= steps; i++) {
+          const progress = (i / steps) * 100;
+          const pulse = Math.sin((i / steps) * Math.PI * 2) * 0.5 + 0.5;
+          const opacity = 0.4 + pulse * 0.6 * multiplier;
+          const blur = 1 + pulse * multiplier;
+
+          keyframes.push(`  ${progress}% { text-shadow: 0 0 ${blur * 4}px ${
+            color === "emerald"
+              ? "#34d399"
+              : color === "amber"
+                ? "#fbbf24"
+                : color === "rose"
+                  ? "#fb7185"
+                  : color === "violet"
+                    ? "#a78bfa"
+                    : color === "cyan"
+                      ? "#22d3ee"
+                      : color === "orange"
+                        ? "#fb923c"
+                        : color === "lime"
+                          ? "#a3e635"
+                          : "#f472b6"
+          } ${opacity.toFixed(2)}; }`);
+        }
+
+        const styleEl = document.createElement('style');
+        styleEl.id = id;
+        styleEl.textContent = `@keyframes ${animationName} {\n${keyframes.join('\n')}\n}`;
+        document.head.appendChild(styleEl);
+      }
     }
-
-    return keyframes;
-  }, [color, multiplier]);
-
-  const animationName = useMemo(() => {
-    return `glow-${color}-${intensity}`;
-  }, [color, intensity]);
-
-  const styleContent = useMemo(() => {
-    const entries = Object.entries(animationStyle)
-      .map(([key, value]) => `  ${key} { ${value} }`)
-      .join("\n");
-    return `@keyframes ${animationName} {\n${entries}\n}`;
-  }, [animationStyle, animationName]);
+  }, [animationName, color, multiplier]);
 
   return (
-    <>
-      <style dangerouslySetInnerHTML={{ __html: styleContent }} />
-      <span
+    <span
         className={cn(
           "inline-block font-semibold",
           config.base,
@@ -133,7 +131,6 @@ export function GlowingText({
       >
         {children}
       </span>
-    </>
   );
 }
 

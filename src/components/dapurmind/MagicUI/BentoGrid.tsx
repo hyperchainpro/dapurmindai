@@ -24,6 +24,8 @@ interface BentoGridProps {
   gap?: number;
 }
 
+let gridIdCounter = 0;
+
 function BentoGrid({
   children,
   className,
@@ -36,21 +38,20 @@ function BentoGrid({
   const lgCols = columns.lg ?? mdCols;
   const xlCols = columns.xl ?? lgCols;
 
+  const gridId = React.useMemo(() => `bento-${++gridIdCounter}`, []);
+
   return (
-    <>
-      <div
-        data-bento-grid=""
-        className={cn('w-full', className)}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${defaultCols}, minmax(0, 1fr))`,
-          gap: `${gap}rem`,
-        }}
-      >
-        {children}
-      </div>
+    <div
+      data-bento-grid={gridId}
+      className={cn('w-full', className)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${defaultCols}, minmax(0, 1fr))`,
+        gap: `${gap}rem`,
+      }}
+    >
       <style>{`
-        [data-bento-grid] {
+        [data-bento-grid="${gridId}"] {
           --bento-default: ${defaultCols};
           --bento-sm: ${smCols};
           --bento-md: ${mdCols};
@@ -58,27 +59,28 @@ function BentoGrid({
           --bento-xl: ${xlCols};
         }
         @media (min-width: 640px) {
-          [data-bento-grid] {
+          [data-bento-grid="${gridId}"] {
             grid-template-columns: repeat(var(--bento-sm), minmax(0, 1fr)) !important;
           }
         }
         @media (min-width: 768px) {
-          [data-bento-grid] {
+          [data-bento-grid="${gridId}"] {
             grid-template-columns: repeat(var(--bento-md), minmax(0, 1fr)) !important;
           }
         }
         @media (min-width: 1024px) {
-          [data-bento-grid] {
+          [data-bento-grid="${gridId}"] {
             grid-template-columns: repeat(var(--bento-lg), minmax(0, 1fr)) !important;
           }
         }
         @media (min-width: 1280px) {
-          [data-bento-grid] {
+          [data-bento-grid="${gridId}"] {
             grid-template-columns: repeat(var(--bento-xl), minmax(0, 1fr)) !important;
           }
         }
       `}</style>
-    </>
+      {children}
+    </div>
   );
 }
 

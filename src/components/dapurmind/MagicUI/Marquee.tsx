@@ -87,16 +87,10 @@ function Marquee({
 
       <style>{`
         @keyframes marquee-scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(calc(-100% - ${gap}px));
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% - ${gap}px)); }
         }
-        .animate-marquee {
-          animation-name: marquee-scroll;
-        }
+        .animate-marquee { animation-name: marquee-scroll; }
       `}</style>
     </div>
   );
