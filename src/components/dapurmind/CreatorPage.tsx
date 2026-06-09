@@ -138,8 +138,8 @@ export function CreatorPage() {
     setLoadingMy(true);
     try {
       const res = await fetch(`/api/creator/recipes?userId=${userId}&includeUnpublished=true`);
-      const data = await res.json();
-      setMyRecipes(Array.isArray(data) ? data : data.recipes ?? []);
+      const json = await res.json();
+      setMyRecipes(json.data ?? []);
     } catch {
       toast.error('Gagal memuat resep');
     } finally {
@@ -152,8 +152,8 @@ export function CreatorPage() {
     setLoadingCommunity(true);
     try {
       const res = await fetch('/api/creator/recipes?userId=all');
-      const data = await res.json();
-      setCommunityRecipes(Array.isArray(data) ? data : data.recipes ?? []);
+      const json = await res.json();
+      setCommunityRecipes(json.data ?? []);
     } catch {
       toast.error('Gagal memuat resep komunitas');
     } finally {
@@ -246,7 +246,7 @@ export function CreatorPage() {
       const res = await fetch('/api/creator/recipes', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: deleteTarget.id }),
+        body: JSON.stringify({ id: deleteTarget.id, userId }),
       });
       if (!res.ok) throw new Error('Delete failed');
       toast.success('Resep dihapus');
@@ -263,9 +263,9 @@ export function CreatorPage() {
   const togglePublish = async (recipe: CreatorRecipeItem) => {
     try {
       const res = await fetch('/api/creator/recipes', {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: recipe.id, action: recipe.isPublished ? 'unpublish' : 'publish' }),
+        body: JSON.stringify({ id: recipe.id, userId, isPublished: !recipe.isPublished }),
       });
       if (!res.ok) throw new Error('Toggle failed');
       toast.success(recipe.isPublished ? 'Resep disimpan sebagai draf' : 'Resep dipublikasikan!');
@@ -885,7 +885,7 @@ export function CreatorPage() {
                 className="flex-1 rounded-xl border-emerald-200/50 text-sm hover:bg-emerald-50 dark:border-emerald-800/50 dark:hover:bg-emerald-900/20"
                 onClick={() => setDeleteOpen(false)}
               >
-                Batal
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="destructive"

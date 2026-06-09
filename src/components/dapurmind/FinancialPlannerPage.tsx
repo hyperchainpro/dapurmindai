@@ -125,9 +125,9 @@ export function FinancialPlannerPage() {
           fetch(`/api/finance/budgets?userId=${userId}`),
           fetch(`/api/finance/goals?userId=${userId}`),
         ]);
-        if (r.ok) setRecords(await r.json());
-        if (b.ok) setBudgets(await b.json());
-        if (g.ok) setGoals(await g.json());
+        if (r.ok) { const json = await r.json(); setRecords(json.data ?? json); }
+        if (b.ok) { const json = await b.json(); setBudgets(json.data ?? json); }
+        if (g.ok) { const json = await g.json(); setGoals(json.data ?? json); }
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
@@ -170,7 +170,7 @@ export function FinancialPlannerPage() {
     try {
       const body = { userId, type: recType, category: recCat, amount: Number(recAmt), description: recDesc, date: recDate };
       const res = await fetch('/api/finance/records', { method: editRecId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editRecId ? { id: editRecId, ...body } : body) });
-      if (res.ok) { const d = await res.json(); editRecId ? updateRecord(editRecId, d) : addRecord(d); }
+      if (res.ok) { const json = await res.json(); const record = json.data ?? json; editRecId ? updateRecord(editRecId, record) : addRecord(record); }
       setDlgRecord(false); resetRec();
     } catch (e) { console.error(e); }
   };
@@ -180,7 +180,7 @@ export function FinancialPlannerPage() {
     try {
       const body = { userId, category: budCat, limitAmount: Number(budLimit), period: budPeriod };
       const res = await fetch('/api/finance/budgets', { method: editBudId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editBudId ? { id: editBudId, ...body } : body) });
-      if (res.ok) { const d = await res.json(); editBudId ? updateBudget(editBudId, d) : addBudget(d); }
+      if (res.ok) { const json = await res.json(); const budget = json.data ?? json; editBudId ? updateBudget(editBudId, budget) : addBudget(budget); }
       setDlgBudget(false); resetBud();
     } catch (e) { console.error(e); }
   };
@@ -190,7 +190,7 @@ export function FinancialPlannerPage() {
     try {
       const body = { userId, title: goTitle, targetAmount: Number(goTarget), savedAmount: Number(goSaved) || 0, deadline: goDeadline, icon: goIcon };
       const res = await fetch('/api/finance/goals', { method: editGoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editGoId ? { id: editGoId, ...body } : body) });
-      if (res.ok) { const d = await res.json(); editGoId ? updateGoal(editGoId, d) : addGoal(d); }
+      if (res.ok) { const json = await res.json(); const goal = json.data ?? json; editGoId ? updateGoal(editGoId, goal) : addGoal(goal); }
       setDlgGoal(false); resetGo();
     } catch (e) { console.error(e); }
   };
@@ -206,10 +206,14 @@ export function FinancialPlannerPage() {
   };
 
   const handleDelete = async () => {
-    if (!dlgDelete) return;
+    if (!dlgDelete || !userId) return;
     const ep = dlgDelete.type === 'record' ? 'records' : dlgDelete.type === 'budget' ? 'budgets' : 'goals';
     try {
-      const res = await fetch(`/api/finance/${ep}?id=${dlgDelete.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/finance/${ep}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: dlgDelete.id, userId }),
+      });
       if (res.ok) {
         if (dlgDelete.type === 'record') removeRecord(dlgDelete.id);
         else if (dlgDelete.type === 'budget') removeBudget(dlgDelete.id);
@@ -290,7 +294,7 @@ export function FinancialPlannerPage() {
           </DialogHeader>
           <div><label className="text-xs font-medium text-muted-foreground">{t('finance.amount')}</label><Input type="number" value={savAmt} onChange={(e) => setSavAmt(e.target.value)} placeholder="50000" className="mt-1" /></div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => { setDlgSavings(null); setSavAmt(''); }} className="flex-1 rounded-full">Batal</Button>
+            <Button variant="outline" onClick={() => { setDlgSavings(null); setSavAmt(''); }} className="flex-1 rounded-full">{t('common.cancel')}</Button>
             <Button onClick={addSavings} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!savAmt || Number(savAmt) <= 0}>{t('finance.save')}</Button>
           </DialogFooter>
         </DialogContent>
@@ -303,7 +307,7 @@ export function FinancialPlannerPage() {
             <DialogDescription>{t('finance.deleteConfirm')}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDlgDelete(null)} className="flex-1 rounded-full">Batal</Button>
+            <Button variant="outline" onClick={() => setDlgDelete(null)} className="flex-1 rounded-full">{t('common.cancel')}</Button>
             <Button variant="destructive" onClick={handleDelete} className="flex-1 rounded-full">{t('finance.delete')}</Button>
           </DialogFooter>
         </DialogContent>
@@ -494,7 +498,7 @@ function RecordFormDialog({ open, onClose, recType, setRecType, recAmt, setRecAm
           <div><label className="text-xs font-medium text-muted-foreground">{t('finance.date')}</label><Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} className="mt-1" /></div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">Batal</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
           <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!recAmt || !recCat}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>
@@ -517,7 +521,7 @@ function BudgetFormDialog({ open, onClose, cat, setCat, limit, setLimit, period,
           <div><label className="text-xs font-medium text-muted-foreground">{t('finance.period')}</label><Select value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly' | 'yearly')}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">{t('finance.weekly')}</SelectItem><SelectItem value="monthly">{t('finance.monthly')}</SelectItem><SelectItem value="yearly">{t('finance.yearly')}</SelectItem></SelectContent></Select></div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">Batal</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
           <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!cat || !limit}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>
@@ -545,7 +549,7 @@ function GoalFormDialog({ open, onClose, title, setTitle, target, setTarget, sav
           <div><label className="text-xs font-medium text-muted-foreground">{t('finance.deadline')}</label><Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="mt-1" /></div>
         </div>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">Batal</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
           <Button onClick={onSave} className="flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!title || !target}>{t('finance.save')}</Button>
         </DialogFooter>
       </DialogContent>

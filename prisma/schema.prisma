@@ -22,11 +22,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  creatorRecipes  CreatorRecipe[]
-  creatorProfiles CreatorProfile[]
-  financeRecords  FinanceRecord[]
-  financeBudgets  FinanceBudget[]
-  financeGoals    FinanceGoal[]
+
 }
 
 // ── Post (legacy) ──
@@ -115,7 +111,6 @@ model CreatorRecipe {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
 }
 
 model CreatorProfile {
@@ -132,7 +127,6 @@ model CreatorProfile {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
 }
 
 // ── Financial Planner Feature ──
@@ -150,7 +144,6 @@ model FinanceRecord {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
 }
 
 model FinanceBudget {
@@ -166,7 +159,6 @@ model FinanceBudget {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
 }
 
 model FinanceGoal {
@@ -182,7 +174,6 @@ model FinanceGoal {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
 }
 
 // ── AI Agent Management ──
