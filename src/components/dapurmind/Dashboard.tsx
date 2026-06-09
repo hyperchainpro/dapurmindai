@@ -187,6 +187,7 @@ function DashboardInner() {
   const user = useAppStore((s) => s.user);
   const setScreen = useAppStore((s) => s.setScreen);
   const setSelectedRecipe = useAppStore((s) => s.setSelectedRecipe);
+  const setPendingChatPrompt = useAppStore((s) => s.setPendingChatPrompt);
   const mealPlans = useAppStore((s) => s.mealPlans);
   const shoppingItems = useAppStore((s) => s.shoppingItems);
   const favoriteRecipes = useAppStore((s) => s.favoriteRecipes);
@@ -237,6 +238,14 @@ function DashboardInner() {
   };
 
   const handleNavigate = (screen: AppScreen) => {
+    // Special flow: "Rencana Menu" -> Chat with auto meal-plan prompt
+    if (screen === 'chat') {
+      const user = useAppStore.getState().user;
+      const budget = user?.weeklyBudget || 300000;
+      const familySize = user?.familySize || 4;
+      const prompt = `Buatkan rencana menu mingguan untuk ${familySize} orang dengan budget Rp ${budget.toLocaleString('id-ID')}`;
+      setPendingChatPrompt(prompt);
+    }
     setScreen(screen);
   };
 

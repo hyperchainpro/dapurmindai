@@ -111,6 +111,7 @@ const EMPTY_FORM: RecipeFormData = {
 export function CreatorPage() {
   const authUser = useAppStore((s) => s.authUser);
   const setScreen = useAppStore((s) => s.setScreen);
+  const goBack = useAppStore((s) => s.goBack);
   const { t } = useTranslation();
 
   const userId = authUser?.id;
@@ -314,7 +315,7 @@ export function CreatorPage() {
           <div className="flex items-center gap-3">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={() => setScreen('home')}
+              onClick={() => goBack()}
               className="flex h-9 w-9 items-center justify-center rounded-full nm-raised-sm"
             >
               <ArrowLeft className="h-4.5 w-4.5 text-foreground" />

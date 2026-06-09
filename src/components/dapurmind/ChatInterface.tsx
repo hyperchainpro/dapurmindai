@@ -594,6 +594,8 @@ export function ChatInterface() {
   const setShoppingItems = useAppStore((s) => s.setShoppingItems);
   const addMealPlan = useAppStore((s) => s.addMealPlan);
   const setCurrentMealPlan = useAppStore((s) => s.setCurrentMealPlan);
+  const pendingChatPrompt = useAppStore((s) => s.pendingChatPrompt);
+  const setPendingChatPrompt = useAppStore((s) => s.setPendingChatPrompt);
 
   const [inputValue, setInputValue] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -629,17 +631,17 @@ export function ChatInterface() {
     [chatMessages]
   );
 
-  /* ── Send message handler ────────────────────────────────── */
+  /* ── Core send logic (extracted so both button & auto-send can use it) ── */
 
-  const handleSend = useCallback(async () => {
-    const text = inputValue.trim();
-    if (!text || isAILoading) return;
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isAILoading) return;
 
     // Add user message
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: text,
+      content: trimmed,
       timestamp: new Date().toISOString(),
     };
     addChatMessage(userMsg);
@@ -651,7 +653,7 @@ export function ChatInterface() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          message: trimmed,
           context: {
             userProfile: user,
             conversationHistory,
@@ -712,13 +714,36 @@ export function ChatInterface() {
       setAILoading(false);
     }
   }, [
-    inputValue,
     isAILoading,
     user,
     conversationHistory,
     addChatMessage,
     setAILoading,
   ]);
+
+  // Ref for auto-send (avoids stale closure in useEffect)
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
+
+  /* ── Auto-send pending prompt from Dashboard quick action ── */
+  const autoSentRef = useRef(false);
+  useEffect(() => {
+    if (pendingChatPrompt && !autoSentRef.current && !isAILoading) {
+      autoSentRef.current = true;
+      setPendingChatPrompt(null);
+      setInputValue(pendingChatPrompt);
+      // Small delay to let UI settle, then send
+      const timer = setTimeout(() => {
+        sendMessageRef.current(pendingChatPrompt);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingChatPrompt, isAILoading, setPendingChatPrompt]);
+
+  /* ── Button/input send wrapper ── */
+  const handleSend = useCallback(async () => {
+    await sendMessage(inputValue);
+  }, [sendMessage, inputValue]);
 
   /* ── Save plan handler ───────────────────────────────────── */
 

@@ -74,6 +74,10 @@ interface AppState {
   isDark: boolean;
   toggleTheme: () => void;
 
+  // Pending chat prompt (for Dashboard quick action -> Chat auto-send)
+  pendingChatPrompt: string | null;
+  setPendingChatPrompt: (prompt: string | null) => void;
+
   // Loading states
   isAILoading: boolean;
   setAILoading: (loading: boolean) => void;
@@ -285,6 +289,10 @@ export const useAppStore = create<AppState>()(
       // Theme
       isDark: false,
       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
+
+      // Pending chat prompt
+      pendingChatPrompt: null,
+      setPendingChatPrompt: (prompt) => set({ pendingChatPrompt: prompt }),
 
       // Loading
       isAILoading: false,
