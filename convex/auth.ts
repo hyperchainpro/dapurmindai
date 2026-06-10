@@ -6,8 +6,8 @@ import { Id } from "./_generated/dataModel";
 
 // Simple hash function (in production, use proper bcrypt via Node action)
 function simpleHash(password: string): string {
-  // This is a placeholder - you should use bcrypt in a Node action
-  return Buffer.from(password).toString("base64");
+  // Convex V8 runtime does not support Buffer by default
+  return btoa(unescape(encodeURIComponent(password)));
 }
 
 function verifyPassword(password: string, hash: string): boolean {
