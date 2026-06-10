@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteSession, getAuthUser, logActivity, AuthError } from '@/lib/auth-server';
+import { convexFetch } from '@/lib/convex-client';
 
 /* ═══════════════════════════════════════════════════════════
    POST /api/auth/logout
@@ -7,28 +7,17 @@ import { deleteSession, getAuthUser, logActivity, AuthError } from '@/lib/auth-s
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    if (!token) {
-      return NextResponse.json({ error: 'Token tidak ditemukan' }, { status: 400 });
-    }
+    const authHeader = request.headers.get('Authorization');
+    
+    // Proxy request to Convex HTTP Action
+    await convexFetch('/api/auth/logout', {
+      method: 'POST',
+      headers: authHeader ? { 'Authorization': authHeader } : {}
+    });
 
-    // Get user before deleting session
-    const auth = await getAuthUser(request);
-
-    // Delete session from DB
-    await deleteSession(token);
-
-    // Log activity (best effort)
-    if (auth) {
-      await logActivity(auth.userId, 'user.logout', 'User', 'User logged out', request);
-    }
-
-    return NextResponse.json({ message: 'Logout berhasil' });
-  } catch (error) {
+    return NextResponse.json({ success: true, message: 'Logout berhasil' }, { status: 200 });
+  } catch (error: any) {
     console.error('[Auth Logout] Error:', error);
-    if (error instanceof AuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
-    }
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

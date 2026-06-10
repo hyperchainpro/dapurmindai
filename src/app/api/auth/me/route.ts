@@ -1,48 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { requireAuth, AuthError } from '@/lib/auth-server';
+import { convexFetch } from '@/lib/convex-client';
 
 /* ═══════════════════════════════════════════════════════════
-   GET /api/auth/me — Get current authenticated user
+   GET /api/auth/me
    ═══════════════════════════════════════════════════════════ */
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireAuth(request);
-
-    const user = await db.user.findUnique({
-      where: { id: auth.userId },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        avatar: true,
-        language: true,
-        role: true,
-        lastLoginAt: true,
-        createdAt: true,
-        // Include related counts
-        _count: {
-          select: {
-            creatorRecipes: { where: { isActive: true, isPublished: true } },
-            financeRecords: { where: { isActive: true } },
-            sessions: true,
-          },
-        },
-      },
+    const authHeader = request.headers.get('Authorization');
+    
+    // Proxy request to Convex HTTP Action
+    const result = await convexFetch('/api/auth/me', {
+      method: 'GET',
+      headers: authHeader ? { 'Authorization': authHeader } : {}
     });
 
-    if (!user) {
-      return NextResponse.json({ error: 'Pengguna tidak ditemukan' }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, user });
-  } catch (error) {
+    return NextResponse.json(result, { status: 200 });
+  } catch (error: any) {
     console.error('[Auth Me] Error:', error);
-    if (error instanceof AuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
-    }
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Terjadi kesalahan server' }, { status: 401 });
   }
 }
