@@ -3,7 +3,7 @@
  * Safe to import in Next.js API Routes / Server Components
  */
 
-const CONVEX_SITE_URL = process.env.NEXT_PUBLIC_CONVEX_SITE_URL!;
+const CONVEX_SITE_URL = process.env.NEXT_PUBLIC_CONVEX_SITE_URL || 'https://silent-ocelot-29.convex.site';
 
 export async function convexFetch(path: string, options: RequestInit = {}) {
   const response = await fetch(`${CONVEX_SITE_URL}${path}`, {
