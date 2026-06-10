@@ -206,7 +206,11 @@ function ScreenRouter() {
   const currentScreen = useAppStore((s) => s.currentScreen);
   const isAdminLoggedIn = useAppStore((s) => s.isAdminLoggedIn);
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
+  const firstLaunch = useAppStore((s) => s.firstLaunch);
+  const user = useAppStore((s) => s.user);
   const setScreen = useAppStore((s) => s.setScreen);
+
+  const isOnboarded = user?.isOnboarded ?? false;
 
   // Auth guard: redirect to admin-login if not authenticated
   React.useEffect(() => {
@@ -224,16 +228,36 @@ function ScreenRouter() {
     }
   }, [currentScreen, isLoggedIn, setScreen]);
 
+  // Splash bypass guard: redirect immediately if already registered or logged in
+  React.useEffect(() => {
+    if (currentScreen === 'splash') {
+      if (isLoggedIn) {
+        if (isOnboarded) {
+          setScreen('dashboard');
+        } else {
+          setScreen('onboarding');
+        }
+      } else if (!firstLaunch) {
+        setScreen('login');
+      }
+    }
+  }, [currentScreen, isLoggedIn, isOnboarded, firstLaunch, setScreen]);
+
+  const showSplash = currentScreen === 'splash' && !isLoggedIn && firstLaunch;
+  const showLogin = currentScreen === 'login' || (currentScreen === 'splash' && !isLoggedIn && !firstLaunch);
+  const showOnboarding = currentScreen === 'onboarding' || (currentScreen === 'splash' && isLoggedIn && !isOnboarded);
+  const showDashboard = currentScreen === 'dashboard' || (currentScreen === 'splash' && isLoggedIn && isOnboarded);
+
   return (
     <AnimatePresence mode="wait">
-      {currentScreen === 'splash' && (
+      {showSplash && (
         <motion.div key="splash" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
           <ScreenWrapper screen="Splash">
             <SplashScreen />
           </ScreenWrapper>
         </motion.div>
       )}
-      {currentScreen === 'login' && (
+      {showLogin && (
         <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
           <ScreenWrapper screen="Login">
             <LoginPage />
@@ -254,14 +278,14 @@ function ScreenRouter() {
           </ScreenWrapper>
         </motion.div>
       )}
-      {currentScreen === 'onboarding' && (
+      {showOnboarding && (
         <motion.div key="onboarding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
           <ScreenWrapper screen="Onboarding">
             <OnboardingFlow />
           </ScreenWrapper>
         </motion.div>
       )}
-      {currentScreen === 'dashboard' && (
+      {showDashboard && (
         <motion.div key="dashboard" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <ScreenWrapper screen="Beranda">
             <Dashboard />

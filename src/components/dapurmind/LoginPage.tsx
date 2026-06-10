@@ -33,6 +33,7 @@ export function LoginPage() {
   const setLanguage = useAppStore((s) => s.setLanguage);
   const updateOnboarding = useAppStore((s) => s.updateOnboarding);
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
+  const setFirstLaunch = useAppStore((s) => s.setFirstLaunch);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -94,6 +95,7 @@ export function LoginPage() {
       const loggedInUser = data.user;
       setAuthUser(loggedInUser);
       setLoggedIn(true);
+      setFirstLaunch(false);
 
       // Sync language preference from server-stored user profile
       if (loggedInUser.language) {
