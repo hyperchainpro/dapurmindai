@@ -130,7 +130,7 @@ export default defineSchema({
 
   // ── Financial Planner Feature ─────────────────────────────────
   financeRecords: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     type: v.string(),
     category: v.string(),
     amount: v.number(),
@@ -145,7 +145,7 @@ export default defineSchema({
     .index("by_userId_and_date", ["userId", "date"]),
 
   financeBudgets: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     category: v.string(),
     limitAmount: v.number(),
     spentAmount: v.number(),
@@ -156,7 +156,7 @@ export default defineSchema({
   }).index("by_userId", ["userId"]),
 
   financeGoals: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     title: v.string(),
     targetAmount: v.number(),
     savedAmount: v.number(),
@@ -190,7 +190,7 @@ export default defineSchema({
 
   aiAgentUsageLogs: defineTable({
     agentId: v.id("aiAgents"),
-    userId: v.optional(v.id("users")),
+    userId: v.optional(v.union(v.id("users"), v.string())),
     feature: v.string(),
     inputTokens: v.number(),
     outputTokens: v.number(),
@@ -204,7 +204,7 @@ export default defineSchema({
 
   // ── Activity Log ──────────────────────────────────────────────
   activityLogs: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     action: v.string(),
     target: v.optional(v.string()),
     detail: v.optional(v.string()),
@@ -213,6 +213,7 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_action", ["action"]),
+
 
   // ── System Setting ────────────────────────────────────────────
   systemSettings: defineTable({
@@ -225,7 +226,7 @@ export default defineSchema({
 
   // ── Notification ─────────────────────────────────────────────
   notifications: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     title: v.string(),
     message: v.string(),
     type: v.string(), // info, warning, success, error
@@ -240,7 +241,7 @@ export default defineSchema({
 
   // ── Recurring Transaction ───────────────────────────────────
   recurringTransactions: defineTable({
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     type: v.string(), // income, expense
     category: v.string(),
     amount: v.number(),

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { client } from '@/lib/convex';
+import { api } from '../../../../convex/_generated/api';
 
 // GET - List all ad placements (admin) or get active by position (public)
 export async function GET(request: NextRequest) {
@@ -9,19 +10,25 @@ export async function GET(request: NextRequest) {
 
     // Public: get active ad for a specific position
     if (position) {
-      const ad = await db.adPlacement.findFirst({
-        where: { position, isActive: true },
-      });
+      const ad = await client.query(api.ads.getAdsByPosition, { position });
       if (!ad) {
         return NextResponse.json({ success: true, data: null });
       }
-      return NextResponse.json({ success: true, data: { id: ad.id, scriptContent: ad.scriptContent, maxWidth: ad.maxWidth, platform: ad.platform } });
+      return NextResponse.json({ success: true, data: { id: ad._id, scriptContent: ad.scriptContent, maxWidth: ad.maxWidth, platform: ad.platform } });
     }
 
     // Admin: list all
-    const ads = await db.adPlacement.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
+
+    const allAds = await client.query(api.ads.listAllAds, { token });
+    const ads = allAds.map((ad: any) => ({
+      ...ad,
+      id: ad._id,
+      createdAt: new Date(ad._creationTime).toISOString(),
+    }));
     return NextResponse.json({ success: true, data: ads });
   } catch (error) {
     console.error('Error fetching ads:', error);
@@ -39,18 +46,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nama dan posisi wajib diisi' }, { status: 400 });
     }
 
-    const ad = await db.adPlacement.create({
-      data: {
-        name,
-        position,
-        scriptContent: scriptContent || '',
-        platform: platform || 'custom',
-        isActive: isActive ?? true,
-        maxWidth: maxWidth || '100%',
-      },
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
+
+    const adId = await client.mutation(api.ads.createAd, {
+      token,
+      name,
+      position,
+      scriptContent: scriptContent || '',
+      platform: platform || 'custom',
+      isActive: isActive ?? true,
+      maxWidth: maxWidth || '100%',
     });
 
-    return NextResponse.json({ success: true, data: ad }, { status: 201 });
+    return NextResponse.json({ success: true, data: { id: adId, name, position, scriptContent, platform, isActive, maxWidth } }, { status: 201 });
   } catch (error) {
     console.error('Error creating ad:', error);
     return NextResponse.json({ error: 'Gagal membuat iklan' }, { status: 500 });
@@ -67,7 +78,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID wajib diisi' }, { status: 400 });
     }
 
-    const updateData: Record<string, unknown> = {};
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
+
+    const updateData: any = { token, adId: id as any };
     if (fields.name !== undefined) updateData.name = fields.name;
     if (fields.position !== undefined) updateData.position = fields.position;
     if (fields.scriptContent !== undefined) updateData.scriptContent = fields.scriptContent;
@@ -75,12 +91,9 @@ export async function PUT(request: NextRequest) {
     if (fields.isActive !== undefined) updateData.isActive = fields.isActive;
     if (fields.maxWidth !== undefined) updateData.maxWidth = fields.maxWidth;
 
-    const ad = await db.adPlacement.update({
-      where: { id },
-      data: updateData,
-    });
+    await client.mutation(api.ads.updateAd, updateData);
 
-    return NextResponse.json({ success: true, data: ad });
+    return NextResponse.json({ success: true, data: { id, ...fields } });
   } catch (error) {
     console.error('Error updating ad:', error);
     return NextResponse.json({ error: 'Gagal mengupdate iklan' }, { status: 500 });

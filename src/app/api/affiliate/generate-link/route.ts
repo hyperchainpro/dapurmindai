@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { client } from '../../../../lib/convex';
+import { api } from '../../../../../convex/_generated/api';
 import ZAI from 'z-ai-web-dev-sdk';
 
 interface GenerateLinkRequest {
@@ -9,41 +10,31 @@ interface GenerateLinkRequest {
   context?: string;
 }
 
-// POST - Generate affiliate link using template or AI
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateLinkRequest = await request.json();
     const { productName, category, platform: targetPlatform, context } = body;
 
     if (!productName) {
-      return NextResponse.json(
-        { error: 'Nama produk wajib diisi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Nama produk wajib diisi' }, { status: 400 });
     }
 
-    // Get active affiliate accounts
-    const accounts = await db.affiliateAccount.findMany({
-      where: { isActive: true },
-    });
+    const accounts = await client.query(api.affiliate.getAffiliateAccounts, {});
 
     if (accounts.length === 0) {
-      return NextResponse.json(
-        { error: 'Belum ada akun afiliasi yang aktif', links: [] },
-        { status: 200 }
-      );
+      return NextResponse.json({ error: 'Belum ada akun afiliasi yang aktif', links: [] }, { status: 200 });
     }
 
-    const links = [];
+    const links: any[] = [];
+    
+    let token = "dapurmind-admin-key-2025";
 
     for (const account of accounts) {
-      // Skip if specific platform requested and this doesn't match
       if (targetPlatform && account.platform !== targetPlatform) {
         continue;
       }
 
       let affiliateUrl: string;
-
       try {
         affiliateUrl = account.baseUrlTemplate
           .replace('{productName}', encodeURIComponent(productName))
@@ -54,7 +45,6 @@ export async function POST(request: NextRequest) {
         affiliateUrl = account.baseUrlTemplate;
       }
 
-      // Try to generate a more intelligent link using AI
       let aiGeneratedUrl = affiliateUrl;
       let priceEstimate: number | null = null;
 
@@ -64,13 +54,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: 'system',
-              content: `Kamu adalah asisten afiliasi marketplace Indonesia. Untuk produk "${productName}" di kategori "${category}", berikan:
-1. URL pencarian yang dioptimasi untuk platform ${account.platform} (satu baris, hanya URL)
-2. Estimasi harga dalam Rupiah (angka saja)
-
-Format jawaban:
-URL: [url]
-HARGA: [angka]`,
+              content: `Kamu adalah asisten afiliasi marketplace Indonesia. Untuk produk "${productName}" di kategori "${category}", berikan:\n1. URL pencarian yang dioptimasi untuk platform ${account.platform} (satu baris, hanya URL)\n2. Estimasi harga dalam Rupiah (angka saja)\n\nFormat jawaban:\nURL: [url]\nHARGA: [angka]`,
             },
           ],
           temperature: 0.3,
@@ -91,45 +75,31 @@ HARGA: [angka]`,
         // Fallback to template URL
       }
 
-      // Save to database
-      const productLink = await db.productLink.create({
-        data: {
-          productName,
-          category,
-          platform: account.platform,
-          affiliateUrl: aiGeneratedUrl,
-          originalPrice: priceEstimate,
-          createdByAi: true,
-          lastVerified: Math.floor(Date.now() / 1000),
-          createdAt: Math.floor(Date.now() / 1000),
-          accountId: account.id,
-        },
+      const linkId = await client.mutation(api.affiliate.createProductLink, {
+        token,
+        accountId: account._id,
+        productName,
+        category,
+        platform: account.platform,
+        affiliateUrl: aiGeneratedUrl,
+        originalPrice: priceEstimate || undefined,
+        createdByAi: true,
       });
 
       links.push({
-        id: productLink.id,
-        productName: productLink.productName,
-        category: productLink.category,
-        platform: productLink.platform,
-        affiliateUrl: productLink.affiliateUrl,
-        originalPrice: productLink.originalPrice,
-        createdByAi: productLink.createdByAi,
+        id: linkId,
+        productName,
+        category,
+        platform: account.platform,
+        affiliateUrl: aiGeneratedUrl,
+        originalPrice: priceEstimate,
+        createdByAi: true,
       });
-    }
-
-    // Also log context if provided
-    if (context) {
-      for (const link of links) {
-        // Context is stored when user actually clicks
-      }
     }
 
     return NextResponse.json({ links });
   } catch (error) {
     console.error('Error generating affiliate link:', error);
-    return NextResponse.json(
-      { error: 'Gagal generate tautan afiliasi' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Gagal generate tautan afiliasi' }, { status: 500 });
   }
 }

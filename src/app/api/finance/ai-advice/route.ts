@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { client } from '@/lib/convex';
+import { api } from '../../../../../convex/_generated/api';
 import ZAI from 'z-ai-web-dev-sdk';
 
 export async function POST(request: NextRequest) {
@@ -16,14 +17,15 @@ export async function POST(request: NextRequest) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
 
-    const recentRecords = await db.financeRecord.findMany({
-      where: { userId, isActive: true, date: { gte: thirtyDaysAgo } },
-      orderBy: { date: 'desc' },
-      take: 50,
+    const recentRecords = await client.query(api.finance.getRecordsByUser, {
+      userId,
+      startDate: thirtyDaysAgo.getTime(),
+      endDate: now.getTime(),
+      limit: 50,
     });
 
-    const totalIncome = recentRecords.filter((r) => r.type === 'income').reduce((s, r) => s + r.amount, 0);
-    const totalExpense = recentRecords.filter((r) => r.type === 'expense').reduce((s, r) => s + r.amount, 0);
+    const totalIncome = recentRecords.filter((r: any) => r.type === 'income').reduce((s: number, r: any) => s + r.amount, 0);
+    const totalExpense = recentRecords.filter((r: any) => r.type === 'expense').reduce((s: number, r: any) => s + r.amount, 0);
 
     // Build expense category summary
     const catMap = new Map<string, number>();

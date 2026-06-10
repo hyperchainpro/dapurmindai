@@ -3,10 +3,9 @@ import { query, mutation } from "./_generated/server";
 
 // ─── Finance Records ───────────────────────────────────────────
 
-// Get finance records by user
 export const getRecordsByUser = query({
   args: {
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     type: v.optional(v.string()),
     startDate: v.optional(v.number()),
     endDate: v.optional(v.number()),
@@ -36,10 +35,9 @@ export const getRecordsByUser = query({
   },
 });
 
-// Create finance record
 export const createRecord = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     type: v.string(),
     category: v.string(),
     amount: v.number(),
@@ -61,7 +59,6 @@ export const createRecord = mutation({
   },
 });
 
-// Update finance record
 export const updateRecord = mutation({
   args: {
     recordId: v.id("financeRecords"),
@@ -78,7 +75,6 @@ export const updateRecord = mutation({
   },
 });
 
-// Delete finance record
 export const deleteRecord = mutation({
   args: { recordId: v.id("financeRecords") },
   handler: async (ctx, args) => {
@@ -91,9 +87,8 @@ export const deleteRecord = mutation({
 
 // ─── Finance Budgets ───────────────────────────────────────────
 
-// Get budgets by user
 export const getBudgetsByUser = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.union(v.id("users"), v.string()) },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("financeBudgets")
@@ -103,10 +98,9 @@ export const getBudgetsByUser = query({
   },
 });
 
-// Create budget
 export const createBudget = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     category: v.string(),
     limitAmount: v.number(),
     period: v.string(),
@@ -127,7 +121,6 @@ export const createBudget = mutation({
   },
 });
 
-// Update budget spent amount
 export const updateBudgetSpent = mutation({
   args: {
     budgetId: v.id("financeBudgets"),
@@ -145,9 +138,8 @@ export const updateBudgetSpent = mutation({
 
 // ─── Finance Goals ─────────────────────────────────────────────
 
-// Get goals by user
 export const getGoalsByUser = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.union(v.id("users"), v.string()) },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("financeGoals")
@@ -157,10 +149,9 @@ export const getGoalsByUser = query({
   },
 });
 
-// Create goal
 export const createGoal = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.union(v.id("users"), v.string()),
     title: v.string(),
     targetAmount: v.number(),
     deadline: v.number(),
@@ -181,7 +172,6 @@ export const createGoal = mutation({
   },
 });
 
-// Update goal saved amount
 export const updateGoalSaved = mutation({
   args: {
     goalId: v.id("financeGoals"),
@@ -194,5 +184,63 @@ export const updateGoalSaved = mutation({
     await ctx.db.patch(args.goalId, {
       savedAmount: goal.savedAmount + args.amount,
     });
+  },
+});
+
+// ─── Recurring Transactions ─────────────────────────────────────
+
+export const getRecurringTransactions = query({
+  args: { userId: v.union(v.id("users"), v.string()) },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("recurringTransactions")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .filter((q) => q.neq(q.field("isActive"), false))
+      .collect();
+  },
+});
+
+export const createRecurringTransaction = mutation({
+  args: {
+    userId: v.union(v.id("users"), v.string()),
+    type: v.string(),
+    category: v.string(),
+    amount: v.number(),
+    description: v.string(),
+    frequency: v.string(),
+    nextDate: v.number(),
+    endDate: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("recurringTransactions", {
+      ...args,
+      endDate: args.endDate || undefined,
+      isActive: true,
+    } as any);
+  },
+});
+
+export const updateRecurringTransaction = mutation({
+  args: {
+    id: v.id("recurringTransactions"),
+    type: v.optional(v.string()),
+    category: v.optional(v.string()),
+    amount: v.optional(v.number()),
+    description: v.optional(v.string()),
+    frequency: v.optional(v.string()),
+    nextDate: v.optional(v.number()),
+    endDate: v.optional(v.number()),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
+  },
+});
+
+export const deleteRecurringTransaction = mutation({
+  args: { id: v.id("recurringTransactions") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { isActive: false });
   },
 });

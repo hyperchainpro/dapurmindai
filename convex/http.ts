@@ -60,7 +60,7 @@ http.route({
     
     try {
       const result = await ctx.runMutation(api.auth.login, {
-        email: body.email,
+        identifier: body.username || body.email,
         password: body.password,
         userAgent: request.headers.get("User-Agent") || undefined,
         ipAddress: request.headers.get("X-Forwarded-For") || undefined,

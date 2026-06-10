@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { requireAdmin, logActivity, AuthError } from '@/lib/auth-server';
+import { client } from '@/lib/convex';
+import { api } from '../../../../../convex/_generated/api';
+import { requireAdmin } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    GET /api/admin/activity-logs — List activity logs (admin only)
@@ -16,36 +17,24 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
     const userId = searchParams.get('userId') || '';
     const action = searchParams.get('action') || '';
-    const startDate = searchParams.get('startDate') || '';
-    const endDate = searchParams.get('endDate') || '';
 
-    const where: Record<string, unknown> = {};
-
-    if (userId) where.userId = userId;
-    if (action) where.action = { contains: action, mode: 'insensitive' };
-
-    if (startDate || endDate) {
-      where.createdAt = {};
-      if (startDate) (where.createdAt as Record<string, unknown>).gte = new Date(startDate);
-      if (endDate) (where.createdAt as Record<string, unknown>).lte = new Date(endDate);
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.slice(7);
+    } else if (request.headers.get('x-admin-key')) {
+      token = request.headers.get('x-admin-key')!;
     }
 
-    const [logs, total] = await Promise.all([
-      db.activityLog.findMany({
-        where,
-        include: {
-          user: {
-            select: { id: true, username: true, name: true, avatar: true, role: true },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      db.activityLog.count({ where }),
-    ]);
+    const allLogs = await client.query(api.admin.getActivityLogs, {
+      token,
+      userId: userId || undefined,
+      action: action || undefined,
+    });
 
-    await logActivity(auth.userId, 'admin.list_activity_logs', 'ActivityLog', `Listed activity logs (page ${page})`, request);
+    const total = allLogs.length;
+    const start = (page - 1) * limit;
+    const logs = allLogs.slice(start, start + limit);
 
     return NextResponse.json({
       success: true,
@@ -57,11 +46,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Admin Activity Logs] Error:', error);
-    if (error instanceof AuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
-    }
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

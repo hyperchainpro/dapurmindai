@@ -104,20 +104,28 @@ export const register = mutation({
 
 export const login = mutation({
   args: {
-    email: v.string(),
+    identifier: v.string(), // Can be username or email
     password: v.string(),
     userAgent: v.optional(v.string()),
     ipAddress: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Find user
-    const user = await ctx.db
+    // Find user by email first
+    let user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("by_email", (q) => q.eq("email", args.identifier))
       .first();
 
+    // If not found, try by username
     if (!user) {
-      throw new Error("Invalid email or password");
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_username", (q) => q.eq("username", args.identifier))
+        .first();
+    }
+
+    if (!user) {
+      throw new Error("Invalid username/email or password");
     }
 
     if (!user.isActive) {
@@ -126,7 +134,7 @@ export const login = mutation({
 
     // Verify password
     if (!user.password || !verifyPassword(args.password, user.password)) {
-      throw new Error("Invalid email or password");
+      throw new Error("Invalid username/email or password");
     }
 
     // Update last login

@@ -3,147 +3,108 @@ import { db } from '@/lib/db';
 import type { AffiliateAccount } from '@/types';
 
 // GET - Fetch all affiliate accounts
-export async function GET() {
-  try {
-    const accounts = await db.affiliateAccount.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+import { client } from '@/lib/convex';
+import { api } from '../../../../../convex/_generated/api';
 
-    const mapped: AffiliateAccount[] = accounts.map((a) => ({
-      id: a.id,
-      platform: a.platform,
-      affiliateId: a.affiliateId,
-      apiKey: a.apiKey ?? undefined,
-      baseUrlTemplate: a.baseUrlTemplate,
-      isActive: a.isActive,
-      createdAt: a.createdAt,
+// GET all affiliate accounts (Admin)
+export async function GET(request: NextRequest) {
+  try {
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
+
+    const accounts = await client.query(api.affiliate.getAffiliateAccounts, { token });
+    const formatted = accounts.map((acc: any) => ({
+      ...acc,
+      id: acc._id,
+      createdAt: new Date(acc._creationTime).toISOString(),
     }));
 
-    return NextResponse.json({ accounts: mapped });
+    return NextResponse.json({ success: true, data: formatted });
   } catch (error) {
-    console.error('Error fetching affiliate accounts:', error);
-    return NextResponse.json(
-      { error: 'Gagal memuat akun afiliasi' },
-      { status: 500 }
-    );
+    console.error('[Affiliate GET] Error:', error);
+    return NextResponse.json({ error: 'Gagal memuat akun afiliasi' }, { status: 500 });
   }
 }
 
-// POST - Create a new affiliate account
+// POST create new affiliate account (Admin)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { platform, affiliateId, apiKey, baseUrlTemplate } = body;
 
     if (!platform || !affiliateId || !baseUrlTemplate) {
-      return NextResponse.json(
-        { error: 'Platform, affiliate ID, dan URL template wajib diisi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
 
-    const account = await db.affiliateAccount.create({
-      data: {
-        platform,
-        affiliateId,
-        apiKey: apiKey || null,
-        baseUrlTemplate,
-        isActive: true,
-        createdAt: Math.floor(Date.now() / 1000),
-      },
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
+
+    const accountId = await client.mutation(api.affiliate.createAffiliateAccount, {
+      token,
+      platform,
+      affiliateId,
+      apiKey: apiKey || undefined,
+      baseUrlTemplate,
     });
 
-    const mapped: AffiliateAccount = {
-      id: account.id,
-      platform: account.platform,
-      affiliateId: account.affiliateId,
-      apiKey: account.apiKey ?? undefined,
-      baseUrlTemplate: account.baseUrlTemplate,
-      isActive: account.isActive,
-      createdAt: account.createdAt,
-    };
-
-    return NextResponse.json({ account: mapped }, { status: 201 });
+    return NextResponse.json({ success: true, data: { id: accountId, platform, affiliateId, baseUrlTemplate } }, { status: 201 });
   } catch (error) {
-    console.error('Error creating affiliate account:', error);
-    return NextResponse.json(
-      { error: 'Gagal membuat akun afiliasi' },
-      { status: 500 }
-    );
+    console.error('[Affiliate POST] Error:', error);
+    return NextResponse.json({ error: 'Gagal membuat akun afiliasi' }, { status: 500 });
   }
 }
 
-// PUT - Update an affiliate account
+// PUT update affiliate account (Admin)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, platform, affiliateId, apiKey, baseUrlTemplate, isActive } = body;
+    const { id, ...fields } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID akun wajib diisi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID wajib diisi' }, { status: 400 });
     }
 
-    const account = await db.affiliateAccount.update({
-      where: { id },
-      data: {
-        ...(platform && { platform }),
-        ...(affiliateId && { affiliateId }),
-        ...(apiKey !== undefined && { apiKey }),
-        ...(baseUrlTemplate && { baseUrlTemplate }),
-        ...(isActive !== undefined && { isActive }),
-      },
-    });
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
 
-    const mapped: AffiliateAccount = {
-      id: account.id,
-      platform: account.platform,
-      affiliateId: account.affiliateId,
-      apiKey: account.apiKey ?? undefined,
-      baseUrlTemplate: account.baseUrlTemplate,
-      isActive: account.isActive,
-      createdAt: account.createdAt,
-    };
+    const updateData: any = { token, accountId: id as any };
+    if (fields.platform !== undefined) updateData.platform = fields.platform;
+    if (fields.affiliateId !== undefined) updateData.affiliateId = fields.affiliateId;
+    if (fields.apiKey !== undefined) updateData.apiKey = fields.apiKey;
+    if (fields.baseUrlTemplate !== undefined) updateData.baseUrlTemplate = fields.baseUrlTemplate;
+    if (fields.isActive !== undefined) updateData.isActive = fields.isActive;
 
-    return NextResponse.json({ account: mapped });
+    await client.mutation(api.affiliate.updateAffiliateAccount, updateData);
+
+    return NextResponse.json({ success: true, data: { id, ...fields } });
   } catch (error) {
-    console.error('Error updating affiliate account:', error);
-    return NextResponse.json(
-      { error: 'Gagal mengupdate akun afiliasi' },
-      { status: 500 }
-    );
+    console.error('[Affiliate PUT] Error:', error);
+    return NextResponse.json({ error: 'Gagal mengupdate akun afiliasi' }, { status: 500 });
   }
 }
 
-// DELETE - Remove an affiliate account
+// DELETE soft delete affiliate account (Admin)
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'ID akun wajib diisi' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'ID wajib diisi' }, { status: 400 });
     }
 
-    // Delete related product links and click logs first
-    await db.clickLog.deleteMany({
-      where: {
-        productLink: { accountId: id },
-      },
-    });
+    let token = "dapurmind-admin-key-2025";
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7);
+    else if (request.headers.get('x-admin-key')) token = request.headers.get('x-admin-key')!;
 
-    await db.productLink.deleteMany({
-      where: { accountId: id },
-    });
-
-    await db.affiliateAccount.delete({
-      where: { id },
-    });
+    await client.mutation(api.affiliate.deleteAffiliateAccount, { token, accountId: id as any });
 
     return NextResponse.json({ success: true });
   } catch (error) {

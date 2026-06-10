@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { client } from '@/lib/convex';
+import { api } from '../../../../../convex/_generated/api';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,19 +26,16 @@ export async function GET(request: NextRequest) {
         startDate.setDate(now.getDate() - 30);
     }
 
-    // Fetch all records in period
-    const records = await db.financeRecord.findMany({
-      where: {
-        userId,
-        isActive: true,
-        date: { gte: startDate, lte: now },
-      },
-      orderBy: { date: 'desc' },
+    const records = await client.query(api.finance.getRecordsByUser, {
+      userId,
+      startDate: startDate.getTime(),
+      endDate: now.getTime(),
+      limit: 10000,
     });
 
     // Summary
-    const totalIncome = records.filter((r) => r.type === 'income').reduce((s, r) => s + r.amount, 0);
-    const totalExpense = records.filter((r) => r.type === 'expense').reduce((s, r) => s + r.amount, 0);
+    const totalIncome = records.filter((r: any) => r.type === 'income').reduce((s: number, r: any) => s + r.amount, 0);
+    const totalExpense = records.filter((r: any) => r.type === 'expense').reduce((s: number, r: any) => s + r.amount, 0);
 
     // Category breakdown (expenses only)
     const catMap = new Map<string, { amount: number; count: number }>();
@@ -63,16 +61,16 @@ export async function GET(request: NextRequest) {
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     sixMonthsAgo.setDate(1);
 
-    const monthlyRecords = await db.financeRecord.findMany({
-      where: {
-        userId,
-        isActive: true,
-        date: { gte: sixMonthsAgo, lte: now },
-      },
+    const monthlyRecords = await client.query(api.finance.getRecordsByUser, {
+      userId,
+      startDate: sixMonthsAgo.getTime(),
+      endDate: now.getTime(),
+      limit: 10000,
     });
 
     for (const r of monthlyRecords) {
-      const key = `${r.date.getFullYear()}-${String(r.date.getMonth() + 1).padStart(2, '0')}`;
+      const d = new Date(r.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 };
       if (r.type === 'income') monthlyData[key].income += r.amount;
       else monthlyData[key].expense += r.amount;
@@ -98,8 +96,8 @@ export async function GET(request: NextRequest) {
       const dayStr = d.toISOString().split('T')[0];
       const dayLabel = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
       const dayExpenses = records
-        .filter((r) => r.type === 'expense' && r.date.toISOString().split('T')[0] === dayStr)
-        .reduce((s, r) => s + r.amount, 0);
+        .filter((r: any) => r.type === 'expense' && new Date(r.date).toISOString().split('T')[0] === dayStr)
+        .reduce((s: number, r: any) => s + r.amount, 0);
       dailyTrend.push({ date: dayStr, amount: Math.round(dayExpenses), label: dayLabel });
     }
 

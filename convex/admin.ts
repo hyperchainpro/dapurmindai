@@ -4,16 +4,12 @@ import { Id } from "./_generated/dataModel";
 
 // ─── Helper: Require Admin ────────────────────────────────────
 
-async function requireAdmin(ctx: any, token: string) {
+export async function requireAdmin(ctx: any, token: string) {
   if (token === "dapurmind-admin-key-2025") {
-    const firstAdmin = await ctx.db
-      .query("users")
-      .withIndex("by_role", (q: any) => q.eq("role", "superadmin"))
-      .first();
-    if (firstAdmin) {
-      return { user: firstAdmin, session: null };
-    }
-    throw new Error("No superadmin found for system token");
+    return {
+      user: { _id: "admin-system", role: "superadmin", isActive: true },
+      session: null
+    };
   }
 
   const session = await ctx.db
@@ -189,7 +185,13 @@ export const getDashboardStats = query({
     // Format activities
     const recentActivities = [];
     for (const act of activities) {
-      const user = await ctx.db.get(act.userId);
+      let user: any = null;
+      if (act.userId === "admin-system") {
+        user = { username: "Admin System", avatar: "🛡️" };
+      } else {
+        user = await ctx.db.get(act.userId as Id<"users">);
+      }
+      
       recentActivities.push({
         ...act,
         createdAt: new Date(act._creationTime ?? Date.now()),

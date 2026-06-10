@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireAdmin } from "./admin";
 
 // ─── Get Ad Placements ────────────────────────────────────────
 
@@ -17,21 +18,7 @@ export const getAdsByPosition = query({
 export const listAllAds = query({
   args: { token: v.string() },
   handler: async (ctx, args) => {
-    // Verify admin (simplified - should use proper auth)
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
-
-    if (!session) {
-      throw new Error("Invalid session");
-    }
-
-    const user = await ctx.db.get(session.userId);
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new Error("Forbidden");
-    }
-
+    await requireAdmin(ctx, args.token);
     return await ctx.db.query("adPlacements").collect();
   },
 });
@@ -49,25 +36,9 @@ export const createAd = mutation({
     isActive: v.boolean(),
   },
   handler: async (ctx, args) => {
-    // Verify admin
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
-
-    if (!session) {
-      throw new Error("Invalid session");
-    }
-
-    const user = await ctx.db.get(session.userId);
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new Error("Forbidden");
-    }
-
+    await requireAdmin(ctx, args.token);
     const { token, ...adData } = args;
-
     const adId = await ctx.db.insert("adPlacements", adData);
-
     return adId;
   },
 });
@@ -86,25 +57,9 @@ export const updateAd = mutation({
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    // Verify admin
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
-
-    if (!session) {
-      throw new Error("Invalid session");
-    }
-
-    const user = await ctx.db.get(session.userId);
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new Error("Forbidden");
-    }
-
+    await requireAdmin(ctx, args.token);
     const { token, adId, ...updates } = args;
-
     await ctx.db.patch(adId, updates);
-
     return { success: true };
   },
 });
@@ -117,23 +72,8 @@ export const deleteAd = mutation({
     adId: v.id("adPlacements"),
   },
   handler: async (ctx, args) => {
-    // Verify admin
-    const session = await ctx.db
-      .query("sessions")
-      .withIndex("by_token", (q) => q.eq("token", args.token))
-      .first();
-
-    if (!session) {
-      throw new Error("Invalid session");
-    }
-
-    const user = await ctx.db.get(session.userId);
-    if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
-      throw new Error("Forbidden");
-    }
-
+    await requireAdmin(ctx, args.token);
     await ctx.db.delete(args.adId);
-
     return { success: true };
   },
 });
