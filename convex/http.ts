@@ -340,7 +340,7 @@ http.route({
     }
 
     try {
-      const stats = await ctx.runQuery(api.admin.getStats, { token });
+      const stats = await ctx.runQuery(api.admin.getDashboardStats, { token });
 
       return new Response(JSON.stringify(stats), {
         status: 200,

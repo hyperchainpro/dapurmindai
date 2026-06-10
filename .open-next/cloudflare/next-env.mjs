@@ -1,0 +1,3 @@
+export const production = {"DATABASE_URL":"postgresql://z@127.0.0.1:5432/dapurmind","NEXT_PUBLIC_CONVEX_URL":"https://unique-bear-361.eu-west-1.convex.cloud","NEXT_PUBLIC_CONVEX_SITE_URL":"https://unique-bear-361.eu-west-1.convex.site","CONVEX_DEPLOYMENT":"dev:unique-bear-361"};
+export const development = {"DATABASE_URL":"postgresql://z@127.0.0.1:5432/dapurmind","CONVEX_DEPLOYMENT":"dev:unique-bear-361","NEXT_PUBLIC_CONVEX_URL":"https://unique-bear-361.eu-west-1.convex.cloud","NEXT_PUBLIC_CONVEX_SITE_URL":"https://unique-bear-361.eu-west-1.convex.site"};
+export const test = {"DATABASE_URL":"postgresql://z@127.0.0.1:5432/dapurmind"};
