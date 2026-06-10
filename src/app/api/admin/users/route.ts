@@ -37,8 +37,12 @@ export async function GET(request: NextRequest) {
 
     // Pagination
     const total = allUsers.length;
-    const start = (page - 1) * limit;
-    const users = allUsers.slice(start, start + limit);
+    const users = allUsers.slice(start, start + limit).map((u: any) => ({
+      ...u,
+      id: u._id,
+      createdAt: new Date(u._creationTime).toISOString(),
+      lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : null,
+    }));
 
     return NextResponse.json({
       success: true,

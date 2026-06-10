@@ -39,7 +39,15 @@ export async function GET(
       return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, user });
+    // Map to Prisma format for frontend compatibility
+    const formattedUser = {
+      ...user,
+      id: user._id,
+      createdAt: new Date(user._creationTime).toISOString(),
+      lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null,
+    };
+
+    return NextResponse.json({ success: true, user: formattedUser });
   } catch (error: any) {
     console.error('[Admin Users GET id] Error:', error);
     return NextResponse.json({ error: error.message || 'Terjadi kesalahan server' }, { status: 500 });
