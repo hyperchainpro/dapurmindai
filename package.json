@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "convex:deploy": "convex deploy",
-    "pages:deploy": "npm run build:cloudflare && wrangler pages deploy .open-next/assets --project-name=dapumindai"
+    "pages:deploy": "npm run build:cloudflare && wrangler pages deploy .open-next/assets --project-name=dapurmindai"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
