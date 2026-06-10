@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as ads from "../ads.js";
 import type * as affiliate from "../affiliate.js";
+import type * as agents from "../agents.js";
 import type * as auth from "../auth.js";
 import type * as finance from "../finance.js";
 import type * as http from "../http.js";
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   ads: typeof ads;
   affiliate: typeof affiliate;
+  agents: typeof agents;
   auth: typeof auth;
   finance: typeof finance;
   http: typeof http;

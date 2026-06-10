@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /* ═══════════════════════════════════════════════════════════
    AI Agent Management API
@@ -9,31 +12,7 @@ import { db } from '@/lib/db';
 // GET /api/admin/agents — List all agents
 export async function GET() {
   try {
-    const agents = await db.aiAgent.findMany({
-      where: { deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        provider: true,
-        model: true,
-        apiBaseUrl: true,
-        maxTokens: true,
-        usedTokens: true,
-        totalRequests: true,
-        failedRequests: true,
-        isActive: true,
-        isDefault: true,
-        description: true,
-        purpose: true,
-        lastUsedAt: true,
-        lastError: true,
-        createdAt: true,
-        updatedAt: true,
-        // Do NOT expose apiKey in list
-      },
-    });
-
+    const agents = await client.query(api.agents.list);
     return NextResponse.json({ success: true, agents });
   } catch (error) {
     console.error('[AdminAgents GET]', error);
@@ -56,34 +35,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: `Provider tidak valid. Pilihan: ${validProviders.join(', ')}` }, { status: 400 });
     }
 
-    const validPurposes = ['all', 'chat', 'meal-plan', 'zero-waste'];
-    const finalPurpose = purpose && validPurposes.includes(purpose) ? purpose : 'all';
+    const finalPurpose = purpose || 'all';
 
-    // If setting as default, unset other defaults for same purpose
-    if (isDefault) {
-      await db.aiAgent.updateMany({
-        where: {
-          purpose: finalPurpose,
-          isDefault: true,
-          deletedAt: null,
-        },
-        data: { isDefault: false },
-      });
-    }
-
-    const agent = await db.aiAgent.create({
-      data: {
-        name,
-        provider,
-        model,
-        apiKey: apiKey || null,
-        apiBaseUrl: apiBaseUrl || null,
-        maxTokens: maxTokens || 2000,
-        description: description || '',
-        purpose: finalPurpose,
-        isDefault: isDefault || false,
-        isActive: isActive !== false,
-      },
+    const agent = await client.mutation(api.agents.create, {
+      name,
+      provider,
+      model,
+      apiKey: apiKey || undefined,
+      apiBaseUrl: apiBaseUrl || undefined,
+      maxTokens: maxTokens || 2000,
+      description: description || '',
+      purpose: finalPurpose,
+      isDefault: isDefault || false,
+      isActive: isActive !== false,
     });
 
     return NextResponse.json({ success: true, agent });

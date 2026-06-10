@@ -1,29 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /* ═══════════════════════════════════════════════════════════
    AI Agent Management API — Single Agent Operations
    ═══════════════════════════════════════════════════════════ */
 
-// GET /api/admin/agents/[id] — Get single agent (includes apiKey masked)
+// GET /api/admin/agents/[id] — Get single agent
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const agent = await db.aiAgent.findUnique({
-      where: { id, deletedAt: null },
-    });
+    
+    const agent = await client.query(api.agents.get, { id: id as Id<"aiAgents"> });
 
-    if (!agent) {
+    if (!agent || agent.deletedAt) {
       return NextResponse.json({ success: false, error: 'Agent tidak ditemukan' }, { status: 404 });
     }
 
     // Mask apiKey for security
     const maskedAgent = {
       ...agent,
-      apiKey: agent.apiKey
+      apiKey: agent.apiKey && agent.apiKey.length > 8
         ? agent.apiKey.substring(0, 8) + '...' + agent.apiKey.substring(agent.apiKey.length - 4)
         : null,
     };
@@ -43,43 +46,13 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, provider, model, apiKey, apiBaseUrl, maxTokens, description, purpose, isDefault, isActive } = body;
 
-    // Check if agent exists
-    const existing = await db.aiAgent.findUnique({ where: { id } });
-    if (!existing || existing.deletedAt) {
-      return NextResponse.json({ success: false, error: 'Agent tidak ditemukan' }, { status: 404 });
-    }
-
-    const updateData: Record<string, unknown> = {};
-    if (name !== undefined) updateData.name = name;
-    if (provider !== undefined) updateData.provider = provider;
-    if (model !== undefined) updateData.model = model;
-    if (apiKey !== undefined) updateData.apiKey = apiKey || null;
-    if (apiBaseUrl !== undefined) updateData.apiBaseUrl = apiBaseUrl || null;
-    if (maxTokens !== undefined) updateData.maxTokens = maxTokens;
-    if (description !== undefined) updateData.description = description;
-    if (purpose !== undefined) updateData.purpose = purpose;
-    if (isActive !== undefined) updateData.isActive = isActive;
-
-    // If setting as default, unset other defaults
-    if (isDefault) {
-      const targetPurpose = purpose || existing.purpose;
-      await db.aiAgent.updateMany({
-        where: {
-          purpose: targetPurpose,
-          isDefault: true,
-          deletedAt: null,
-          id: { not: id },
-        },
-        data: { isDefault: false },
-      });
-      updateData.isDefault = true;
-    }
-
-    const agent = await db.aiAgent.update({
-      where: { id },
-      data: updateData,
+    const agent = await client.mutation(api.agents.update, {
+      id: id as Id<"aiAgents">,
+      ...body,
+      // override empty string apiKey/apiBaseUrl to undefined so convex handles it correctly
+      apiKey: body.apiKey === "" ? undefined : body.apiKey,
+      apiBaseUrl: body.apiBaseUrl === "" ? undefined : body.apiBaseUrl,
     });
 
     return NextResponse.json({ success: true, agent });
@@ -97,15 +70,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const existing = await db.aiAgent.findUnique({ where: { id } });
-    if (!existing || existing.deletedAt) {
-      return NextResponse.json({ success: false, error: 'Agent tidak ditemukan' }, { status: 404 });
-    }
-
-    await db.aiAgent.update({
-      where: { id },
-      data: { deletedAt: new Date(), isActive: false, isDefault: false },
-    });
+    await client.mutation(api.agents.remove, { id: id as Id<"aiAgents"> });
 
     return NextResponse.json({ success: true, message: 'Agent berhasil dihapus' });
   } catch (error) {
