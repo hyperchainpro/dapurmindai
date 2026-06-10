@@ -84,7 +84,19 @@ export const register = mutation({
       userAgent: undefined,
     });
 
-    return { userId, token };
+    return { 
+      userId, 
+      token,
+      user: {
+        id: userId,
+        username: args.username,
+        email: args.email,
+        name: args.name,
+        avatar: undefined,
+        role: "user",
+        language: "id",
+      }
+    };
   },
 });
 

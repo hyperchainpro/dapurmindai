@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { convexFetch } from '@/lib/convex-client';
+import { convexFetch } from '@/lib/convex-server';
 
 /* ═══════════════════════════════════════════════════════════
    POST /api/auth/logout
