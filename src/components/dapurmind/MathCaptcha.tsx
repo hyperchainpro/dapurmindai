@@ -7,6 +7,7 @@ import { RefreshCw, ShieldCheck } from 'lucide-react';
 interface MathCaptchaProps {
   onVerify: (isCorrect: boolean) => void;
   onCaptchaChange?: (value: string) => void;
+  resetTrigger?: number;
 }
 
 const OPERATIONS = ['+', '-', '\u00d7'] as const;
@@ -37,7 +38,7 @@ function generateCaptcha(): { question: string; answer: number } {
   return { question: `${a} ${op} ${b} = ?`, answer };
 }
 
-export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
+export function MathCaptcha({ onVerify, onCaptchaChange, resetTrigger }: MathCaptchaProps) {
   const [captcha, setCaptcha] = useState(() => generateCaptcha());
   const [input, setInput] = useState('');
   const [isVerified, setIsVerified] = useState(false);
@@ -52,6 +53,12 @@ export function MathCaptcha({ onVerify, onCaptchaChange }: MathCaptchaProps) {
     onVerify(false);
     inputRef.current?.focus();
   }, [onCaptchaChange, onVerify]);
+
+  React.useEffect(() => {
+    if (resetTrigger !== undefined && resetTrigger > 0) {
+      regenerate();
+    }
+  }, [resetTrigger, regenerate]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
