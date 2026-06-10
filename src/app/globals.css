@@ -196,6 +196,18 @@
     background: var(--nm-bg);
   }
 
+  /* Shadow-only neumorphic utilities (safe for custom backgrounds) */
+  .nm-shadow-sm {
+    box-shadow:
+      3px 3px 6px var(--nm-shadow-dark),
+      -3px -3px 6px var(--nm-shadow-light);
+  }
+  .nm-shadow {
+    box-shadow:
+      6px 6px 12px var(--nm-shadow-dark),
+      -6px -6px 12px var(--nm-shadow-light);
+  }
+
   /* Flat / pressed in — inset shadow for active/pressed state */
   .nm-pressed {
     box-shadow:

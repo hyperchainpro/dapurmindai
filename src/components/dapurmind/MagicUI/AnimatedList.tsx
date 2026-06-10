@@ -64,7 +64,7 @@ function AnimatedList({
   animateOnMount = true,
 }: AnimatedListProps) {
   return (
-    <div className={cn('relative', className)}>
+    <div className="relative w-full">
       <AnimatePresence mode="popLayout">
         <motion.div
           key={items.map((i) => i.id).join('-')}
@@ -72,6 +72,7 @@ function AnimatedList({
           variants={containerVariants}
           initial={animateOnMount ? 'hidden' : false}
           animate="visible"
+          className={cn(className)}
         >
           {items.map((item) => (
             <motion.div

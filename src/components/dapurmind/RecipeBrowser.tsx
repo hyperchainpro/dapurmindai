@@ -328,8 +328,8 @@ export function RecipeBrowser() {
                   onClick={() => setMode('local')}
                   className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'local'
-                      ? 'nm-raised-sm bg-emerald-600 text-white'
-                      : 'text-foreground/60 hover:text-foreground'
+                      ? 'nm-shadow-sm bg-emerald-600 text-white'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Wifi className="h-3.5 w-3.5" />
@@ -339,8 +339,8 @@ export function RecipeBrowser() {
                   onClick={() => setMode('api')}
                   className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     mode === 'api'
-                      ? 'nm-raised-sm bg-blue-600 text-white'
-                      : 'text-foreground/60 hover:text-foreground'
+                      ? 'nm-shadow-sm bg-blue-600 text-white'
+                      : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Globe2 className="h-3.5 w-3.5" />
@@ -349,7 +349,7 @@ export function RecipeBrowser() {
               </div>
               <button
                 onClick={() => setScreen('explore')}
-                className="nm-raised-sm flex items-center gap-1.5 rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700 active:scale-95"
+                className="nm-shadow-sm flex items-center gap-1.5 rounded-full bg-amber-600 px-5 py-2 text-sm font-semibold text-white transition-all hover:bg-amber-700 active:scale-95"
               >
                 <Compass className="h-3.5 w-3.5" />
                 Explore
