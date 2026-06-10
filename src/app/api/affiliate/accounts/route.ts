@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
 import type { AffiliateAccount } from '@/types';
 
 // GET - Fetch all affiliate accounts

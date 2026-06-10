@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 import { requireAuth, logActivity, AuthError } from '@/lib/auth-server';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /* ── Allowed file types ──────────────────────────────────── */
 
@@ -46,10 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current user
-    const user = await db.user.findUnique({
-      where: { id: auth.userId },
-      select: { avatar: true },
-    });
+    const user = await client.query(api.users.getById, { userId: auth.userId as Id<"users"> });
 
     if (!user) {
       return NextResponse.json({ error: 'Pengguna tidak ditemukan.' }, { status: 404 });
@@ -85,9 +86,9 @@ export async function POST(request: NextRequest) {
 
     // Update user avatar
     const avatarUrl = `/avatars/${filename}`;
-    await db.user.update({
-      where: { id: auth.userId },
-      data: { avatar: avatarUrl },
+    await client.mutation(api.users.update, {
+      userId: auth.userId as Id<"users">,
+      avatar: avatarUrl,
     });
 
     await logActivity(auth.userId, 'profile.update_avatar', 'User', `Avatar updated: ${avatarUrl}`, request);
@@ -119,19 +120,29 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { name, language } = body;
 
-    const updateData: Record<string, unknown> = {};
+    const updateData: any = {};
     if (name !== undefined) updateData.name = name;
     if (language !== undefined) updateData.language = language;
 
-    const user = await db.user.update({
-      where: { id: auth.userId },
-      data: updateData,
+    await client.mutation(api.users.update, {
+      userId: auth.userId as Id<"users">,
+      ...updateData,
     });
+
+    const user = await client.query(api.users.getById, { userId: auth.userId as Id<"users"> });
+    if (!user) {
+      return NextResponse.json({ error: 'Pengguna tidak ditemukan.' }, { status: 404 });
+    }
 
     await logActivity(auth.userId, 'profile.update', 'User', `Profile updated`, request);
 
-    const { password: _, ...safeUser } = user;
-    return NextResponse.json({ success: true, user: safeUser });
+    const { password: _, ...safeUser } = user as any;
+    const formattedUser = {
+      ...safeUser,
+      id: user._id,
+      createdAt: new Date(user._creationTime).toISOString(),
+    };
+    return NextResponse.json({ success: true, user: formattedUser });
   } catch (error) {
     console.error('[Profile API] PUT Error:', error);
     if (error instanceof AuthError) {
@@ -149,26 +160,25 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await requireAuth(request);
 
-    const user = await db.user.findUnique({
-      where: { id: auth.userId },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        avatar: true,
-        language: true,
-        role: true,
-        lastLoginAt: true,
-        createdAt: true,
-      },
-    });
+    const user = await client.query(api.users.getById, { userId: auth.userId as Id<"users"> });
 
     if (!user) {
       return NextResponse.json({ error: 'Pengguna tidak ditemukan.' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, user });
+    const formattedUser = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+      language: user.language,
+      role: user.role,
+      lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : null,
+      createdAt: new Date(user._creationTime).toISOString(),
+    };
+
+    return NextResponse.json({ success: true, user: formattedUser });
   } catch (error) {
     console.error('[Profile API] GET Error:', error);
     if (error instanceof AuthError) {

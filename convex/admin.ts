@@ -492,3 +492,246 @@ export const broadcastNotification = mutation({
     return { success: true, sentTo: users.length };
   },
 });
+
+export const listNotifications = query({
+  args: {
+    token: v.string(),
+    userId: v.optional(v.string()),
+    category: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.token);
+
+    let query = ctx.db.query("notifications");
+
+    let notifications = await query.collect();
+
+    if (args.userId) {
+      notifications = notifications.filter((n) => n.userId === args.userId);
+    }
+
+    if (args.category) {
+      notifications = notifications.filter((n) => n.category === args.category);
+    }
+
+    notifications.sort((a, b) => (b._creationTime ?? 0) - (a._creationTime ?? 0));
+
+    const limit = args.limit || 50;
+    const paginated = notifications.slice(0, limit);
+
+    const data = [];
+    for (const n of paginated) {
+      const user = (await ctx.db.get(n.userId as any)) as any;
+      data.push({
+        ...n,
+        user: user ? { id: user._id, username: user.username, name: user.name } : null,
+      });
+    }
+
+    return data;
+  },
+});
+
+export const getAiTokenStats = query({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.token);
+
+    const agents = await ctx.db.query("aiAgents").filter((q) => q.eq(q.field("deletedAt"), undefined)).collect();
+    const usageLogs = await ctx.db.query("aiAgentUsageLogs").collect();
+    const alerts = await ctx.db
+      .query("aiTokenAlerts")
+      .withIndex("by_isTriggered", (q) => q.eq("isTriggered", true))
+      .filter((q) => q.eq(q.field("resolvedAt"), undefined))
+      .collect();
+
+    const totalUsedTokens = agents.reduce((sum, a) => sum + (a.usedTokens || 0), 0);
+    const totalRequests = agents.reduce((sum, a) => sum + (a.totalRequests || 0), 0);
+    const totalFailed = agents.reduce((sum, a) => sum + (a.failedRequests || 0), 0);
+
+    const successLogs = usageLogs.filter((l) => l.status === "success");
+    const totalLatency = successLogs.reduce((sum, l) => sum + (l.latencyMs || 0), 0);
+    const avgLatencyMs = successLogs.length > 0 ? Math.round(totalLatency / successLogs.length) : 0;
+
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const recentLogs = usageLogs.filter((l) => (l._creationTime ?? 0) >= thirtyDaysAgo);
+
+    const dailyGroup: Record<string, { tokens: number; requests: number; errors: number }> = {};
+    for (const log of recentLogs) {
+      const dateStr = new Date(log._creationTime).toISOString().split('T')[0];
+      if (!dailyGroup[dateStr]) {
+        dailyGroup[dateStr] = { tokens: 0, requests: 0, errors: 0 };
+      }
+      const tokens = (log.inputTokens || 0) + (log.outputTokens || 0);
+      dailyGroup[dateStr].tokens += tokens;
+      dailyGroup[dateStr].requests += 1;
+      if (log.status === "error") {
+        dailyGroup[dateStr].errors += 1;
+      }
+    }
+    const dailyUsage = Object.entries(dailyGroup).map(([date, val]) => ({
+      date,
+      ...val,
+    })).sort((a, b) => a.date.localeCompare(b.date));
+
+    const featureGroup: Record<string, { tokens: number; requests: number }> = {};
+    for (const log of recentLogs) {
+      const feature = log.feature || "chat";
+      if (!featureGroup[feature]) {
+        featureGroup[feature] = { tokens: 0, requests: 0 };
+      }
+      const tokens = (log.inputTokens || 0) + (log.outputTokens || 0);
+      featureGroup[feature].tokens += tokens;
+      featureGroup[feature].requests += 1;
+    }
+
+    const userGroup: Record<string, { userId: string; username: string; totalTokens: number; totalRequests: number }> = {};
+    for (const log of recentLogs) {
+      if (!log.userId) continue;
+      const uidStr = String(log.userId);
+      if (!userGroup[uidStr]) {
+        userGroup[uidStr] = { userId: uidStr, username: "Unknown", totalTokens: 0, totalRequests: 0 };
+      }
+      const tokens = (log.inputTokens || 0) + (log.outputTokens || 0);
+      userGroup[uidStr].totalTokens += tokens;
+      userGroup[uidStr].totalRequests += 1;
+    }
+
+    const topUsers = [];
+    for (const key of Object.keys(userGroup)) {
+      try {
+        const user = (await ctx.db.get(key as any)) as any;
+        if (user) {
+          userGroup[key].username = user.username || user.name || "Unknown";
+        }
+      } catch (e) {}
+      topUsers.push(userGroup[key]);
+    }
+    topUsers.sort((a, b) => b.totalTokens - a.totalTokens);
+    const top10Users = topUsers.slice(0, 10);
+
+    const formattedAgents = agents.map((a) => ({
+      id: a._id,
+      name: a.name,
+      provider: a.provider,
+      model: a.model,
+      usedTokens: a.usedTokens,
+      maxTokens: a.maxTokens,
+      totalRequests: a.totalRequests,
+      failedRequests: a.failedRequests,
+      lastUsedAt: a.lastUsedAt ? new Date(a.lastUsedAt).toISOString() : null,
+      lastError: a.lastError,
+      successRate: a.totalRequests > 0
+        ? Math.round(((a.totalRequests - a.failedRequests) / a.totalRequests) * 10000) / 100
+        : 100,
+    }));
+
+    return {
+      agents: formattedAgents,
+      totalUsedTokens,
+      totalRequests,
+      totalFailed,
+      avgLatencyMs,
+      dailyUsage,
+      usageByFeature: featureGroup,
+      alerts,
+      topUsers: top10Users,
+    };
+  },
+});
+
+// ─── AI Token Alerts Management ────────────────────────────────
+
+export const listTokenAlerts = query({
+  args: {
+    token: v.string(),
+    active: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx, args.token);
+
+    let query = ctx.db.query("aiTokenAlerts").filter((q) => q.eq(q.field("isActive"), true));
+
+    let alerts = await query.collect();
+
+    if (args.active) {
+      alerts = alerts.filter((a) => a.isTriggered && a.resolvedAt === undefined);
+    }
+
+    alerts.sort((a, b) => (b._creationTime ?? 0) - (a._creationTime ?? 0));
+
+    return alerts;
+  },
+});
+
+export const createTokenAlert = mutation({
+  args: {
+    token: v.string(),
+    agentId: v.optional(v.id("aiAgents")),
+    thresholdType: v.string(),
+    thresholdValue: v.number(),
+    message: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { user: admin } = await requireAdmin(ctx, args.token);
+
+    const alertId = await ctx.db.insert("aiTokenAlerts", {
+      agentId: args.agentId,
+      thresholdType: args.thresholdType,
+      thresholdValue: args.thresholdValue,
+      message: args.message,
+      isTriggered: false,
+      isActive: true,
+    });
+
+    // Log activity
+    await ctx.db.insert("activityLogs", {
+      userId: admin._id,
+      action: "create_token_alert",
+      target: alertId,
+      detail: `Created AI token alert: ${args.thresholdType}`,
+      ipAddress: undefined,
+      userAgent: undefined,
+    });
+
+    return await ctx.db.get(alertId);
+  },
+});
+
+export const resolveTokenAlert = mutation({
+  args: {
+    token: v.string(),
+    alertId: v.id("aiTokenAlerts"),
+    resolvedAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { user: admin } = await requireAdmin(ctx, args.token);
+
+    const existing = await ctx.db.get(args.alertId);
+    if (!existing || !existing.isActive) {
+      throw new Error("Alert tidak ditemukan");
+    }
+
+    const resolvedTime = args.resolvedAt || Date.now();
+    await ctx.db.patch(args.alertId, {
+      resolvedAt: resolvedTime,
+      isTriggered: false,
+    });
+
+    // Log activity
+    await ctx.db.insert("activityLogs", {
+      userId: admin._id,
+      action: "resolve_token_alert",
+      target: args.alertId,
+      detail: `Resolved AI token alert: ${args.alertId}`,
+      ipAddress: undefined,
+      userAgent: undefined,
+    });
+
+    return await ctx.db.get(args.alertId);
+  },
+});
+
+
+

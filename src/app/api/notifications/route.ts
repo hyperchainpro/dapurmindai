@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /* ═══════════════════════════════════════════════════════════
    GET/PUT — User notifications
@@ -9,48 +13,40 @@ import { db } from '@/lib/db';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
     const limit = parseInt(searchParams.get('limit') || '20', 10);
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
+    const authHeader = request.headers.get('authorization');
+    let token = '';
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.slice(7);
     }
 
-    const where: Record<string, unknown> = {
-      userId,
-      deletedAt: null,
-    };
-
-    if (unreadOnly) {
-      where.isRead = false;
+    if (!token) {
+      return NextResponse.json({ error: 'Authorization token required' }, { status: 401 });
     }
 
-    const [notifications, total] = await Promise.all([
-      db.notification.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-      }),
-      db.notification.count({ where }),
-    ]);
+    const notifications = await client.query(api.notifications.getUserNotifications, {
+      token,
+      unreadOnly,
+      limit,
+    });
+
+    // Format _id to id
+    const formatted = notifications.map((n: any) => ({
+      ...n,
+      id: n._id,
+      createdAt: new Date(n._creationTime).toISOString(),
+    }));
 
     return NextResponse.json({
       success: true,
-      data: notifications,
-      total,
-      limit,
-      offset,
+      data: formatted,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Notifications] GET error:', error);
     return NextResponse.json(
-      { error: 'Gagal memuat notifikasi' },
+      { error: error.message || 'Gagal memuat notifikasi' },
       { status: 500 }
     );
   }
@@ -59,27 +55,24 @@ export async function GET(request: NextRequest) {
 // PUT - Mark notification(s) as read
 export async function PUT(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('authorization');
+    let token = '';
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.slice(7);
+    }
+
+    if (!token) {
+      return NextResponse.json({ error: 'Authorization token required' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { ids, markAll, userId } = body;
+    const { ids, markAll } = body;
 
     if (markAll) {
-      // Mark all notifications as read for user
-      if (!userId) {
-        return NextResponse.json(
-          { error: 'User ID wajib diisi untuk markAll' },
-          { status: 400 }
-        );
-      }
-
-      const result = await db.notification.updateMany({
-        where: { userId, isRead: false, deletedAt: null },
-        data: { isRead: true },
-      });
-
+      const result = await client.mutation(api.notifications.markAllAsRead, { token });
       return NextResponse.json({ success: true, data: { updated: result.count } });
     }
 
-    // Mark specific notifications as read
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
         { error: 'ids atau markAll wajib diisi' },
@@ -87,16 +80,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const result = await db.notification.updateMany({
-      where: { id: { in: ids }, isRead: false },
-      data: { isRead: true },
-    });
+    // Mark each specific notification as read
+    let updatedCount = 0;
+    for (const id of ids) {
+      try {
+        await client.mutation(api.notifications.markAsRead, {
+          token,
+          notificationId: id as Id<"notifications">,
+        });
+        updatedCount++;
+      } catch (e) {
+        console.warn(`Failed to mark notification ${id} as read:`, e);
+      }
+    }
 
-    return NextResponse.json({ success: true, data: { updated: result.count } });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: { updated: updatedCount } });
+  } catch (error: any) {
     console.error('[Notifications] PUT error:', error);
     return NextResponse.json(
-      { error: 'Gagal mengupdate notifikasi' },
+      { error: error.message || 'Gagal mengupdate notifikasi' },
       { status: 500 }
     );
   }

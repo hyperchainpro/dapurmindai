@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+// Helper to format profile
+function formatProfile(p: any) {
+  if (!p) return null;
+  return {
+    ...p,
+    id: p._id,
+    createdAt: new Date(p._creationTime).toISOString(),
+  };
+}
 
 // GET - Get creator profile or list all profiles
 export async function GET(request: NextRequest) {
@@ -10,33 +24,9 @@ export async function GET(request: NextRequest) {
 
     // List all creator profiles with published recipe counts
     if (list === 'all') {
-      const profiles = await db.creatorProfile.findMany({
-        where: { isActive: true },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      // Get published recipe counts for all profile users
-      const userIds = profiles.map(p => p.userId);
-      const recipeCounts = userIds.length > 0
-        ? await db.creatorRecipe.groupBy({
-            by: ['userId'],
-            where: {
-              userId: { in: userIds },
-              isActive: true,
-              isPublished: true,
-            },
-            _count: { id: true },
-          })
-        : [];
-
-      const countMap = new Map(recipeCounts.map(r => [r.userId, r._count.id]));
-
-      const mapped = profiles.map((p) => ({
-        ...p,
-        publishedRecipeCount: countMap.get(p.userId) || 0,
-      }));
-
-      return NextResponse.json({ success: true, data: { profiles: mapped } });
+      const profiles = await client.query(api.creator.listProfiles);
+      const formatted = profiles.map(p => formatProfile(p));
+      return NextResponse.json({ success: true, data: { profiles: formatted } });
     }
 
     if (!userId) {
@@ -46,15 +36,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const profile = await db.creatorProfile.findFirst({
-      where: { userId, isActive: true },
+    const profile = await client.query(api.creator.getProfileByUserId, {
+      userId: userId as Id<"users">,
     });
 
-    return NextResponse.json({ success: true, data: profile });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: formatProfile(profile) });
+  } catch (error: any) {
     console.error('Error fetching creator profile:', error);
     return NextResponse.json(
-      { error: 'Gagal memuat profil creator' },
+      { error: error.message || 'Gagal memuat profil creator' },
       { status: 500 }
     );
   }
@@ -73,26 +63,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const profile = await db.creatorProfile.upsert({
-      where: { userId },
-      update: {
-        ...(displayName !== undefined && { displayName }),
-        ...(bio !== undefined && { bio }),
-        ...(avatar !== undefined && { avatar }),
-      },
-      create: {
-        userId,
-        displayName: displayName || '',
-        bio: bio || '',
-        avatar: avatar || '',
-      },
+    const profile = await client.mutation(api.creator.upsertProfile, {
+      userId: userId as Id<"users">,
+      displayName,
+      bio,
+      avatar,
     });
 
-    return NextResponse.json({ success: true, data: profile }, { status: 201 });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: formatProfile(profile) }, { status: 201 });
+  } catch (error: any) {
     console.error('Error creating/updating creator profile:', error);
     return NextResponse.json(
-      { error: 'Gagal menyimpan profil creator' },
+      { error: error.message || 'Gagal menyimpan profil creator' },
       { status: 500 }
     );
   }
@@ -111,32 +93,18 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const existing = await db.creatorProfile.findFirst({
-      where: { userId, isActive: true },
+    const profile = await client.mutation(api.creator.updateProfile, {
+      userId: userId as Id<"users">,
+      displayName,
+      bio,
+      avatar,
     });
 
-    if (!existing) {
-      return NextResponse.json(
-        { error: 'Profil creator tidak ditemukan' },
-        { status: 404 }
-      );
-    }
-
-    const updateData: Record<string, unknown> = {};
-    if (displayName !== undefined) updateData.displayName = displayName;
-    if (bio !== undefined) updateData.bio = bio;
-    if (avatar !== undefined) updateData.avatar = avatar;
-
-    const profile = await db.creatorProfile.update({
-      where: { id: existing.id },
-      data: updateData,
-    });
-
-    return NextResponse.json({ success: true, data: profile });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: formatProfile(profile) });
+  } catch (error: any) {
     console.error('Error updating creator profile:', error);
     return NextResponse.json(
-      { error: 'Gagal mengupdate profil creator' },
+      { error: error.message || 'Gagal mengupdate profil creator' },
       { status: 500 }
     );
   }

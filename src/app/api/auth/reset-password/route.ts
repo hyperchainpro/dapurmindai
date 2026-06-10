@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { hashPassword, verifyPassword, getAuthUser, logActivity, deleteSession, deleteAllUserSessions, AuthError } from '@/lib/auth-server';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { requireAuth, logActivity, AuthError } from '@/lib/auth-server';
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+const simpleHash = (pw: string) => Buffer.from(unescape(encodeURIComponent(pw))).toString('base64');
 
 /* ═══════════════════════════════════════════════════════════
    POST /api/auth/reset-password
@@ -21,12 +26,9 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Verify email exists
     if (step === 'verify') {
-      const user = await db.user.findFirst({
-        where: { email: normalizedEmail, isActive: true, deletedAt: null },
-        select: { id: true, name: true, email: true },
-      });
+      const user = await client.query(api.users.getByEmail, { email: normalizedEmail });
 
-      if (!user) {
+      if (!user || !user.isActive || user.deletedAt) {
         return NextResponse.json(
           { error: 'Email tidak ditemukan dalam sistem kami' },
           { status: 404 }
@@ -50,49 +52,43 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Password minimal 6 karakter' }, { status: 400 });
       }
 
-      const user = await db.user.findFirst({
-        where: { email: normalizedEmail, isActive: true, deletedAt: null },
-      });
+      const user = await client.query(api.users.getByEmail, { email: normalizedEmail });
 
-      if (!user) {
+      if (!user || !user.isActive || user.deletedAt) {
         return NextResponse.json({ error: 'Email tidak ditemukan' }, { status: 404 });
       }
 
       // If currentPassword provided, verify it
       if (currentPassword && user.password) {
-        const isMatch = await verifyPassword(currentPassword, user.password);
+        const isMatch = simpleHash(currentPassword) === user.password;
         if (!isMatch) {
           return NextResponse.json({ error: 'Password saat ini salah' }, { status: 401 });
         }
       }
 
-      // Hash and update password
-      const hashedPassword = await hashPassword(newPassword);
-      await db.user.update({
-        where: { id: user.id },
-        data: { password: hashedPassword },
+      // Hash and update password, which also invalidates all sessions
+      await client.mutation(api.auth.resetPasswordByEmail, {
+        email: normalizedEmail,
+        newPassword,
       });
 
-      // Invalidate all sessions (force re-login)
-      await deleteAllUserSessions(user.id);
-
-      // Log activity
-      await logActivity(user.id, 'user.reset_password', 'User', 'Password was reset', request);
-
-      const { password: _, ...safeUser } = user;
+      const { password: _, ...safeUser } = user as any;
 
       return NextResponse.json({
         message: 'Password berhasil diubah. Silakan login kembali.',
-        user: safeUser,
+        user: {
+          ...safeUser,
+          id: user._id,
+        },
       });
     }
 
     return NextResponse.json({ error: 'Step tidak valid' }, { status: 400 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Auth Reset Password] Error:', error);
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

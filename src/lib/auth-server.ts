@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
-import { db } from './db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 /* ── Constants ─────────────────────────────────────────── */
 
@@ -52,49 +55,48 @@ export async function createSession(
   token: string,
   req?: Request
 ): Promise<void> {
-  const ipAddress = req?.headers.get('x-forwarded-for') || req?.headers.get('x-real-ip') || null;
-  const userAgent = req?.headers.get('user-agent') || null;
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 3600 * 1000);
+  const ipAddress = req?.headers.get('x-forwarded-for') || req?.headers.get('x-real-ip') || undefined;
+  const userAgent = req?.headers.get('user-agent') || undefined;
+  const expiresAt = Date.now() + TOKEN_EXPIRY_HOURS * 3600 * 1000;
 
-  await db.session.create({
-    data: {
-      userId,
+  try {
+    await client.mutation(api.auth.createSession, {
+      userId: userId as any,
       token,
       ipAddress: ipAddress || undefined,
       userAgent: userAgent || undefined,
       expiresAt,
-    },
-  });
+    });
+  } catch (error) {
+    console.error('[Auth Server] createSession error:', error);
+  }
 }
 
 export async function validateSession(token: string): Promise<{ userId: string; role: string } | null> {
-  // First verify JWT
-  const jwtPayload = await verifyToken(token);
-  if (!jwtPayload) return null;
-
-  // Then check session in DB
-  const session = await db.session.findFirst({
-    where: {
-      token,
-      userId: jwtPayload.userId,
-      expiresAt: { gte: new Date() },
-    },
-    include: { user: { select: { id: true, role: true, isActive: true, deletedAt: true } } },
-  });
-
-  if (!session || !session.user.isActive || session.user.deletedAt) {
+  try {
+    const user = await client.query(api.auth.verifyToken, { token });
+    if (!user) return null;
+    return { userId: user.userId, role: user.role };
+  } catch (e) {
+    console.error('[Auth Server] validateSession error:', e);
     return null;
   }
-
-  return { userId: session.userId, role: session.user.role };
 }
 
 export async function deleteSession(token: string): Promise<void> {
-  await db.session.deleteMany({ where: { token } });
+  try {
+    await client.mutation(api.auth.logout, { token });
+  } catch (e) {
+    console.error('[Auth Server] deleteSession error:', e);
+  }
 }
 
 export async function deleteAllUserSessions(userId: string): Promise<void> {
-  await db.session.deleteMany({ where: { userId } });
+  try {
+    await client.mutation(api.auth.deleteAllUserSessions, { userId: userId as any });
+  } catch (e) {
+    console.error('[Auth Server] deleteAllUserSessions error:', e);
+  }
 }
 
 /* ── Auth Request Helper ───────────────────────────────── */
@@ -148,19 +150,17 @@ export async function logActivity(
   detail?: string,
   req?: Request
 ): Promise<void> {
-  const ipAddress = req?.headers.get('x-forwarded-for') || req?.headers.get('x-real-ip') || null;
-  const userAgent = req?.headers.get('user-agent') || null;
+  const ipAddress = req?.headers.get('x-forwarded-for') || req?.headers.get('x-real-ip') || undefined;
+  const userAgent = req?.headers.get('user-agent') || undefined;
 
   try {
-    await db.activityLog.create({
-      data: {
-        userId,
-        action,
-        target: target || null,
-        detail: detail || null,
-        ipAddress: ipAddress || undefined,
-        userAgent: userAgent || undefined,
-      },
+    await client.mutation(api.users.logUserActivity, {
+      userId,
+      action,
+      target: target || undefined,
+      detail: detail || undefined,
+      ipAddress: ipAddress || undefined,
+      userAgent: userAgent || undefined,
     });
   } catch (error) {
     console.error('[Auth] Failed to log activity:', error);

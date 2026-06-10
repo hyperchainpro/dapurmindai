@@ -117,3 +117,26 @@ export const softDelete = mutation({
     });
   },
 });
+
+// Log user activity
+export const logUserActivity = mutation({
+  args: {
+    userId: v.string(),
+    action: v.string(),
+    target: v.optional(v.string()),
+    detail: v.optional(v.string()),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("activityLogs", {
+      userId: args.userId,
+      action: args.action,
+      target: args.target,
+      detail: args.detail,
+      ipAddress: args.ipAddress,
+      userAgent: args.userAgent,
+    });
+  },
+});
+

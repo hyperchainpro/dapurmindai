@@ -408,3 +408,70 @@ export const deleteAllUserSessions = mutation({
     return { success: true, deletedCount: sessions.length };
   },
 });
+
+// Create new session
+export const createSession = mutation({
+  args: {
+    userId: v.id("users"),
+    token: v.string(),
+    ipAddress: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+    expiresAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const sessionId = await ctx.db.insert("sessions", {
+      userId: args.userId,
+      token: args.token,
+      ipAddress: args.ipAddress,
+      userAgent: args.userAgent,
+      expiresAt: args.expiresAt,
+    });
+    return sessionId;
+  },
+});
+
+// Reset password by email (requires verification or admin bypass)
+export const resetPasswordByEmail = mutation({
+  args: {
+    email: v.string(),
+    newPassword: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+
+    if (!user) {
+      throw new Error("Email tidak ditemukan");
+    }
+
+    await ctx.db.patch(user._id, {
+      password: btoa(unescape(encodeURIComponent(args.newPassword))), // matches simpleHash
+    });
+
+    // Delete all sessions for user
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    // Log activity
+    await ctx.db.insert("activityLogs", {
+      userId: user._id,
+      action: "reset_password",
+      target: "user",
+      detail: "Password reset by email",
+      ipAddress: undefined,
+      userAgent: undefined,
+    });
+
+    return { success: true };
+  },
+});
+
+

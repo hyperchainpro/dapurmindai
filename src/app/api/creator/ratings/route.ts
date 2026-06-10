@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 
-/* ═══════════════════════════════════════════════════════════
-   GET/POST/PUT/DELETE — Recipe Ratings CRUD
-   ═══════════════════════════════════════════════════════════ */
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+// Helper to format ratings
+function formatRating(r: any) {
+  if (!r) return null;
+  return {
+    ...r,
+    id: r._id,
+    createdAt: new Date(r._creationTime).toISOString(),
+  };
+}
 
 // GET - List ratings for a recipe or user's ratings
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const recipeId = searchParams.get('recipeId');
-    const userId = searchParams.get('userId');
+    const recipeId = searchParams.get('recipeId') || undefined;
+    const userId = searchParams.get('userId') || undefined;
 
     if (!recipeId && !userId) {
       return NextResponse.json(
@@ -19,24 +29,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const where: Record<string, unknown> = {
-      isActive: true,
-      deletedAt: null,
-    };
-
-    if (recipeId) where.recipeId = recipeId;
-    if (userId) where.userId = userId;
-
-    const ratings = await db.recipeRating.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+    const ratings = await client.query(api.ratings.getRatings, {
+      recipeId,
+      userId: userId ? (userId as Id<"users">) : undefined,
     });
 
-    return NextResponse.json({ success: true, data: ratings });
-  } catch (error) {
+    const formatted = ratings.map((r: any) => formatRating(r));
+    return NextResponse.json({ success: true, data: formatted });
+  } catch (error: any) {
     console.error('[Ratings] GET error:', error);
     return NextResponse.json(
-      { error: 'Gagal memuat rating' },
+      { error: error.message || 'Gagal memuat rating' },
       { status: 500 }
     );
   }
@@ -55,39 +58,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    const ratingVal = Number(rating);
+    if (!Number.isInteger(ratingVal) || ratingVal < 1 || ratingVal > 5) {
       return NextResponse.json(
         { error: 'Rating harus berupa angka antara 1-5' },
         { status: 400 }
       );
     }
 
-    // Check if user already rated this recipe
-    const existing = await db.recipeRating.findFirst({
-      where: { recipeId, userId, isActive: true, deletedAt: null },
+    const newRating = await client.mutation(api.ratings.createRating, {
+      recipeId,
+      userId: userId as Id<"users">,
+      rating: ratingVal,
+      comment: comment || '',
     });
 
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Anda sudah memberikan rating untuk resep ini' },
-        { status: 409 }
-      );
-    }
-
-    const newRating = await db.recipeRating.create({
-      data: {
-        recipeId,
-        userId,
-        rating,
-        comment: comment || '',
-      },
-    });
-
-    return NextResponse.json({ success: true, data: newRating }, { status: 201 });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: formatRating(newRating) }, { status: 201 });
+  } catch (error: any) {
     console.error('[Ratings] POST error:', error);
     return NextResponse.json(
-      { error: 'Gagal membuat rating' },
+      { error: error.message || 'Gagal membuat rating' },
       { status: 500 }
     );
   }
@@ -106,40 +96,30 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Check ownership
-    const existing = await db.recipeRating.findFirst({
-      where: { id, userId, isActive: true, deletedAt: null },
-    });
+    const updateData: any = {
+      ratingId: id as Id<"recipeRatings">,
+      userId: userId as Id<"users">,
+    };
 
-    if (!existing) {
-      return NextResponse.json(
-        { error: 'Rating tidak ditemukan atau bukan milik Anda' },
-        { status: 404 }
-      );
-    }
-
-    const updateData: Record<string, unknown> = {};
     if (rating !== undefined) {
-      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      const ratingVal = Number(rating);
+      if (!Number.isInteger(ratingVal) || ratingVal < 1 || ratingVal > 5) {
         return NextResponse.json(
           { error: 'Rating harus berupa angka antara 1-5' },
           { status: 400 }
         );
       }
-      updateData.rating = rating;
+      updateData.rating = ratingVal;
     }
     if (comment !== undefined) updateData.comment = comment;
 
-    const updated = await db.recipeRating.update({
-      where: { id },
-      data: updateData,
-    });
+    const updated = await client.mutation(api.ratings.updateRating, updateData);
 
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
+    return NextResponse.json({ success: true, data: formatRating(updated) });
+  } catch (error: any) {
     console.error('[Ratings] PUT error:', error);
     return NextResponse.json(
-      { error: 'Gagal mengupdate rating' },
+      { error: error.message || 'Gagal mengupdate rating' },
       { status: 500 }
     );
   }
@@ -158,31 +138,16 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Check ownership
-    const existing = await db.recipeRating.findFirst({
-      where: { id, userId, isActive: true, deletedAt: null },
-    });
-
-    if (!existing) {
-      return NextResponse.json(
-        { error: 'Rating tidak ditemukan atau bukan milik Anda' },
-        { status: 404 }
-      );
-    }
-
-    await db.recipeRating.update({
-      where: { id },
-      data: {
-        isActive: false,
-        deletedAt: new Date(),
-      },
+    await client.mutation(api.ratings.deleteRating, {
+      ratingId: id as Id<"recipeRatings">,
+      userId: userId as Id<"users">,
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Ratings] DELETE error:', error);
     return NextResponse.json(
-      { error: 'Gagal menghapus rating' },
+      { error: error.message || 'Gagal menghapus rating' },
       { status: 500 }
     );
   }

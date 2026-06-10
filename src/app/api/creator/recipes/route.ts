@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
+
+const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+// Helper to format recipe response
+function formatRecipe(r: any) {
+  if (!r) return null;
+  return {
+    ...r,
+    id: r._id,
+    createdAt: new Date(r._creationTime).toISOString(),
+  };
+}
 
 // GET - List creator recipes
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const includeUnpublished = searchParams.get('includeUnpublished') === 'true';
 
     if (!userId) {
       return NextResponse.json(
@@ -15,44 +28,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (userId === 'all') {
-      // Return all published recipes only
-      const recipes = await db.creatorRecipe.findMany({
-        where: {
-          isActive: true,
-          isPublished: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-      return NextResponse.json({ success: true, data: recipes });
-    }
-
-    // Return all published recipes + user's own unpublished recipes
-    const recipes = await db.creatorRecipe.findMany({
-      where: {
-        isActive: true,
-        ...(includeUnpublished
-          ? {
-              OR: [
-                { isPublished: true },
-                { userId },
-              ],
-            }
-          : {
-              OR: [
-                { isPublished: true },
-                { userId, isPublished: false },
-              ],
-            }),
-      },
-      orderBy: { createdAt: 'desc' },
+    const isAll = userId === 'all';
+    const recipes = await client.query(api.recipes.listAll, {
+      userId: isAll ? undefined : (userId as Id<"users">),
     });
 
-    return NextResponse.json({ success: true, data: recipes });
-  } catch (error) {
+    const formatted = recipes.map((r: any) => formatRecipe(r));
+    return NextResponse.json({ success: true, data: formatted });
+  } catch (error: any) {
     console.error('Error fetching creator recipes:', error);
     return NextResponse.json(
-      { error: 'Gagal memuat resep creator' },
+      { error: error.message || 'Gagal memuat resep creator' },
       { status: 500 }
     );
   }
@@ -85,29 +71,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const recipe = await db.creatorRecipe.create({
-      data: {
-        userId,
-        name,
-        description: description || '',
-        image: image || '',
-        category: category || 'Lainnya',
-        difficulty: difficulty || 'Mudah',
-        cookTime: cookTime || 30,
-        prepTime: prepTime || 15,
-        servings: servings || 4,
-        ingredients: ingredients || '[]',
-        steps: steps || '[]',
-        tags: tags || '[]',
-        youtubeUrl: youtubeUrl || null,
-      },
+    const recipeId = await client.mutation(api.recipes.create, {
+      userId: userId as Id<"users">,
+      name,
+      description: description || '',
+      image: image || '',
+      category: category || 'Lainnya',
+      difficulty: difficulty || 'Mudah',
+      cookTime: cookTime || 30,
+      prepTime: prepTime || 15,
+      servings: servings || 4,
+      ingredients: typeof ingredients === 'string' ? ingredients : JSON.stringify(ingredients || []),
+      steps: typeof steps === 'string' ? steps : JSON.stringify(steps || []),
+      tags: typeof tags === 'string' ? tags : JSON.stringify(tags || []),
+      youtubeUrl: youtubeUrl || undefined,
     });
 
-    return NextResponse.json({ success: true, data: recipe }, { status: 201 });
-  } catch (error) {
+    const created = await client.query(api.recipes.getById, { recipeId });
+
+    return NextResponse.json({ success: true, data: formatRecipe(created) }, { status: 201 });
+  } catch (error: any) {
     console.error('Error creating creator recipe:', error);
     return NextResponse.json(
-      { error: 'Gagal membuat resep creator' },
+      { error: error.message || 'Gagal membuat resep creator' },
       { status: 500 }
     );
   }
@@ -127,43 +113,46 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check ownership
-    const existing = await db.creatorRecipe.findFirst({
-      where: { id, userId, isActive: true },
-    });
+    const existing = await client.query(api.recipes.getById, { recipeId: id as Id<"creatorRecipes"> });
 
-    if (!existing) {
+    if (!existing || existing.userId !== userId || !existing.isActive) {
       return NextResponse.json(
         { error: 'Resep tidak ditemukan atau bukan milik Anda' },
         { status: 404 }
       );
     }
 
-    // Build update data with only provided fields
-    const updateData: Record<string, unknown> = {};
+    // Build update data
+    const updateData: any = { recipeId: id as Id<"creatorRecipes"> };
     if (fields.name !== undefined) updateData.name = fields.name;
     if (fields.description !== undefined) updateData.description = fields.description;
     if (fields.image !== undefined) updateData.image = fields.image;
     if (fields.category !== undefined) updateData.category = fields.category;
     if (fields.difficulty !== undefined) updateData.difficulty = fields.difficulty;
-    if (fields.cookTime !== undefined) updateData.cookTime = fields.cookTime;
-    if (fields.prepTime !== undefined) updateData.prepTime = fields.prepTime;
-    if (fields.servings !== undefined) updateData.servings = fields.servings;
-    if (fields.ingredients !== undefined) updateData.ingredients = fields.ingredients;
-    if (fields.steps !== undefined) updateData.steps = fields.steps;
-    if (fields.tags !== undefined) updateData.tags = fields.tags;
-    if (fields.youtubeUrl !== undefined) updateData.youtubeUrl = fields.youtubeUrl;
+    if (fields.cookTime !== undefined) updateData.cookTime = Number(fields.cookTime);
+    if (fields.prepTime !== undefined) updateData.prepTime = Number(fields.prepTime);
+    if (fields.servings !== undefined) updateData.servings = Number(fields.servings);
+    if (fields.ingredients !== undefined) {
+      updateData.ingredients = typeof fields.ingredients === 'string' ? fields.ingredients : JSON.stringify(fields.ingredients);
+    }
+    if (fields.steps !== undefined) {
+      updateData.steps = typeof fields.steps === 'string' ? fields.steps : JSON.stringify(fields.steps);
+    }
+    if (fields.tags !== undefined) {
+      updateData.tags = typeof fields.tags === 'string' ? fields.tags : JSON.stringify(fields.tags);
+    }
+    if (fields.youtubeUrl !== undefined) updateData.youtubeUrl = fields.youtubeUrl || undefined;
     if (fields.isPublished !== undefined) updateData.isPublished = fields.isPublished;
 
-    const recipe = await db.creatorRecipe.update({
-      where: { id },
-      data: updateData,
-    });
+    await client.mutation(api.recipes.update, updateData);
 
-    return NextResponse.json({ success: true, data: recipe });
-  } catch (error) {
+    const updated = await client.query(api.recipes.getById, { recipeId: id as Id<"creatorRecipes"> });
+
+    return NextResponse.json({ success: true, data: formatRecipe(updated) });
+  } catch (error: any) {
     console.error('Error updating creator recipe:', error);
     return NextResponse.json(
-      { error: 'Gagal mengupdate resep creator' },
+      { error: error.message || 'Gagal mengupdate resep creator' },
       { status: 500 }
     );
   }
@@ -183,30 +172,22 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check ownership
-    const existing = await db.creatorRecipe.findFirst({
-      where: { id, userId, isActive: true },
-    });
+    const existing = await client.query(api.recipes.getById, { recipeId: id as Id<"creatorRecipes"> });
 
-    if (!existing) {
+    if (!existing || existing.userId !== userId || !existing.isActive) {
       return NextResponse.json(
         { error: 'Resep tidak ditemukan atau bukan milik Anda' },
         { status: 404 }
       );
     }
 
-    await db.creatorRecipe.update({
-      where: { id },
-      data: {
-        isActive: false,
-        deletedAt: new Date(),
-      },
-    });
+    await client.mutation(api.recipes.softDelete, { recipeId: id as Id<"creatorRecipes"> });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting creator recipe:', error);
     return NextResponse.json(
-      { error: 'Gagal menghapus resep creator' },
+      { error: error.message || 'Gagal menghapus resep creator' },
       { status: 500 }
     );
   }
@@ -232,29 +213,28 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const recipe = await db.creatorRecipe.findFirst({
-      where: { id, isActive: true },
-    });
+    const recipe = await client.query(api.recipes.getById, { recipeId: id as Id<"creatorRecipes"> });
 
-    if (!recipe) {
+    if (!recipe || !recipe.isActive) {
       return NextResponse.json(
         { error: 'Resep tidak ditemukan' },
         { status: 404 }
       );
     }
 
-    const updated = await db.creatorRecipe.update({
-      where: { id },
-      data: {
-        likes: action === 'like' ? recipe.likes + 1 : Math.max(0, recipe.likes - 1),
-      },
-    });
+    if (action === 'like') {
+      await client.mutation(api.recipes.incrementLikes, { recipeId: id as Id<"creatorRecipes"> });
+    } else {
+      await client.mutation(api.recipes.decrementLikes, { recipeId: id as Id<"creatorRecipes"> });
+    }
 
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
+    const updated = await client.query(api.recipes.getById, { recipeId: id as Id<"creatorRecipes"> });
+
+    return NextResponse.json({ success: true, data: formatRecipe(updated) });
+  } catch (error: any) {
     console.error('Error liking creator recipe:', error);
     return NextResponse.json(
-      { error: 'Gagal memproses like pada resep' },
+      { error: error.message || 'Gagal memproses like pada resep' },
       { status: 500 }
     );
   }

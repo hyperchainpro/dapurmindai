@@ -13,9 +13,11 @@ import type * as ads from "../ads.js";
 import type * as affiliate from "../affiliate.js";
 import type * as agents from "../agents.js";
 import type * as auth from "../auth.js";
+import type * as creator from "../creator.js";
 import type * as finance from "../finance.js";
 import type * as http from "../http.js";
 import type * as notifications from "../notifications.js";
+import type * as ratings from "../ratings.js";
 import type * as recipes from "../recipes.js";
 import type * as users from "../users.js";
 
@@ -31,9 +33,11 @@ declare const fullApi: ApiFromModules<{
   affiliate: typeof affiliate;
   agents: typeof agents;
   auth: typeof auth;
+  creator: typeof creator;
   finance: typeof finance;
   http: typeof http;
   notifications: typeof notifications;
+  ratings: typeof ratings;
   recipes: typeof recipes;
   users: typeof users;
 }>;

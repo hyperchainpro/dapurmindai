@@ -172,3 +172,145 @@ export const softDelete = mutation({
     });
   },
 });
+
+// Decrement likes
+export const decrementLikes = mutation({
+  args: { recipeId: v.id("creatorRecipes") },
+  handler: async (ctx, args) => {
+    const recipe = await ctx.db.get(args.recipeId);
+    if (!recipe) throw new Error("Recipe not found");
+
+    await ctx.db.patch(args.recipeId, {
+      likes: Math.max(0, recipe.likes - 1),
+    });
+  },
+});
+
+// List all recipes non-paginated
+export const listAll = query({
+  args: {
+    userId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("creatorRecipes")
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    if (args.userId) {
+      return all.filter(
+        (r) => r.isPublished || r.userId === args.userId
+      );
+    }
+
+    return all.filter((r) => r.isPublished);
+  },
+});
+
+// GET - explore data
+export const getExploreData = query({
+  args: {
+    category: v.optional(v.string()),
+    sort: v.optional(v.string()),
+    cursor: v.optional(v.number()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 20;
+
+    let recipes = await ctx.db
+      .query("creatorRecipes")
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("isPublished"), true)
+      ))
+      .collect();
+
+    // Filter by category
+    if (args.category && args.category !== 'Semua') {
+      recipes = recipes.filter((r) => r.category === args.category);
+    }
+
+    // Filter by cursor
+    if (args.cursor) {
+      recipes = recipes.filter((r) => r._creationTime < args.cursor!);
+    }
+
+    // Sort
+    if (args.sort === 'popular') {
+      recipes.sort((a, b) => b.likes - a.likes);
+    } else if (args.sort === 'fastest') {
+      recipes.sort((a, b) => a.cookTime - b.cookTime);
+    } else {
+      recipes.sort((a, b) => (b._creationTime ?? 0) - (a._creationTime ?? 0));
+    }
+
+    // Take limit
+    const paginatedRecipes = recipes.slice(0, limit);
+
+    // Get category counts
+    const categoryStats: Record<string, number> = { Semua: 0 };
+    const allPublished = await ctx.db
+      .query("creatorRecipes")
+      .filter((q) => q.and(
+        q.eq(q.field("isActive"), true),
+        q.eq(q.field("isPublished"), true)
+      ))
+      .collect();
+
+    for (const r of allPublished) {
+      categoryStats[r.category] = (categoryStats[r.category] || 0) + 1;
+      categoryStats.Semua += 1;
+    }
+
+    // Map recipes
+    const data = [];
+    for (const r of paginatedRecipes) {
+      const user = await ctx.db.get(r.userId);
+      const profile = await ctx.db
+        .query("creatorProfiles")
+        .withIndex("by_userId", (q) => q.eq("userId", r.userId))
+        .filter((q) => q.eq(q.field("isActive"), true))
+        .first();
+
+      data.push({
+        id: r._id,
+        name: r.name,
+        description: r.description,
+        image: r.image,
+        category: r.category,
+        difficulty: r.difficulty,
+        cookTime: r.cookTime,
+        prepTime: r.prepTime,
+        servings: r.servings,
+        likes: r.likes,
+        tags: r.tags,
+        youtubeUrl: r.youtubeUrl,
+        createdAt: new Date(r._creationTime).toISOString(),
+        user: {
+          id: user?._id || "",
+          username: user?.username || "",
+          name: user?.name || user?.username || "",
+          avatar: user?.avatar,
+          displayName: profile?.displayName || user?.name || user?.username || "",
+          bio: profile?.bio || '',
+          followers: profile?.followers || 0,
+          totalRecipes: profile?.totalRecipes || 0,
+        },
+      });
+    }
+
+    const nextCursor = paginatedRecipes.length === limit
+      ? paginatedRecipes[paginatedRecipes.length - 1]._creationTime
+      : null;
+
+    return {
+      data,
+      nextCursor,
+      categoryStats,
+    };
+  },
+});
+
+
+
