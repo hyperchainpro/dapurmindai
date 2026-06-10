@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider, ThemeInitScript } from "@/components/dapurmind/ThemeProvider";
+import { ConvexClientProvider } from "@/components/ConvexProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,12 +76,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <ThemeProvider>
-          <div className="mx-auto max-w-lg h-screen relative overflow-x-hidden overflow-y-auto scroll-compact scroll-elevated">
-            {children}
-          </div>
-        </ThemeProvider>
-        <Toaster />
+        <ConvexClientProvider>
+          <ThemeProvider>
+            <div className="mx-auto max-w-lg h-screen relative overflow-x-hidden overflow-y-auto scroll-compact scroll-elevated">
+              {children}
+            </div>
+          </ThemeProvider>
+          <Toaster />
+        </ConvexClientProvider>
       </body>
     </html>
   );
