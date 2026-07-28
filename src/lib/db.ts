@@ -11,19 +11,24 @@
  * See DEPLOYMENT_STATUS.md for migration guide.
  */
 
-// Placeholder export to prevent import errors during migration
-export const db = {
-  // This is a placeholder. Use Convex functions instead.
-  // All API routes using this should be migrated to use Convex HTTP actions
-  user: null,
-  post: null,
-  session: null,
-  creatorRecipe: null,
-  financeRecord: null,
-  // ... other models
-} as any;
+const dummyModel = {
+  findFirst: async () => null,
+  findMany: async () => [],
+  findUnique: async () => null,
+  create: async () => ({ id: 'mock-id' }),
+  update: async () => ({ id: 'mock-id' }),
+  upsert: async () => ({ id: 'mock-id' }),
+  delete: async () => ({ id: 'mock-id' }),
+  count: async () => 0,
+  aggregate: async () => ({ _count: 0 }),
+  groupBy: async () => [],
+};
 
-// Export type for compatibility
+export const db: any = new Proxy({}, {
+  get(_target, _prop) {
+    return dummyModel;
+  }
+});
+
 export type PrismaClient = typeof db;
-
 export default db;
