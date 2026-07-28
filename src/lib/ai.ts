@@ -2,6 +2,8 @@ import ZAI from 'z-ai-web-dev-sdk';
 import type { UserProfile } from '@/types';
 import { recipes } from './recipes';
 import { db } from './db';
+import { client } from './convex';
+import { api } from '../../convex/_generated/api';
 
 /* ── Types ─────────────────────────────────────────────────── */
 
@@ -28,40 +30,24 @@ interface AiUsageResult {
 
 async function getActiveAgent(purpose: string = 'chat'): Promise<AgentConfig | null> {
   try {
-    // Find the default active agent first
-    let agent = await db.aiAgent.findFirst({
-      where: {
-        isActive: true,
-        isDefault: true,
-        deletedAt: null,
-        purpose: { in: ['all', purpose] },
-      },
-    });
+    const agents = await client.query(api.agents.list);
+    if (!agents || agents.length === 0) return null;
 
-    // If no default, find any active agent matching purpose
-    if (!agent) {
-      agent = await db.aiAgent.findFirst({
-        where: {
-          isActive: true,
-          deletedAt: null,
-          purpose: { in: ['all', purpose] },
-        },
-        orderBy: { createdAt: 'asc' },
-      });
-    }
+    const defaultAgent = agents.find((a: any) => a.isDefault && (a.purpose === 'all' || a.purpose === purpose));
+    const activeAgent = defaultAgent || agents.find((a: any) => a.purpose === 'all' || a.purpose === purpose) || agents[0];
 
-    if (!agent) return null;
+    if (!activeAgent) return null;
 
     return {
-      id: agent.id,
-      name: agent.name,
-      provider: agent.provider,
-      model: agent.model,
-      apiKey: agent.apiKey,
-      apiBaseUrl: agent.apiBaseUrl,
+      id: activeAgent._id,
+      name: activeAgent.name,
+      provider: activeAgent.provider,
+      model: activeAgent.model,
+      apiKey: activeAgent.apiKey,
+      apiBaseUrl: activeAgent.apiBaseUrl,
     };
   } catch (error) {
-    console.error('[AI] Error fetching agent config:', error);
+    console.error('[AI] Error fetching agent config from Convex:', error);
     return null;
   }
 }
