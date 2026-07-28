@@ -121,22 +121,42 @@ async function callBuiltinAgent(
   temperature: number = 0.7,
   maxTokens: number = 2000,
 ): Promise<{ content: string; inputTokens: number; outputTokens: number }> {
-  const zai = await ZAI.create();
-  const completion = await zai.chat.completions.create({
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ],
-    temperature,
-    max_tokens: maxTokens,
-  });
+  try {
+    const zai = await ZAI.create();
+    const completion = await zai.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature,
+      max_tokens: maxTokens,
+    });
 
-  const content = completion.choices[0]?.message?.content || '';
-  // z-ai-web-dev-sdk may not return token counts, estimate
-  const inputTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(userMessage.length / 4);
-  const outputTokens = Math.ceil(content.length / 4);
+    const content = completion.choices[0]?.message?.content || '';
+    const inputTokens = Math.ceil(systemPrompt.length / 4) + Math.ceil(userMessage.length / 4);
+    const outputTokens = Math.ceil(content.length / 4);
 
-  return { content, inputTokens, outputTokens };
+    return { content, inputTokens, outputTokens };
+  } catch (err) {
+    console.warn('[AI] ZAI SDK call failed, attempting direct Gemini fallback:', err);
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    if (geminiKey) {
+      return callGoogleGemini(
+        {
+          id: 'built-in-gemini-fallback',
+          name: 'Google Gemini AI Fallback',
+          provider: 'google',
+          model: 'gemini-1.5-flash',
+          apiKey: geminiKey,
+        },
+        systemPrompt,
+        userMessage,
+        temperature,
+        maxTokens
+      );
+    }
+    throw err;
+  }
 }
 
 /* ── OpenAI-compatible Agent (Anthropic via proxy, OpenAI, Groq, DeepSeek, Mistral, OpenRouter) ───────── */

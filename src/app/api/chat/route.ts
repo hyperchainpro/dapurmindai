@@ -53,22 +53,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Get AI response
-    const aiResponse = await getAIResponse(systemPrompt, augmentedMessage);
+    try {
+      const aiResponse = await getAIResponse(systemPrompt, augmentedMessage);
 
-    return NextResponse.json({
-      success: true,
-      response: aiResponse,
-      timestamp: new Date().toISOString(),
-    });
+      return NextResponse.json({
+        success: true,
+        response: aiResponse,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (aiErr) {
+      console.warn('[Chat API] AI response unavailable, using Chef Mindi offline mode:', aiErr);
+      return NextResponse.json({
+        success: true,
+        response: 'Halo! Saya **Chef Mindi** 🍳. Saat ini koneksi API AI sedang dalam pemeliharaan atau kuncinya belum dikonfigurasi. Anda tetap bisa menggunakan fitur pencarian resep, meal plan, dan manajemen bahan makanan di DapurMind AI!',
+        source: 'offline_fallback',
+        timestamp: new Date().toISOString(),
+      });
+    }
   } catch (error) {
     console.error('[Chat API] Error:', error);
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json(
       { error: 'Terjadi kesalahan server. Silakan coba lagi.' },
