@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       createdAt: new Date(acc._creationTime).toISOString(),
     }));
 
-    return NextResponse.json({ success: true, data: formatted });
+    return NextResponse.json({ success: true, accounts: formatted, data: formatted });
   } catch (error) {
     console.error('[Affiliate GET] Error:', error);
     return NextResponse.json({ error: 'Gagal memuat akun afiliasi' }, { status: 500 });
@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       baseUrlTemplate,
     });
 
-    return NextResponse.json({ success: true, data: { id: accountId, platform, affiliateId, baseUrlTemplate } }, { status: 201 });
+    const newAcc = { id: accountId, platform, affiliateId, apiKey: apiKey || null, baseUrlTemplate, isActive: true };
+    return NextResponse.json({ success: true, account: newAcc, data: newAcc }, { status: 201 });
   } catch (error) {
     console.error('[Affiliate POST] Error:', error);
     return NextResponse.json({ error: 'Gagal membuat akun afiliasi' }, { status: 500 });
@@ -81,7 +82,8 @@ export async function PUT(request: NextRequest) {
 
     await client.mutation(api.affiliate.updateAffiliateAccount, updateData);
 
-    return NextResponse.json({ success: true, data: { id, ...fields } });
+    const updatedAcc = { id, ...fields };
+    return NextResponse.json({ success: true, account: updatedAcc, data: updatedAcc });
   } catch (error) {
     console.error('[Affiliate PUT] Error:', error);
     return NextResponse.json({ error: 'Gagal mengupdate akun afiliasi' }, { status: 500 });

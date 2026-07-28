@@ -288,7 +288,7 @@ export function AdminAffiliate() {
       const res = await fetch('/api/affiliate/accounts');
       if (!res.ok) throw new Error('Gagal memuat akun afiliasi');
       const data = await res.json();
-      setAffiliateAccounts(data.accounts);
+      setAffiliateAccounts(data.accounts || data.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
@@ -334,12 +334,14 @@ export function AdminAffiliate() {
           baseUrlTemplate: addBaseUrlTemplate.trim(),
         }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || 'Gagal menambahkan akun');
       }
-      const { account } = await res.json();
-      addAffiliateAccount(account);
+      const account = data.account || data.data;
+      if (account) {
+        addAffiliateAccount(account);
+      }
       setShowAddDialog(false);
       resetAddForm();
     } catch (err) {
@@ -385,15 +387,16 @@ export function AdminAffiliate() {
           isActive: editIsActive,
         }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || 'Gagal mengupdate akun');
       }
-      const { account } = await res.json();
-      // Update local state: replace the account
-      setAffiliateAccounts(
-        affiliateAccounts.map((a) => (a.id === account.id ? account : a)),
-      );
+      const account = data.account || data.data;
+      if (account) {
+        setAffiliateAccounts(
+          affiliateAccounts.map((a) => (a.id === account.id ? account : a)),
+        );
+      }
       setShowEditDialog(false);
       setEditingAccount(null);
     } catch (err) {
