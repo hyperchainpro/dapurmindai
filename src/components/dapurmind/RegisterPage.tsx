@@ -127,7 +127,14 @@ export function RegisterPage() {
       setAuthUser(newUser);
       setLoggedIn(true);
       setFirstLaunch(false);
-      setScreen('onboarding');
+      updateOnboarding({
+        id: newUser.id,
+        name: newUser.name || newUser.username || name,
+        username: newUser.username || username,
+        email: newUser.email || email,
+        isOnboarded: true,
+      });
+      setScreen('dashboard');
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
       setResetTrigger((t) => t + 1);

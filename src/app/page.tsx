@@ -221,11 +221,11 @@ function ScreenRouter() {
 
   const isOnboarded = user?.isOnboarded ?? false;
 
-  // Compute effective screen synchronously to NEVER show splash for returning/registered users
+  // Compute effective screen synchronously to NEVER show splash or onboarding for registered/logged-in users
   let effectiveScreen = currentScreen;
-  if (effectiveScreen === 'splash') {
+  if (effectiveScreen === 'splash' || effectiveScreen === 'onboarding') {
     if (isLoggedIn) {
-      effectiveScreen = isOnboarded ? 'dashboard' : 'onboarding';
+      effectiveScreen = 'dashboard';
     } else if (!firstLaunch) {
       effectiveScreen = 'login';
     }

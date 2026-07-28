@@ -102,30 +102,18 @@ export function LoginPage() {
         setLanguage(loggedInUser.language);
       }
 
-      // If user has admin/superadmin role, redirect to admin panel
+      // Mark user as onboarded and redirect directly to dashboard (or admin panel)
+      updateOnboarding({
+        id: loggedInUser.id,
+        name: loggedInUser.name || loggedInUser.username || 'Pengguna',
+        username: loggedInUser.username,
+        email: loggedInUser.email,
+        isOnboarded: true,
+      });
+
       if (loggedInUser.role === 'admin' || loggedInUser.role === 'superadmin') {
-        updateOnboarding({
-          id: loggedInUser.id,
-          name: loggedInUser.name,
-          username: loggedInUser.username,
-          email: loggedInUser.email,
-        });
         setScreen('admin-affiliate');
-      } else if (!loggedInUser.isOnboarded) {
-        updateOnboarding({
-          id: loggedInUser.id,
-          name: loggedInUser.name,
-          isOnboarded: false,
-          createdAt: loggedInUser.createdAt,
-        });
-        setScreen('onboarding');
       } else {
-        updateOnboarding({
-          id: loggedInUser.id,
-          name: loggedInUser.name,
-          username: loggedInUser.username,
-          email: loggedInUser.email,
-        });
         setScreen('dashboard');
       }
     } catch {
