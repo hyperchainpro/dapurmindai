@@ -44,10 +44,17 @@ export default function SplashScreen() {
   const hasRedirected = React.useRef(false);
   const emojis = FLOATING_EMOJIS;
 
+  const setFirstLaunch = useAppStore((s) => s.setFirstLaunch);
+
   useEffect(() => {
     // If already logged in, skip splash entirely
     if (isLoggedIn) {
       setScreen('dashboard');
+      return;
+    }
+    // If already launched/visited before, skip splash and go straight to login
+    if (!firstLaunch) {
+      setScreen('login');
       return;
     }
 
@@ -62,20 +69,20 @@ export default function SplashScreen() {
       });
     }, 50);
 
-    // After 2s, trigger exit (shorter duration)
+    // After 2s, trigger exit
     const timeout = setTimeout(() => setIsVisible(false), 2000);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [isLoggedIn, setScreen, firstLaunch]);
+  }, [isLoggedIn, firstLaunch, setScreen]);
 
   const handleExitComplete = () => {
     if (!isVisible && !hasRedirected.current) {
       hasRedirected.current = true;
-      // First launch: go to register; returning user: go to login
-      setScreen(firstLaunch ? 'register' : 'login');
+      setFirstLaunch(false);
+      setScreen('login');
     }
   };
 
