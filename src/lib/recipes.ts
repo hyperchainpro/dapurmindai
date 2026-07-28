@@ -1033,7 +1033,10 @@ export function searchRecipes(query: string): Recipe[] {
       r.name.toLowerCase().includes(q) ||
       r.description.toLowerCase().includes(q) ||
       r.tags.some((t) => t.toLowerCase().includes(q)) ||
-      r.ingredients.some((i) => i.name.toLowerCase().includes(q))
+      r.ingredients.some((i) => {
+        const name = typeof i === 'string' ? i : i.name;
+        return name ? name.toLowerCase().includes(q) : false;
+      })
   );
 }
 

@@ -18,7 +18,9 @@ function matchLocalRecipes(
   const scored: { recipe: Recipe; score: number; matched: string[] }[] = [];
 
   for (const recipe of recipes) {
-    const recipeIngNames = recipe.ingredients.map((i) => i.name.toLowerCase());
+    const recipeIngNames = recipe.ingredients.map((i) =>
+      (typeof i === 'string' ? i : i.name).toLowerCase()
+    );
     const matched: string[] = [];
 
     for (const ing of lowerIngredients) {
@@ -178,15 +180,19 @@ export async function POST(request: NextRequest) {
       const formattedResponse = localResults
         .map((r, i) => {
           const matchedIngs = r.ingredients
-            .filter((ing) =>
-              cleanedIngredients.some(
+            .filter((ing) => {
+              const name = typeof ing === 'string' ? ing : ing.name;
+              return cleanedIngredients.some(
                 (ci) =>
-                  ing.name.toLowerCase().includes(ci.toLowerCase()) ||
-                  ci.toLowerCase().includes(ing.name.toLowerCase())
-              )
-            )
-            .map((ing) => ing.name);
-          return `${i + 1}. **${r.name}** (${r.difficulty}, ~${r.cookTime + r.prepTime} menit)\n   ${r.description}\n   Bahan cocok: ${matchedIngs.join(', ') || r.ingredients.slice(0, 3).map((i) => i.name).join(', ')}\n   Langkah: ${r.steps.slice(0, 3).join(' → ')}...`;
+                  name.toLowerCase().includes(ci.toLowerCase()) ||
+                  ci.toLowerCase().includes(name.toLowerCase())
+              );
+            })
+            .map((ing) => (typeof ing === 'string' ? ing : ing.name));
+          const fallbackIngs = r.ingredients
+            .slice(0, 3)
+            .map((i) => (typeof i === 'string' ? i : i.name));
+          return `${i + 1}. **${r.name}** (${r.difficulty}, ~${r.cookTime + r.prepTime} menit)\n   ${r.description}\n   Bahan cocok: ${matchedIngs.join(', ') || fallbackIngs.join(', ')}\n   Langkah: ${r.steps.slice(0, 3).join(' → ')}...`;
         })
         .join('\n\n');
 
