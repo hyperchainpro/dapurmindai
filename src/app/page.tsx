@@ -221,6 +221,16 @@ function ScreenRouter() {
 
   const isOnboarded = user?.isOnboarded ?? false;
 
+  // Compute effective screen synchronously to NEVER show splash for returning/registered users
+  let effectiveScreen = currentScreen;
+  if (effectiveScreen === 'splash') {
+    if (isLoggedIn) {
+      effectiveScreen = isOnboarded ? 'dashboard' : 'onboarding';
+    } else if (!firstLaunch) {
+      effectiveScreen = 'login';
+    }
+  }
+
   // Auth guard: redirect to admin-login if not authenticated
   React.useEffect(() => {
     if (['admin-dashboard', 'admin-affiliate', 'admin-analytics', 'admin-users', 'admin-agents', 'admin-settings', 'admin-ads'].includes(currentScreen) && !isAdminLoggedIn) {
@@ -237,25 +247,17 @@ function ScreenRouter() {
     }
   }, [currentScreen, isLoggedIn, setScreen]);
 
-  // Splash bypass guard: redirect immediately if already registered or logged in
+  // Sync effectiveScreen back to store if changed from splash
   React.useEffect(() => {
-    if (currentScreen === 'splash') {
-      if (isLoggedIn) {
-        if (isOnboarded) {
-          setScreen('dashboard');
-        } else {
-          setScreen('onboarding');
-        }
-      } else if (!firstLaunch) {
-        setScreen('login');
-      }
+    if (currentScreen === 'splash' && effectiveScreen !== 'splash') {
+      setScreen(effectiveScreen);
     }
-  }, [currentScreen, isLoggedIn, isOnboarded, firstLaunch, setScreen]);
+  }, [currentScreen, effectiveScreen, setScreen]);
 
-  const showSplash = currentScreen === 'splash' && !isLoggedIn && firstLaunch;
-  const showLogin = currentScreen === 'login' || (currentScreen === 'splash' && !isLoggedIn && !firstLaunch);
-  const showOnboarding = currentScreen === 'onboarding' || (currentScreen === 'splash' && isLoggedIn && !isOnboarded);
-  const showDashboard = currentScreen === 'dashboard' || (currentScreen === 'splash' && isLoggedIn && isOnboarded);
+  const showSplash = effectiveScreen === 'splash';
+  const showLogin = effectiveScreen === 'login';
+  const showOnboarding = effectiveScreen === 'onboarding';
+  const showDashboard = effectiveScreen === 'dashboard';
 
   return (
     <AnimatePresence mode="wait">
