@@ -302,7 +302,11 @@ function AILinkResultCard({ result, index }: { result: AILinkResult; index: numb
 export function MarketplaceHub() {
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
-  const shoppingItems = useAppStore((s) => s.shoppingItems);
+  const rawShoppingItems = useAppStore((s) => s.shoppingItems);
+  const shoppingItems = useMemo(
+    () => (Array.isArray(rawShoppingItems) ? rawShoppingItems : []),
+    [rawShoppingItems],
+  );
   const setShoppingItems = useAppStore((s) => s.setShoppingItems);
   const user = useAppStore((s) => s.user);
   const setAILoading = useAppStore((s) => s.setAILoading);
@@ -319,7 +323,7 @@ export function MarketplaceHub() {
 
   /* ── Derived state ─────────────────────────────────── */
   const uncheckedItems = useMemo(
-    () => shoppingItems.filter((i) => !i.checked),
+    () => shoppingItems.filter((i) => i && !i.checked),
     [shoppingItems]
   );
 

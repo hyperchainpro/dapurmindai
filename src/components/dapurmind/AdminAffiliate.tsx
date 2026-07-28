@@ -236,7 +236,11 @@ export function AdminAffiliate() {
   /* ── Store hooks ───────────────────────────────────────────── */
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
-  const affiliateAccounts = useAppStore((s) => s.affiliateAccounts);
+  const rawAffiliateAccounts = useAppStore((s) => s.affiliateAccounts);
+  const affiliateAccounts = useMemo(
+    () => (Array.isArray(rawAffiliateAccounts) ? rawAffiliateAccounts : []),
+    [rawAffiliateAccounts],
+  );
   const setAffiliateAccounts = useAppStore((s) => s.setAffiliateAccounts);
   const addAffiliateAccount = useAppStore((s) => s.addAffiliateAccount);
   const removeAffiliateAccount = useAppStore((s) => s.removeAffiliateAccount);
@@ -271,9 +275,12 @@ export function AdminAffiliate() {
 
   /* ── Derived data ──────────────────────────────────────────── */
   const totalAvailable = AFFILIATE_MARKETPLACES.length;
-  const connectedCount = affiliateAccounts.filter((a) => a.isActive).length;
+  const connectedCount = useMemo(
+    () => affiliateAccounts.filter((a) => a && a.isActive).length,
+    [affiliateAccounts],
+  );
   const connectedPlatforms = useMemo(
-    () => new Set(affiliateAccounts.map((a) => a.platform)),
+    () => new Set(affiliateAccounts.filter(Boolean).map((a) => a.platform)),
     [affiliateAccounts],
   );
 
