@@ -114,7 +114,7 @@ export function FavoritePage() {
         variants={stagger}
         initial="hidden"
         animate="visible"
-        className="flex flex-col pb-28"
+        className="flex flex-col pb-60"
       >
         {/* ── Header ─────────────────────────────────── */}
         <header className="sticky top-0 z-20 glass">

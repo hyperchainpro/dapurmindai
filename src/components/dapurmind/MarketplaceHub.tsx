@@ -529,7 +529,7 @@ export function MarketplaceHub() {
   /* ── Main render ───────────────────────────────────── */
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
-      <div className="flex flex-col pb-40">
+      <div className="flex flex-col pb-60">
         {/* ── Header ─────────────────────────────────────── */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">

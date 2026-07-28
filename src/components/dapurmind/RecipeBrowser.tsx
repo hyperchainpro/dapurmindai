@@ -252,7 +252,7 @@ export function RecipeBrowser() {
 
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
-      <div className="flex flex-col pb-24">
+      <div className="flex flex-col pb-60">
         {/* ── Header ───────────────────────────────────── */}
         <header className="sticky top-0 z-20 glass">
           <div className="space-y-3 px-4 pb-3 pt-4">

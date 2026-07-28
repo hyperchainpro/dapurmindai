@@ -600,7 +600,7 @@ export function ZeroWasteRecipe() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
       {/* Content */}
-      <div className="relative z-10 flex flex-col pb-24">
+      <div className="relative z-10 flex flex-col pb-64">
         {/* ── Header ───────────────────────────────────── */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
