@@ -289,6 +289,32 @@ async function callAgent(
 ): Promise<AiUsageResult> {
   const startTime = Date.now();
 
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+  if (geminiKey) {
+    try {
+      const geminiConfig: AgentConfig = {
+        id: 'google-gemini-env',
+        name: 'Google Gemini AI',
+        provider: 'google',
+        model: 'gemini-1.5-flash',
+        apiKey: geminiKey,
+      };
+      const result = await callGoogleGemini(geminiConfig, systemPrompt, userMessage, temperature, maxTokens);
+      const latencyMs = Date.now() - startTime;
+      return {
+        response: result.content,
+        agentId: 'google-gemini-env',
+        provider: 'google',
+        model: 'gemini-1.5-flash',
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
+        latencyMs,
+      };
+    } catch (gErr) {
+      console.warn('[AI] Direct Gemini API call failed:', gErr);
+    }
+  }
+
   // Try to get configured agent
   const agent = await getActiveAgent(purpose);
 
@@ -298,7 +324,6 @@ async function callAgent(
       const result = await callBuiltinAgent(systemPrompt, userMessage, temperature, maxTokens);
       const latencyMs = Date.now() - startTime;
 
-      // Log usage if agent exists in DB
       if (agent) {
         await logUsage(agent.id, purpose, 'success', result.inputTokens, result.outputTokens, latencyMs, undefined, userId);
       }
@@ -313,19 +338,17 @@ async function callAgent(
         latencyMs,
       };
     } catch (error) {
-      // If built-in fails and we have a configured agent, log it
       if (agent) {
         const latencyMs = Date.now() - startTime;
         await logUsage(agent.id, purpose, 'error', 0, 0, latencyMs, String(error), userId);
       }
 
-      // Try fallback to next available agent
       const fallbackResult = await tryFallbackAgent(
         systemPrompt, userMessage, purpose, temperature, maxTokens, startTime, userId, agent?.id
       );
       if (fallbackResult) return fallbackResult;
 
-      throw new Error('Gagal mendapatkan respons AI. Silakan coba lagi.');
+      throw new Error('AI_SERVICE_UNAVAILABLE');
     }
   }
 
@@ -392,56 +415,59 @@ async function tryFallbackAgent(
   userId?: string,
   excludeAgentId?: string,
 ): Promise<AiUsageResult | null> {
-  // Find next active agent (excluding the failed one)
-  const fallbackAgents = await db.aiAgent.findMany({
-    where: {
-      isActive: true,
-      deletedAt: null,
-      purpose: { in: ['all', purpose] },
-      id: { not: excludeAgentId || undefined },
-    },
-    orderBy: { createdAt: 'asc' },
-  });
+  try {
+    const fallbackAgents = await db.aiAgent.findMany({
+      where: {
+        isActive: true,
+        deletedAt: null,
+        purpose: { in: ['all', purpose] },
+        id: { not: excludeAgentId || undefined },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
 
-  for (const fbAgent of fallbackAgents) {
-    try {
-      const agentConfig: AgentConfig = {
-        id: fbAgent.id,
-        name: fbAgent.name,
-        provider: fbAgent.provider,
-        model: fbAgent.model,
-        apiKey: fbAgent.apiKey,
-        apiBaseUrl: fbAgent.apiBaseUrl,
-      };
+    for (const fbAgent of fallbackAgents) {
+      try {
+        const agentConfig: AgentConfig = {
+          id: fbAgent.id,
+          name: fbAgent.name,
+          provider: fbAgent.provider,
+          model: fbAgent.model,
+          apiKey: fbAgent.apiKey,
+          apiBaseUrl: fbAgent.apiBaseUrl,
+        };
 
-      let result: { content: string; inputTokens: number; outputTokens: number };
+        let result: { content: string; inputTokens: number; outputTokens: number };
 
-      if (fbAgent.provider === 'built-in') {
-        result = await callBuiltinAgent(systemPrompt, userMessage, temperature, maxTokens);
-      } else if (fbAgent.provider === 'anthropic') {
-        result = await callAnthropic(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
-      } else if (fbAgent.provider === 'google') {
-        result = await callGoogleGemini(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
-      } else {
-        result = await callOpenAICompatible(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
+        if (fbAgent.provider === 'built-in') {
+          result = await callBuiltinAgent(systemPrompt, userMessage, temperature, maxTokens);
+        } else if (fbAgent.provider === 'anthropic') {
+          result = await callAnthropic(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
+        } else if (fbAgent.provider === 'google') {
+          result = await callGoogleGemini(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
+        } else {
+          result = await callOpenAICompatible(agentConfig, systemPrompt, userMessage, temperature, maxTokens);
+        }
+
+        const latencyMs = Date.now() - startTime;
+        await logUsage(fbAgent.id, purpose, 'success', result.inputTokens, result.outputTokens, latencyMs, undefined, userId);
+
+        return {
+          response: result.content,
+          agentId: fbAgent.id,
+          provider: fbAgent.provider,
+          model: fbAgent.model,
+          inputTokens: result.inputTokens,
+          outputTokens: result.outputTokens,
+          latencyMs,
+        };
+      } catch (fbError) {
+        console.error(`[AI] Fallback agent "${fbAgent.name}" also failed:`, fbError);
+        continue;
       }
-
-      const latencyMs = Date.now() - startTime;
-      await logUsage(fbAgent.id, purpose, 'success', result.inputTokens, result.outputTokens, latencyMs, undefined, userId);
-
-      return {
-        response: result.content,
-        agentId: fbAgent.id,
-        provider: fbAgent.provider,
-        model: fbAgent.model,
-        inputTokens: result.inputTokens,
-        outputTokens: result.outputTokens,
-        latencyMs,
-      };
-    } catch (fbError) {
-      console.error(`[AI] Fallback agent "${fbAgent.name}" also failed:`, fbError);
-      continue;
     }
+  } catch (dbErr) {
+    console.warn('[AI] DB fallback agent lookup unavailable:', dbErr);
   }
 
   return null;
