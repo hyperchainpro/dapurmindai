@@ -18,17 +18,19 @@ function matchLocalRecipes(
   const scored: { recipe: Recipe; score: number; matched: string[] }[] = [];
 
   for (const recipe of recipes) {
+    if (!recipe || !recipe.ingredients || !Array.isArray(recipe.ingredients)) continue;
     const recipeIngNames = recipe.ingredients.map((i) =>
-      (typeof i === 'string' ? i : i.name).toLowerCase()
+      (typeof i === 'string' ? i : (i?.name || '')).toLowerCase()
     );
     const matched: string[] = [];
 
     for (const ing of lowerIngredients) {
       for (const rIng of recipeIngNames) {
         if (
-          rIng.includes(ing) ||
-          ing.includes(rIng) ||
-          rIng.split(' ').some((word) => word.length > 2 && ing.includes(word))
+          rIng &&
+          (rIng.includes(ing) ||
+            ing.includes(rIng) ||
+            rIng.split(' ').some((word) => word.length > 2 && ing.includes(word)))
         ) {
           if (!matched.includes(ingredients[lowerIngredients.indexOf(ing)])) {
             matched.push(ingredients[lowerIngredients.indexOf(ing)]);
@@ -39,9 +41,10 @@ function matchLocalRecipes(
     }
 
     // Also match by recipe tags
+    const tags = Array.isArray(recipe.tags) ? recipe.tags : [];
     for (const ing of lowerIngredients) {
-      for (const tag of recipe.tags) {
-        if (tag.toLowerCase().includes(ing) && !matched.includes(ingredients[lowerIngredients.indexOf(ing)])) {
+      for (const tag of tags) {
+        if (tag && tag.toLowerCase().includes(ing) && !matched.includes(ingredients[lowerIngredients.indexOf(ing)])) {
           matched.push(ingredients[lowerIngredients.indexOf(ing)]);
           break;
         }
@@ -49,8 +52,8 @@ function matchLocalRecipes(
     }
 
     if (matched.length > 0) {
-      // Score: more matched ingredients + bonus for quick recipes when expiry is short
-      const timeScore = expiryDays <= 2 ? (recipe.cookTime <= 20 ? 3 : 1) : 0;
+      const cookTime = recipe.cookTime || 15;
+      const timeScore = expiryDays <= 2 ? (cookTime <= 20 ? 3 : 1) : 0;
       const score = matched.length + timeScore;
       scored.push({ recipe, score, matched });
     }
@@ -180,20 +183,25 @@ export async function POST(request: NextRequest) {
       // Format local results into a readable response string
       const formattedResponse = localResults
         .map((r, i) => {
-          const matchedIngs = r.ingredients
+          const rIngs = Array.isArray(r.ingredients) ? r.ingredients : [];
+          const rSteps = Array.isArray(r.steps) ? r.steps : [];
+          const cookTime = r.cookTime || 15;
+          const prepTime = r.prepTime || 10;
+
+          const matchedIngs = rIngs
             .filter((ing) => {
-              const name = typeof ing === 'string' ? ing : ing.name;
-              return cleanedIngredients.some(
+              const name = typeof ing === 'string' ? ing : (ing?.name || '');
+              return name && cleanedIngredients.some(
                 (ci) =>
                   name.toLowerCase().includes(ci.toLowerCase()) ||
                   ci.toLowerCase().includes(name.toLowerCase())
               );
             })
-            .map((ing) => (typeof ing === 'string' ? ing : ing.name));
-          const fallbackIngs = r.ingredients
+            .map((ing) => (typeof ing === 'string' ? ing : (ing?.name || 'Bahan')));
+          const fallbackIngs = rIngs
             .slice(0, 3)
-            .map((i) => (typeof i === 'string' ? i : i.name));
-          return `${i + 1}. **${r.name}** (${r.difficulty}, ~${r.cookTime + r.prepTime} menit)\n   ${r.description}\n   Bahan cocok: ${matchedIngs.join(', ') || fallbackIngs.join(', ')}\n   Langkah: ${r.steps.slice(0, 3).join(' → ')}...`;
+            .map((i) => (typeof i === 'string' ? i : (i?.name || 'Bahan')));
+          return `${i + 1}. **${r.name}** (${r.difficulty || 'Mudah'}, ~${cookTime + prepTime} menit)\n   ${r.description || ''}\n   Bahan cocok: ${matchedIngs.join(', ') || fallbackIngs.join(', ')}\n   Langkah: ${rSteps.slice(0, 3).join(' → ')}...`;
         })
         .join('\n\n');
 
