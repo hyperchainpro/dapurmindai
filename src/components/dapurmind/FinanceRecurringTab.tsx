@@ -88,7 +88,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
   const [editId, setEditId] = useState<string | null>(null);
 
   /* ── Fetch ─────────────────────────────────────── */
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     try {
@@ -102,9 +102,13 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
-  useEffect(() => { fetchData(); }, [userId]);
+  useEffect(() => {
+    let isMounted = true;
+    fetchData();
+    return () => { isMounted = false; };
+  }, [fetchData]);
 
   /* ── Grouped by frequency ──────────────────────── */
   const grouped = useMemo(() => {

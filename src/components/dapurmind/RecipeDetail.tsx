@@ -21,7 +21,7 @@ import {
   Globe2,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
-import type { Ingredient, Recipe } from '@/types';
+import { Ingredient, Recipe, normalizeIngredient } from '@/types';
 import { NumberTicker } from '@/components/dapurmind/MagicUI';
 import { ShineBorder } from '@/components/dapurmind/MagicUI';
 import { Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
@@ -340,7 +340,8 @@ function RecipeDetailContent({
     if (!recipe) return [];
     const groups: { category: string; items: { ingredient: Ingredient; index: number }[] }[] = [];
     const categoryOrder: string[] = [];
-    recipe.ingredients.forEach((ing, idx) => {
+    recipe.ingredients.forEach((rawIng, idx) => {
+      const ing = normalizeIngredient(rawIng);
       const cat = ing.category || 'Bahan';
       let group = groups.find((g) => g.category === cat);
       if (!group) {

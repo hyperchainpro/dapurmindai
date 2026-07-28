@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   // Remove 'standalone' for Cloudflare Pages
@@ -7,6 +8,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL || 'https://silent-ocelot-29.convex.cloud',
     NEXT_PUBLIC_CONVEX_SITE_URL: process.env.NEXT_PUBLIC_CONVEX_SITE_URL || 'https://silent-ocelot-29.convex.site',
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN || '',
   },
   
   /* config options here */
@@ -21,4 +23,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG || "",
+  project: process.env.SENTRY_PROJECT || "",
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+});
+
+

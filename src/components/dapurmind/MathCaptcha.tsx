@@ -54,8 +54,10 @@ export function MathCaptcha({ onVerify, onCaptchaChange, resetTrigger }: MathCap
     inputRef.current?.focus();
   }, [onCaptchaChange, onVerify]);
 
+  const prevTriggerRef = useRef(resetTrigger);
   React.useEffect(() => {
-    if (resetTrigger !== undefined && resetTrigger > 0) {
+    if (resetTrigger !== undefined && resetTrigger > 0 && resetTrigger !== prevTriggerRef.current) {
+      prevTriggerRef.current = resetTrigger;
       regenerate();
     }
   }, [resetTrigger, regenerate]);

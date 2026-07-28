@@ -149,8 +149,13 @@ export function RecipeBrowser() {
     return result;
   }, [activeCategory, debouncedQuery, maxCookTime, selectedDifficulty]);
 
+  const prevFilterKey = useRef('');
   useEffect(() => {
-    setVisibleCount(50);
+    const key = `${activeCategory}-${debouncedQuery}-${maxCookTime}-${selectedDifficulty}`;
+    if (prevFilterKey.current && prevFilterKey.current !== key) {
+      setVisibleCount(50);
+    }
+    prevFilterKey.current = key;
   }, [activeCategory, debouncedQuery, maxCookTime, selectedDifficulty]);
 
   const paginatedRecipes = filteredRecipes.slice(0, visibleCount);

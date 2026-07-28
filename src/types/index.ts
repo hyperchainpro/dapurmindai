@@ -26,7 +26,7 @@ export interface Recipe {
   prepTime: number;
   servings: number;
   calories?: number;
-  ingredients: Ingredient[];
+  ingredients: (Ingredient | string)[];
   steps: string[];
   tags: string[];
   rating: number;
@@ -40,6 +40,56 @@ export interface Ingredient {
   unit: string;
   category?: string;
 }
+
+export function normalizeIngredient(ing: string | Ingredient): Ingredient {
+  if (typeof ing !== 'string') {
+    return ing;
+  }
+
+  let text = ing.trim();
+  let category = 'Bahan';
+
+  if (text.includes(':')) {
+    const parts = text.split(':');
+    if (parts.length === 2 && parts[0].trim().length > 0 && !/\d/.test(parts[0])) {
+      category = parts[0].trim();
+      text = parts[1].trim();
+    }
+  }
+
+  const match = text.match(/^([\d\/\.\s\-]+)?\s*([a-zA-Z]+)?\s*(.*)$/);
+  if (match) {
+    const rawAmount = match[1]?.trim() || '';
+    const rawUnit = match[2]?.trim() || '';
+    const rawName = match[3]?.trim() || text;
+
+    let amount = 1;
+    if (rawAmount) {
+      if (rawAmount.includes('/')) {
+        const [num, den] = rawAmount.split('/').map((n) => parseFloat(n.trim()));
+        if (num && den) amount = num / den;
+      } else {
+        const parsed = parseFloat(rawAmount);
+        if (!isNaN(parsed)) amount = parsed;
+      }
+    }
+
+    return {
+      name: rawName || text,
+      amount,
+      unit: rawUnit || '',
+      category,
+    };
+  }
+
+  return {
+    name: text,
+    amount: 1,
+    unit: '',
+    category,
+  };
+}
+
 
 export type RecipeCategory =
   | 'Sarapan'

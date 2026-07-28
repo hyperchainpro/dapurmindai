@@ -4,6 +4,7 @@ import React, { Suspense, Component, ErrorInfo, ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 import { useAppStore } from '@/hooks/useAppState';
 import { BottomNav } from '@/components/dapurmind/BottomNav';
 import type { AppScreen } from '@/types';
@@ -42,6 +43,14 @@ class ScreenErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySta
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`[ErrorBoundary:${this.props.screenName}]`, error, errorInfo);
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      Sentry.captureException(error, {
+        extra: {
+          screen: this.props.screenName,
+          componentStack: errorInfo.componentStack,
+        },
+      });
+    }
   }
 
   handleRetry = () => {
