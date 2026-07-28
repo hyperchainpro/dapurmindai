@@ -312,9 +312,21 @@ export function AdminAffiliate() {
   const openAddDialog = useCallback((marketplace?: AffiliateMarketplace) => {
     if (marketplace) {
       setAddPlatform(marketplace.id);
-      setAddBaseUrlTemplate(
-        `https://example.com/aff?product={query}&aff={affiliateId}`,
-      );
+      let template = `https://shopee.co.id/search?keyword={productName}&aff_sub={affiliateId}`;
+      if (marketplace.id.includes('tokopedia')) {
+        template = `https://www.tokopedia.com/search?q={productName}&utm_source=affiliate&utm_medium={affiliateId}`;
+      } else if (marketplace.id.includes('shopee')) {
+        template = `https://shopee.co.id/search?keyword={productName}&aff_sub={affiliateId}`;
+      } else if (marketplace.id.includes('sayurbox')) {
+        template = `https://www.sayurbox.com/search?q={productName}&aff={affiliateId}`;
+      } else if (marketplace.id.includes('blibli')) {
+        template = `https://www.blibli.com/cari/{productName}?aff_code={affiliateId}`;
+      } else if (marketplace.id.includes('lotte')) {
+        template = `https://www.lottemart.co.id/catalogsearch/result/?q={productName}&aff={affiliateId}`;
+      } else if (marketplace.id.includes('indomaret')) {
+        template = `https://www.klikindomaret.com/search?key={productName}&aff={affiliateId}`;
+      }
+      setAddBaseUrlTemplate(template);
     } else {
       setAddPlatform('');
       setAddBaseUrlTemplate('');
