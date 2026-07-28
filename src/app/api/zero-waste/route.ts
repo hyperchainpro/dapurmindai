@@ -78,7 +78,8 @@ function matchLocalRecipes(
 export async function POST(request: NextRequest) {
   try {
     const body: ZeroWasteRequestBody = await request.json();
-    const { ingredients, expiryDays } = body;
+    const ingredients = body.ingredients;
+    const expiryDays = (typeof body.expiryDays === 'number' && body.expiryDays >= 1 && body.expiryDays <= 30) ? body.expiryDays : 3;
 
     // Validate required fields
     if (
