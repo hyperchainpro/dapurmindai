@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "@/../convex/_generated/api";
-import { Id } from "@/../convex/_generated/dataModel";
+import { client } from "@/lib/convex";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 import { requireAdmin, logActivity, AuthError } from '@/lib/auth-server';
-
-const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 // Helper to extract token
 function getToken(request: NextRequest): string {
