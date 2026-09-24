@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -47,7 +47,7 @@ const fadeUp = {
   },
 };
 
-/* ── Group icons ─────────────────────────────────────────────── */
+/* == Group icons =============================================== */
 
 const GROUP_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   general: { label: 'Umum', icon: <Globe className="h-4 w-4" />, color: 'from-emerald-500 to-teal-500' },
@@ -56,7 +56,7 @@ const GROUP_CONFIG: Record<string, { label: string; icon: React.ReactNode; color
   notification: { label: 'Notifikasi', icon: <Bell className="h-4 w-4" />, color: 'from-amber-500 to-yellow-500' },
 };
 
-/* ── Setting row labels ───────────────────────────────────────── */
+/* == Setting row labels ========================================= */
 
 const SETTING_LABELS: Record<string, string> = {
   app_name: 'Nama Aplikasi',
@@ -76,7 +76,7 @@ const SETTING_LABELS: Record<string, string> = {
   email_from_address: 'Email Pengirim',
 };
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminSettings() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -90,7 +90,7 @@ export function AdminSettings() {
   // Local edits
   const [edits, setEdits] = useState<Record<string, string>>({});
 
-  // ── Fetch settings ──
+  // == Fetch settings ==
   const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
@@ -113,12 +113,12 @@ export function AdminSettings() {
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
-  // ── Update edit ──
+  // == Update edit ==
   const updateEdit = (key: string, value: string) => {
     setEdits(prev => ({ ...prev, [key]: value }));
   };
 
-  // ── Save group ──
+  // == Save group ==
   const saveGroup = async (group: string) => {
     setSaving(true);
     try {
@@ -149,11 +149,11 @@ export function AdminSettings() {
     }
   };
 
-  // ── Group settings ──
+  // == Group settings ==
   const groups = ['general', 'security', 'ai', 'notification'];
   const getGroupSettings = (group: string) => settings.filter(s => s.group === group);
 
-  // ── Render input based on type ──
+  // == Render input based on type ==
   const renderInput = (setting: SystemSetting) => {
     const value = edits[setting.key] ?? setting.value;
 
@@ -218,7 +218,7 @@ export function AdminSettings() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* == Header ======================================= */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -269,7 +269,7 @@ export function AdminSettings() {
           </div>
         </motion.div>
 
-        {/* ── Loading ────────────────────────────────────── */}
+        {/* == Loading ====================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-5">
             {[1, 2, 3].map((i) => (
@@ -286,7 +286,7 @@ export function AdminSettings() {
           </motion.div>
         )}
 
-        {/* ── Settings Groups ─────────────────────────────── */}
+        {/* == Settings Groups =============================== */}
         {!loading && groups.map((group) => {
           const config = GROUP_CONFIG[group] ?? { label: group, icon: <Settings className="h-4 w-4" />, color: 'from-gray-500 to-gray-400' };
           const groupSettings = getGroupSettings(group);
@@ -339,7 +339,7 @@ export function AdminSettings() {
           );
         })}
 
-        {/* ── Empty State ──────────────────────────────── */}
+        {/* == Empty State ================================ */}
         {!loading && settings.length === 0 && (
           <motion.div
             variants={fadeUp}
@@ -357,7 +357,7 @@ export function AdminSettings() {
           </motion.div>
         )}
 
-        {/* ── Refresh ────────────────────────────────────── */}
+        {/* == Refresh ====================================== */}
         {!loading && settings.length > 0 && (
           <motion.div variants={fadeUp} className="flex justify-center pt-2">
             <Button

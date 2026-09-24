@@ -24,7 +24,7 @@ import { Marquee } from '@/components/dapurmind/MagicUI';
 import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { AdSlot } from '@/components/dapurmind/AdSlot';
 
-/* ── Types ─────────────────────────────────────────── */
+/* == Types =========================================== */
 
 interface ExploreRecipe {
   id: string;
@@ -89,7 +89,7 @@ const EMOJI_GRADIENTS: string[] = [
   'from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/30',
 ];
 
-/* ── Helper ────────────────────────────────────────── */
+/* == Helper ========================================== */
 function timeAgo(dateStr: string): string {
   const now = Date.now();
   const date = new Date(dateStr).getTime();
@@ -110,7 +110,7 @@ function getGradient(id: string): string {
   return EMOJI_GRADIENTS[Math.abs(hash) % EMOJI_GRADIENTS.length];
 }
 
-/* ── Main Component ────────────────────────────────── */
+/* == Main Component ================================== */
 
 export default function ExplorePage() {
   const { setScreen } = useAppStore();
@@ -213,7 +213,7 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-24">
-        {/* ── Header ─────────────────────────────────── */}
+        {/* == Header =================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="space-y-3 px-4 pb-3 pt-4">
             {/* Title row */}
@@ -302,7 +302,7 @@ export default function ExplorePage() {
           </div>
         </header>
 
-        {/* ── Trending Tags Marquee ─────────────────── */}
+        {/* == Trending Tags Marquee =================== */}
         <section className="py-2.5">
           <Marquee speed={30} pauseOnHover gap={10}>
             {TRENDING_TAGS.map((tag, i) => (
@@ -319,7 +319,7 @@ export default function ExplorePage() {
           </Marquee>
         </section>
 
-        {/* ── Recipe Grid (Instagram-style) ─────────── */}
+        {/* == Recipe Grid (Instagram-style) =========== */}
         <AdSlot position="explore-before-grid" />
         <section className="px-3 pt-2">
           {loading && recipes.length === 0 ? (
@@ -391,7 +391,7 @@ export default function ExplorePage() {
         {/* Ad: after grid */}
         <AdSlot position="explore-after-grid" />
 
-        {/* ── Recipe Detail Modal (Instagram-style) ── */}
+        {/* == Recipe Detail Modal (Instagram-style) == */}
         <AnimatePresence>
           {selectedRecipe && (
             <RecipeDetailModal
@@ -407,7 +407,7 @@ export default function ExplorePage() {
   );
 }
 
-/* ── Instagram Grid Card ───────────────────────────── */
+/* == Instagram Grid Card ============================= */
 
 function ExploreGridCard({
   recipe,
@@ -518,7 +518,7 @@ function ExploreGridCard({
   );
 }
 
-/* ── Recipe Detail Modal (Instagram Post Style) ───── */
+/* == Recipe Detail Modal (Instagram Post Style) ===== */
 
 function RecipeDetailModal({
   recipe,

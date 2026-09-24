@@ -50,7 +50,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -67,7 +67,7 @@ const fadeUp = {
   },
 };
 
-/* ── Types ──────────────────────────────────────────────────── */
+/* == Types ==================================================== */
 
 interface AdminRecipe {
   id: string;
@@ -86,7 +86,7 @@ interface AdminRecipe {
   updatedAt: string;
 }
 
-/* ── Difficulty color helper ─────────────────────────────────── */
+/* == Difficulty color helper =================================== */
 
 function getDifficultyColor(difficulty: string) {
   switch (difficulty) {
@@ -101,7 +101,7 @@ function getDifficultyColor(difficulty: string) {
   }
 }
 
-/* ── Swipe-to-delete Recipe Card ────────────────────────────── */
+/* == Swipe-to-delete Recipe Card ============================== */
 
 interface SwipeableRecipeCardProps {
   recipe: AdminRecipe;
@@ -232,13 +232,13 @@ function SwipeableRecipeCard({
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminRecipeManager() {
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
 
-  /* ── Local state ───────────────────────────────────────────── */
+  /* == Local state ============================================= */
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recipes, setRecipes] = useState<AdminRecipe[]>([]);
@@ -263,7 +263,7 @@ export function AdminRecipeManager() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingRecipe, setDeletingRecipe] = useState<AdminRecipe | null>(null);
 
-  /* ── Fetch recipes ──────────────────────────────────────────── */
+  /* == Fetch recipes ============================================ */
   const fetchRecipes = useCallback(async () => {
     try {
       setLoading(true);
@@ -283,7 +283,7 @@ export function AdminRecipeManager() {
     fetchRecipes();
   }, [fetchRecipes, refreshKey]);
 
-  /* ── Stats ─────────────────────────────────────────────────── */
+  /* == Stats =================================================== */
   const stats = useMemo(() => {
     const nonDeleted = recipes.filter((r) => !r.deletedAt);
     return {
@@ -294,13 +294,13 @@ export function AdminRecipeManager() {
     };
   }, [recipes]);
 
-  /* ── Categories ────────────────────────────────────────────── */
+  /* == Categories ============================================== */
   const categories = useMemo(() => {
     const cats = new Set(recipes.map((r) => r.category));
     return ['all', ...Array.from(cats).sort()];
   }, [recipes]);
 
-  /* ── Filtered recipes ─────────────────────────────────────── */
+  /* == Filtered recipes ======================================= */
   const filteredRecipes = useMemo(() => {
     let result = recipes.filter((r) => !r.deletedAt);
 
@@ -321,7 +321,7 @@ export function AdminRecipeManager() {
     return result;
   }, [recipes, categoryFilter, search]);
 
-  /* ── Dialog handlers ───────────────────────────────────────── */
+  /* == Dialog handlers ========================================= */
 
   const openEditDialog = useCallback((recipe: AdminRecipe) => {
     setEditingRecipe(recipe);
@@ -410,7 +410,7 @@ export function AdminRecipeManager() {
     }
   }, [deletingRecipe]);
 
-  /* ── Header nav items ─────────────────────────────────────── */
+  /* == Header nav items ======================================= */
   const headerNav = [
     { icon: LayoutDashboard, screen: 'admin-dashboard' as const, label: 'Dashboard' },
     { icon: Users, screen: 'admin-users' as const, label: 'User' },
@@ -420,7 +420,7 @@ export function AdminRecipeManager() {
     { icon: BarChart3, screen: 'admin-analytics' as const, label: 'Analitik' },
   ];
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* == Render ================================================== */
 
   return (
     <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
@@ -430,7 +430,7 @@ export function AdminRecipeManager() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* == Header ============================================ */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -476,7 +476,7 @@ export function AdminRecipeManager() {
           </div>
         </motion.div>
 
-        {/* ── Error Banner ────────────────────────────────────── */}
+        {/* == Error Banner ====================================== */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -503,7 +503,7 @@ export function AdminRecipeManager() {
           )}
         </AnimatePresence>
 
-        {/* ── Stats Banner ───────────────────────────────────── */}
+        {/* == Stats Banner ===================================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
             <div className="grid grid-cols-4 gap-2">
@@ -533,7 +533,7 @@ export function AdminRecipeManager() {
           </div>
         </motion.div>
 
-        {/* ── Search Bar ──────────────────────────────────────── */}
+        {/* == Search Bar ======================================== */}
         <motion.div variants={fadeUp} className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -546,7 +546,7 @@ export function AdminRecipeManager() {
           </div>
         </motion.div>
 
-        {/* ── Category Filter ──────────────────────────────────── */}
+        {/* == Category Filter ==================================== */}
         <motion.div variants={fadeUp} className="mb-4">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {categories.map((cat) => (
@@ -566,7 +566,7 @@ export function AdminRecipeManager() {
           </div>
         </motion.div>
 
-        {/* ── Refresh Button ──────────────────────────────────── */}
+        {/* == Refresh Button ==================================== */}
         <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ChefHat className="h-4 w-4 text-amber-500" />
@@ -584,7 +584,7 @@ export function AdminRecipeManager() {
           </button>
         </motion.div>
 
-        {/* ── Loading State ──────────────────────────────────── */}
+        {/* == Loading State ==================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -603,7 +603,7 @@ export function AdminRecipeManager() {
           </motion.div>
         )}
 
-        {/* ── Recipe List ───────────────────────────────────────── */}
+        {/* == Recipe List ========================================= */}
         {!loading && filteredRecipes.length > 0 && (
           <motion.div variants={fadeUp} className="mb-6 space-y-0">
             {filteredRecipes.map((recipe) => (
@@ -617,7 +617,7 @@ export function AdminRecipeManager() {
           </motion.div>
         )}
 
-        {/* ── Empty State ─────────────────────────────────────── */}
+        {/* == Empty State ======================================= */}
         {!loading && filteredRecipes.length === 0 && (
           <motion.div variants={fadeUp} className="mb-6">
             <Bounce delay={0.2} intensity={2} hover>
@@ -642,7 +642,7 @@ export function AdminRecipeManager() {
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── EDIT DIALOG ──────────────────────────────────────── */}
+      {/* == EDIT DIALOG ======================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
@@ -802,7 +802,7 @@ export function AdminRecipeManager() {
       </Dialog>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── DELETE DIALOG ──────────────────────────────────────── */}
+      {/* == DELETE DIALOG ======================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">

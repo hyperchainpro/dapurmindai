@@ -33,7 +33,7 @@ import type {
   AppScreen,
 } from '@/types';
 
-/* ── Animation Variants ──────────────────────────────────────── */
+/* == Animation Variants ======================================== */
 
 const messageSlideUp = {
   hidden: { opacity: 0, y: 16, scale: 0.97 },
@@ -57,7 +57,7 @@ const typingDot = {
   }),
 };
 
-/* ── Quick Suggestions ───────────────────────────────────────── */
+/* == Quick Suggestions ========================================= */
 
 const quickSuggestions = [
   { label: 'Menu seminggu budget hemat', icon: '💰' },
@@ -66,7 +66,7 @@ const quickSuggestions = [
   { label: 'Menu sehat bergizi', icon: '🥗' },
 ];
 
-/* ── Typing Indicator ────────────────────────────────────────── */
+/* == Typing Indicator ========================================== */
 
 function TypingIndicator() {
   return (
@@ -93,7 +93,7 @@ function TypingIndicator() {
   );
 }
 
-/* ── Message Bubble ──────────────────────────────────────────── */
+/* == Message Bubble ============================================ */
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -216,7 +216,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
     );
   }
 
-  /* ── AI message ───────────────────────────────────────────── */
+  /* == AI message ============================================= */
 
   const containsMealPlan = message.mealPlan != null;
 
@@ -343,7 +343,7 @@ function MessageBubble({ message, onSavePlan, onViewShopping, onDelete, onEdit }
   );
 }
 
-/* ── Helpers ─────────────────────────────────────────────────── */
+/* == Helpers =================================================== */
 
 function formatTime(timestamp: string): string {
   const d = new Date(timestamp);
@@ -535,7 +535,7 @@ function createShoppingItemsFromPlan(plan: MealPlan): ShoppingItem[] {
   }));
 }
 
-/* ── Welcome Message ─────────────────────────────────────────── */
+/* == Welcome Message =========================================== */
 
 function WelcomeCard() {
   return (
@@ -580,7 +580,7 @@ function WelcomeCard() {
   );
 }
 
-/* ── ChatInterface ───────────────────────────────────────────── */
+/* == ChatInterface ============================================= */
 
 export function ChatInterface() {
   const user = useAppStore((s) => s.user);
@@ -629,7 +629,7 @@ export function ChatInterface() {
     [chatMessages]
   );
 
-  /* ── Send message handler ────────────────────────────────── */
+  /* == Send message handler ================================== */
 
   const handleSend = useCallback(async () => {
     const text = inputValue.trim();
@@ -720,7 +720,7 @@ export function ChatInterface() {
     setAILoading,
   ]);
 
-  /* ── Save plan handler ───────────────────────────────────── */
+  /* == Save plan handler ===================================== */
 
   const handleSavePlan = useCallback(
     (plan: MealPlan) => {
@@ -739,7 +739,7 @@ export function ChatInterface() {
     [addMealPlan, setShoppingItems, setCurrentMealPlan, setScreen]
   );
 
-  /* ── View shopping handler ───────────────────────────────── */
+  /* == View shopping handler ================================= */
 
   const handleViewShopping = useCallback(() => {
     // Find the latest message with a meal plan
@@ -755,14 +755,14 @@ export function ChatInterface() {
     setScreen('shopping');
   }, [chatMessages, setShoppingItems, setScreen]);
 
-  /* ── Quick suggestion handler ────────────────────────────── */
+  /* == Quick suggestion handler ============================== */
 
   const handleSuggestion = useCallback((label: string) => {
     setInputValue(label);
     inputRef.current?.focus();
   }, []);
 
-  /* ── Keydown handler ─────────────────────────────────────── */
+  /* == Keydown handler ======================================= */
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -774,11 +774,11 @@ export function ChatInterface() {
     [handleSend]
   );
 
-  /* ── Render ──────────────────────────────────────────────── */
+  /* == Render ================================================ */
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      {/* ── Header ──────────────────────────────────────────── */}
+      {/* == Header ============================================ */}
       <header className="glass sticky top-0 z-40">
         <div className="mx-auto flex max-w-lg items-center gap-3 px-4 py-3">
           {/* Back button */}
@@ -833,7 +833,7 @@ export function ChatInterface() {
         </div>
       </header>
 
-      {/* ── Chat Area ───────────────────────────────────────── */}
+      {/* == Chat Area ========================================= */}
       <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto overscroll-contain"
@@ -876,7 +876,7 @@ export function ChatInterface() {
         </div>
       </div>
 
-      {/* ── Input Area (fixed to bottom, above nav) ─────────── */}
+      {/* == Input Area (fixed to bottom, above nav) =========== */}
       <div
         className="glass fixed bottom-[68px] left-0 right-0 z-30"
         style={{

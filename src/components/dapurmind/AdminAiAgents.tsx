@@ -30,7 +30,7 @@ import {
 import { useAppStore } from '@/hooks/useAppState';
 import { adminFetch } from '@/lib/admin-fetch';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -63,7 +63,7 @@ const slideUp = {
   exit: { opacity: 0, y: 40, transition: { duration: 0.25 } },
 };
 
-/* ── Types ──────────────────────────────────────────────────── */
+/* == Types ==================================================== */
 
 interface AiAgent {
   id: string;
@@ -97,7 +97,7 @@ type AgentProvider =
 
 type AgentPurpose = 'all' | 'chat' | 'meal-plan' | 'zero-waste' | 'affiliate';
 
-/* ── Constants ──────────────────────────────────────────────── */
+/* == Constants ================================================ */
 
 const PROVIDER_CONFIG: Record<
   AgentProvider,
@@ -182,7 +182,7 @@ const PURPOSE_OPTIONS: AgentPurpose[] = [
 
 /* ADMIN_KEY removed – use adminFetch() instead */
 
-/* ── Helpers ─────────────────────────────────────────────────── */
+/* == Helpers =================================================== */
 
 function getRelativeTime(dateStr?: string): string {
   if (!dateStr) return 'Belum pernah';
@@ -224,7 +224,7 @@ function formatTokens(n: number): string {
   return String(n);
 }
 
-/* ── Token Progress Bar Component ───────────────────────────── */
+/* == Token Progress Bar Component ============================= */
 
 interface TokenBarProps {
   used: number;
@@ -257,7 +257,7 @@ function TokenProgressBar({ used, max }: TokenBarProps) {
   );
 }
 
-/* ── Agent Card Component ──────────────────────────────────── */
+/* == Agent Card Component ==================================== */
 
 interface AgentCardProps {
   agent: AiAgent;
@@ -415,12 +415,12 @@ function AgentCard({ agent, onSetDefault, onToggleActive, onEdit, onDelete }: Ag
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminAiAgents() {
   const setScreen = useAppStore((s) => s.setScreen);
 
-  /* ── Local state ───────────────────────────────────────────── */
+  /* == Local state ============================================= */
   const [agents, setAgents] = useState<AiAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -449,12 +449,12 @@ export function AdminAiAgents() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingAgent, setDeletingAgent] = useState<AiAgent | null>(null);
 
-  /* ── Derived data ──────────────────────────────────────────── */
+  /* == Derived data ============================================ */
   const activeAgents = agents.filter((a) => a.isActive);
   const defaultAgent = agents.find((a) => a.isDefault);
   const totalTokensUsed = agents.reduce((sum, a) => sum + a.usedTokens, 0);
 
-  /* ── Fetch agents ─────────────────────────────────────────── */
+  /* == Fetch agents =========================================== */
   const fetchAgents = useCallback(async () => {
     try {
       setLoading(true);
@@ -477,7 +477,7 @@ export function AdminAiAgents() {
     fetchAgents();
   }, [fetchAgents, refreshKey]);
 
-  /* ── Form helpers ─────────────────────────────────────────── */
+  /* == Form helpers =========================================== */
   const resetForm = useCallback(() => {
     setFormName('');
     setFormProvider('built-in');
@@ -514,7 +514,7 @@ export function AdminAiAgents() {
     setShowDialog(true);
   }, []);
 
-  /* ── API actions ──────────────────────────────────────────── */
+  /* == API actions ============================================ */
   const handleSubmit = useCallback(async () => {
     if (!formName.trim() || !formModel.trim()) return;
 
@@ -651,7 +651,7 @@ export function AdminAiAgents() {
     }
   }, [deletingAgent]);
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* == Render ================================================== */
 
   return (
     <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
@@ -661,7 +661,7 @@ export function AdminAiAgents() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* == Header ============================================ */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
@@ -738,7 +738,7 @@ export function AdminAiAgents() {
           </div>
         </motion.div>
 
-        {/* ── Error Banner ────────────────────────────────────── */}
+        {/* == Error Banner ====================================== */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -763,7 +763,7 @@ export function AdminAiAgents() {
           )}
         </AnimatePresence>
 
-        {/* ── Usage Stats Section ────────────────────────────── */}
+        {/* == Usage Stats Section ============================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="rounded-2xl nm-raised p-4">
             <div className="flex items-center gap-2 mb-3">
@@ -807,7 +807,7 @@ export function AdminAiAgents() {
           </div>
         </motion.div>
 
-        {/* ── Loading State ──────────────────────────────────── */}
+        {/* == Loading State ==================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -826,7 +826,7 @@ export function AdminAiAgents() {
           </motion.div>
         )}
 
-        {/* ── Agent List Header + Add Button ─────────────────── */}
+        {/* == Agent List Header + Add Button =================== */}
         {!loading && (
           <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -856,7 +856,7 @@ export function AdminAiAgents() {
           </motion.div>
         )}
 
-        {/* ── Agent List ─────────────────────────────────────── */}
+        {/* == Agent List ======================================= */}
         {!loading && agents.length > 0 && (
           <motion.div variants={fadeUp} className="mb-6">
             <AnimatePresence mode="popLayout">
@@ -874,7 +874,7 @@ export function AdminAiAgents() {
           </motion.div>
         )}
 
-        {/* ── Empty State ─────────────────────────────────────── */}
+        {/* == Empty State ======================================= */}
         {!loading && agents.length === 0 && (
           <motion.div variants={fadeUp} className="mb-6">
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--nm-shadow-dark)]/20 nm-raised p-10 text-center">
@@ -897,7 +897,7 @@ export function AdminAiAgents() {
           </motion.div>
         )}
 
-        {/* ── Info Section ────────────────────────────────────── */}
+        {/* == Info Section ====================================== */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="rounded-xl nm-raised-sm p-4">
             <div className="flex items-start gap-2">
@@ -913,7 +913,7 @@ export function AdminAiAgents() {
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── ADD / EDIT DIALOG ─────────────────────────────────── */}
+      {/* == ADD / EDIT DIALOG =================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {showDialog && (
@@ -1209,7 +1209,7 @@ export function AdminAiAgents() {
       </AnimatePresence>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── DELETE CONFIRMATION DIALOG ────────────────────────── */}
+      {/* == DELETE CONFIRMATION DIALOG ========================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {showDeleteDialog && deletingAgent && (

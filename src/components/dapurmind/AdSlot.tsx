@@ -115,7 +115,7 @@ export function AdSlot({ position, className = '', fallback = null }: AdSlotProp
   );
 }
 
-/* ── Available Positions (for reference) ── */
+/* == Available Positions (for reference) == */
 export const AD_POSITIONS = [
   { value: 'dashboard-after-recipes', label: 'Dashboard: Setelah Resep Populer' },
   { value: 'dashboard-after-actions', label: 'Dashboard: Setelah Quick Actions' },

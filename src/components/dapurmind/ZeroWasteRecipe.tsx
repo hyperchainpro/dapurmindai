@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import type { Recipe } from '@/types';
 
-/* ── Constants ──────────────────────────────────────────────── */
+/* == Constants ================================================ */
 
 const COMMON_INGREDIENTS = [
   'Tahu',
@@ -72,7 +72,7 @@ const AI_THINKING_MESSAGES = [
   'Hampir selesai...',
 ];
 
-/* ── Types ─────────────────────────────────────────────────── */
+/* == Types =================================================== */
 
 interface ZeroWasteResult {
   title: string;
@@ -91,7 +91,7 @@ interface ChatMessage {
   timestamp: number;
 }
 
-/* ── AI Thinking Animation Component ──────────────────────── */
+/* == AI Thinking Animation Component ======================== */
 
 function AIThinkingAnimation() {
   const [messageIndex, setMessageIndex] = useState(0);
@@ -162,7 +162,7 @@ function AIThinkingAnimation() {
   );
 }
 
-/* ── AI Chat Follow-up Component ──────────────────────────── */
+/* == AI Chat Follow-up Component ============================ */
 
 function AIChatFollowUp({
   ingredients,
@@ -362,7 +362,7 @@ function AIChatFollowUp({
   );
 }
 
-/* ── AI Quick Actions Component ───────────────────────────── */
+/* == AI Quick Actions Component ============================= */
 
 function AIQuickActions({
   ingredients,
@@ -454,7 +454,7 @@ function AIQuickActions({
   );
 }
 
-/* ── AI Quick Action Result Modal ─────────────────────────── */
+/* == AI Quick Action Result Modal =========================== */
 
 function AIActionResultModal({
   result,
@@ -505,7 +505,7 @@ function AIActionResultModal({
   );
 }
 
-/* ── Main Component ────────────────────────────────────────── */
+/* == Main Component ========================================== */
 
 export function ZeroWasteRecipe() {
   const { goBack } = useAppStore();
@@ -601,7 +601,7 @@ export function ZeroWasteRecipe() {
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
       {/* Content */}
       <div className="relative z-10 flex flex-col pb-24">
-        {/* ── Header ───────────────────────────────────── */}
+        {/* == Header ===================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <Button
@@ -631,7 +631,7 @@ export function ZeroWasteRecipe() {
           </div>
         </header>
 
-        {/* ── Main Content ─────────────────────────────── */}
+        {/* == Main Content =============================== */}
         <main className="flex-1 px-4 pt-4">
           {/* Input Section */}
           <motion.section
@@ -745,7 +745,7 @@ export function ZeroWasteRecipe() {
             </motion.div>
           </motion.section>
 
-          {/* ── Results Section ────────────────────────── */}
+          {/* == Results Section ========================== */}
           <AnimatePresence mode="wait">
             {hasSearched && (
               <motion.section
@@ -871,7 +871,7 @@ export function ZeroWasteRecipe() {
   );
 }
 
-/* ── Result Card ────────────────────────────────────────────── */
+/* == Result Card ============================================== */
 
 function ResultCard({
   result,
@@ -1135,7 +1135,7 @@ function ResultCard({
   );
 }
 
-/* ── AI Response Parser ─────────────────────────────────────── */
+/* == AI Response Parser ======================================= */
 
 function parseAIResponse(
   response: string,

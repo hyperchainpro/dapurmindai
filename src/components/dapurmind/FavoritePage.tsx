@@ -116,7 +116,7 @@ export function FavoritePage() {
         animate="visible"
         className="flex flex-col pb-28"
       >
-        {/* ── Header ─────────────────────────────────── */}
+        {/* == Header =================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
@@ -137,7 +137,7 @@ export function FavoritePage() {
           </div>
         </header>
 
-        {/* ── Content ───────────────────────────────── */}
+        {/* == Content ================================= */}
         <div className="px-4 pt-4">
           {favoriteRecipesData.length > 0 ? (
             <div className="grid grid-cols-2 gap-2.5">

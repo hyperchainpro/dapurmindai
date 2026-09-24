@@ -8,7 +8,7 @@ interface ZeroWasteRequestBody {
   expiryDays: number;
 }
 
-/* ── Local recipe matching fallback ──────────────────────── */
+/* == Local recipe matching fallback ======================== */
 
 function matchLocalRecipes(
   ingredients: string[],
@@ -71,7 +71,7 @@ function matchLocalRecipes(
   return results;
 }
 
-/* ── POST /api/zero-waste ─────────────────────────────────── */
+/* == POST /api/zero-waste =================================== */
 
 export async function POST(request: NextRequest) {
   try {

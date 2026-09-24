@@ -31,7 +31,7 @@ import {
 import { GlowingText, Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { AFFILIATE_MARKETPLACES } from '@/lib/affiliate';
 
-/* ── Helpers ─────────────────────────────────────────────────── */
+/* == Helpers =================================================== */
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -67,7 +67,7 @@ const difficultyColor: Record<string, string> = {
   Susah: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400',
 };
 
-/* ── Stagger container ──────────────────────────────────────── */
+/* == Stagger container ======================================== */
 
 const stagger = {
   hidden: {},
@@ -86,11 +86,11 @@ const fadeUp = {
   },
 };
 
-/* ── Featured recipes (pick 4) ──────────────────────────────── */
+/* == Featured recipes (pick 4) ================================ */
 
 const featuredIds = ['nasi-goreng', 'rendang', 'sate-ayam', 'klepon'];
 
-/* ── Quick Actions ──────────────────────────────────────────── */
+/* == Quick Actions ============================================ */
 
 interface QuickAction {
   screen: AppScreen;
@@ -145,7 +145,7 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-/* ── Sub-components ─────────────────────────────────────────── */
+/* == Sub-components =========================================== */
 
 function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }) {
   return (
@@ -178,7 +178,7 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
   );
 }
 
-/* ── Dashboard ──────────────────────────────────────────────── */
+/* == Dashboard ================================================ */
 
 function DashboardInner() {
   const user = useAppStore((s) => s.user);
@@ -243,7 +243,7 @@ function DashboardInner() {
       animate="visible"
       className="min-h-screen px-4 pb-28 pt-4"
     >
-      {/* ── Header ────────────────────────────────────────── */}
+      {/* == Header ========================================== */}
       <motion.div variants={fadeUp} className="mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -282,7 +282,7 @@ function DashboardInner() {
         </div>
       </motion.div>
 
-      {/* ── Quick Actions ─────────────────────────────────── */}
+      {/* == Quick Actions =================================== */}
       <motion.div variants={fadeUp} className="mb-6">
         <BentoGrid columns={{ default: 2, sm: 2, md: 2, lg: 4 }} gap={0.625}>
           {quickActions.map((action) => (
@@ -309,7 +309,7 @@ function DashboardInner() {
         </BentoGrid>
       </motion.div>
 
-      {/* ── Affiliate Marketplace Banner ────────────────── */}
+      {/* == Affiliate Marketplace Banner ================== */}
       <motion.div variants={fadeUp} className="mb-6">
         <ClickSpark color="#10b981" count={8}>
           <button
@@ -368,7 +368,7 @@ function DashboardInner() {
         </ClickSpark>
       </motion.div>
 
-      {/* ── Featured Recipe Carousel ──────────────────────── */}
+      {/* == Featured Recipe Carousel ======================== */}
       <motion.div variants={fadeUp} className="mb-6">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -392,7 +392,7 @@ function DashboardInner() {
         </div>
       </motion.div>
 
-      {/* ── Latest Meal Plan ──────────────────────────────── */}
+      {/* == Latest Meal Plan ================================ */}
       {latestPlan && (
         <motion.div variants={fadeUp} className="mb-6">
           <div className="mb-3 flex items-center gap-2">
@@ -437,7 +437,7 @@ function DashboardInner() {
         </motion.div>
       )}
 
-      {/* ── Achievements Preview ──────────────────────────── */}
+      {/* == Achievements Preview ============================ */}
       {unlockedAchievements.length > 0 && (
         <motion.div variants={fadeUp} className="mb-6">
           <div className="mb-3 flex items-center gap-2">
@@ -448,7 +448,7 @@ function DashboardInner() {
         </motion.div>
       )}
 
-      {/* ── Stats Section ─────────────────────────────────── */}
+      {/* == Stats Section =================================== */}
       <motion.div variants={fadeUp} className="mb-6">
         <h2 className="mb-3 text-base font-semibold">Statistik Kamu</h2>
         <BentoGrid columns={{ default: 3, sm: 3, md: 3, lg: 3 }} gap={0.625}>

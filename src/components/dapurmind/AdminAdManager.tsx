@@ -23,7 +23,7 @@ import { useAppStore } from '@/hooks/useAppState';
 import { AD_SLOTS } from '@/components/dapurmind/AdSlot';
 import type { AdPlacement } from '@/types';
 
-/* ── Animation ────────────────────────────────────────── */
+/* == Animation ========================================== */
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
@@ -35,7 +35,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.06 } },
 };
 
-/* ── Helper ──────────────────────────────────────────── */
+/* == Helper ============================================ */
 
 function formatDate(iso: string): string {
   if (!iso) return '-';
@@ -49,7 +49,7 @@ function formatDate(iso: string): string {
   }
 }
 
-/* ── Main Component ────────────────────────────────────── */
+/* == Main Component ====================================== */
 
 export function AdminAdManager() {
   const goBack = useAppStore((s) => s.goBack);
@@ -60,7 +60,7 @@ export function AdminAdManager() {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  /* ── Initialize default placements ── */
+  /* == Initialize default placements == */
   const ensurePlacements = useCallback(() => {
     if (adPlacements.length === 0) {
       const defaults: AdPlacement[] = AD_SLOTS.map((slot) => ({
@@ -76,7 +76,7 @@ export function AdminAdManager() {
     }
   }, [adPlacements.length, setAdPlacements]);
 
-  /* ── Handlers ── */
+  /* == Handlers == */
   const handleToggle = useCallback((id: string) => {
     const current = adPlacements.find((a) => a.id === id);
     if (current) {
@@ -130,7 +130,7 @@ export function AdminAdManager() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  /* ── Initialize on first render ── */
+  /* == Initialize on first render == */
   if (adPlacements.length === 0) {
     ensurePlacements();
   }
@@ -140,7 +140,7 @@ export function AdminAdManager() {
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-12">
-        {/* ── Header ─────────────────────────────────── */}
+        {/* == Header =================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
@@ -165,7 +165,7 @@ export function AdminAdManager() {
           </div>
         </header>
 
-        {/* ── Global Script Input ─────────────────────── */}
+        {/* == Global Script Input ======================= */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -210,7 +210,7 @@ export function AdminAdManager() {
           </div>
         </motion.div>
 
-        {/* ── Slot List ──────────────────────────────── */}
+        {/* == Slot List ================================ */}
         <motion.div
           variants={stagger}
           initial="hidden"
@@ -411,7 +411,7 @@ export function AdminAdManager() {
           })}
         </motion.div>
 
-        {/* ── Info Box ───────────────────────────────── */}
+        {/* == Info Box ================================= */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -436,7 +436,7 @@ export function AdminAdManager() {
         </motion.div>
       </div>
 
-      {/* ── Toast Notification ────────────────────────── */}
+      {/* == Toast Notification ========================== */}
       <AnimatePresence>
         {toast && (
           <motion.div

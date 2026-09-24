@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-/* ── In-memory rate limiter (per IP) ────────────────────────────── */
+/* == In-memory rate limiter (per IP) ============================== */
 
 interface RateLimitEntry {
   count: number;
@@ -46,7 +46,7 @@ function checkRateLimit(
   return { allowed: true, remaining: maxRequests - entry.count, resetTime: entry.resetTime };
 }
 
-/* ── Rate limit config per route pattern ────────────────────────── */
+/* == Rate limit config per route pattern ========================== */
 
 interface RateLimitConfig {
   max: number;
@@ -81,7 +81,7 @@ function getRateLimitConfig(path: string): RateLimitConfig {
   return { max: 60, windowMs: 60 * 1000 }; // default
 }
 
-/* ── Middleware ─────────────────────────────────────────────────── */
+/* == Middleware =================================================== */
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

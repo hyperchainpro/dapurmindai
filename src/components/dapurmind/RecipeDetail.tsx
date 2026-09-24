@@ -28,7 +28,7 @@ import { Bounce, ClickSpark } from '@/components/dapurmind/ReactBits';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AFFILIATE_MARKETPLACES, buildAffiliateUrl } from '@/lib/affiliate';
-/* ── Helpers ──────────────────────────────────────────────────── */
+/* == Helpers ==================================================== */
 
 /* Fallback food images from Unsplash (free, no API key needed) */
 const FOOD_IMAGE_MAP: Record<string, string> = {
@@ -236,7 +236,7 @@ function renderStars(rating: number): React.ReactNode[] {
   return stars;
 }
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -253,7 +253,7 @@ const fadeUp = {
   },
 };
 
-/* ── RecipeDetailContent (inner component, keyed per-recipe) ── */
+/* == RecipeDetailContent (inner component, keyed per-recipe) == */
 
 interface RecipeDetailContentProps {
   recipe: Recipe;
@@ -324,7 +324,7 @@ function RecipeDetailContent({
     };
   }, [recipeImageUrl, fallbackImageUrl, recipe.id]);
 
-  /* ── Compute scaled values ───────────────────────── */
+  /* == Compute scaled values ========================= */
   const scaledServings = useMemo(
     () => Math.round((recipe.servings ?? 1) * portionScale),
     [recipe.servings, portionScale]
@@ -335,7 +335,7 @@ function RecipeDetailContent({
     [recipe.calories, portionScale]
   );
 
-  /* ── Group ingredients by category ───────────────── */
+  /* == Group ingredients by category ================= */
   const ingredientGroups = useMemo(() => {
     if (!recipe) return [];
     const groups: { category: string; items: { ingredient: Ingredient; index: number }[] }[] = [];
@@ -353,7 +353,7 @@ function RecipeDetailContent({
     return groups;
   }, [recipe]);
 
-  /* ── Handlers ────────────────────────────────────── */
+  /* == Handlers ====================================== */
   const handleToggleIngredient = useCallback((idx: number) => {
     setCheckedIngredients((prev) => {
       const next = new Set(prev);
@@ -397,7 +397,7 @@ function RecipeDetailContent({
   const isFavorite = recipe ? favoriteRecipes.includes(recipe.id) : false;
   const isApiRecipe = recipe ? recipe.id.startsWith('api-') || (recipe.tags && recipe.tags.includes('api-recipe')) : false;
 
-  /* ── No recipe fallback ──────────────────────────── */
+  /* == No recipe fallback ============================ */
   if (!recipe) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
@@ -412,7 +412,7 @@ function RecipeDetailContent({
     );
   }
 
-  /* ── Main render ─────────────────────────────────── */
+  /* == Main render =================================== */
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <motion.div
@@ -421,7 +421,7 @@ function RecipeDetailContent({
         animate="visible"
         className="flex flex-col pb-32"
       >
-        {/* ── Hero Section ──────────────────────────── */}
+        {/* == Hero Section ============================ */}
         <motion.section variants={fadeUp} className="relative">
           {/* Back button overlay */}
           <motion.button
@@ -589,7 +589,7 @@ function RecipeDetailContent({
           </div>
         </motion.section>
 
-        {/* ── Quick Stats Bar ───────────────────────── */}
+        {/* == Quick Stats Bar ========================= */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             <StatChip icon="⏱️" label="Persiapan" value={`${recipe.prepTime} menit`} />
@@ -601,7 +601,7 @@ function RecipeDetailContent({
           </div>
         </motion.section>
 
-        {/* ── Portion Calculator ────────────────────── */}
+        {/* == Portion Calculator ====================== */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <ShineBorder
             borderRadius={16}
@@ -667,7 +667,7 @@ function RecipeDetailContent({
           </ShineBorder>
         </motion.section>
 
-        {/* ── Ingredients Section ───────────────────── */}
+        {/* == Ingredients Section ===================== */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <button
             onClick={() => setIngredientsExpanded(!ingredientsExpanded)}
@@ -806,7 +806,7 @@ function RecipeDetailContent({
           </AnimatePresence>
         </motion.section>
 
-        {/* ── Steps Section ─────────────────────────── */}
+        {/* == Steps Section =========================== */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <button
             onClick={() => setStepsExpanded(!stepsExpanded)}
@@ -944,7 +944,7 @@ function RecipeDetailContent({
           </AnimatePresence>
         </motion.section>
 
-        {/* ── Tags ───────────────────────────────────── */}
+        {/* == Tags ===================================== */}
         {recipe.tags.length > 0 && (
           <motion.section variants={fadeUp} className="px-4 pt-4">
             <div className="flex flex-wrap gap-1.5">
@@ -963,7 +963,7 @@ function RecipeDetailContent({
           </motion.section>
         )}
 
-        {/* ── Source Link (API recipes) ──────────────── */}
+        {/* == Source Link (API recipes) ================ */}
         {isApiRecipe && (recipe as any).source && (
           <motion.section variants={fadeUp} className="px-4 pt-3">
             <a
@@ -979,7 +979,7 @@ function RecipeDetailContent({
         )}
       </motion.div>
 
-      {/* ── Bottom Action Buttons (fixed) ─────────── */}
+      {/* == Bottom Action Buttons (fixed) =========== */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
         <div className="flex gap-2 rounded-2xl nm-raised p-3 shadow-lg backdrop-blur-xl">
           {/* Favorite */}
@@ -1028,7 +1028,7 @@ function RecipeDetailContent({
   );
 }
 
-/* ── RecipeDetail (outer component with key-based reset) ── */
+/* == RecipeDetail (outer component with key-based reset) == */
 
 export function RecipeDetail() {
   const selectedRecipe = useAppStore((s) => s.selectedRecipe);
@@ -1072,7 +1072,7 @@ export function RecipeDetail() {
 
 export default RecipeDetail;
 
-/* ── Stat Chip ────────────────────────────────────────────────── */
+/* == Stat Chip ================================================== */
 
 function StatChip({
   icon,

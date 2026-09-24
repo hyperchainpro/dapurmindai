@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── PATCH /api/admin/affiliates — Restore soft-deleted ── */
+/* == PATCH /api/admin/affiliates — Restore soft-deleted == */
 export async function PATCH(request: NextRequest) {
   try {
     await requireAdmin(request);

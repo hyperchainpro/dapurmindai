@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── Helper: serialize agent without sensitive fields ──── */
+/* == Helper: serialize agent without sensitive fields ==== */
 function serializeAgent(a: {
   id: string;
   name: string;
@@ -47,7 +47,7 @@ function serializeAgent(a: {
   };
 }
 
-/* ── GET /api/admin/ai-agents/[id] ────────────────────── */
+/* == GET /api/admin/ai-agents/[id] ====================== */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -75,7 +75,7 @@ export async function GET(
   }
 }
 
-/* ── PUT /api/admin/ai-agents/[id] ────────────────────── */
+/* == PUT /api/admin/ai-agents/[id] ====================== */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -140,7 +140,7 @@ export async function PUT(
   }
 }
 
-/* ── PATCH /api/admin/ai-agents/[id] ──────────────────── */
+/* == PATCH /api/admin/ai-agents/[id] ==================== */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -195,7 +195,7 @@ export async function PATCH(
   }
 }
 
-/* ── DELETE /api/admin/ai-agents/[id] — Soft delete ──── */
+/* == DELETE /api/admin/ai-agents/[id] — Soft delete ==== */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

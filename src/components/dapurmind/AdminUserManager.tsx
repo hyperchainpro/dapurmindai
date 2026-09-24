@@ -49,7 +49,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -66,7 +66,7 @@ const fadeUp = {
   },
 };
 
-/* ── Types ──────────────────────────────────────────────────── */
+/* == Types ==================================================== */
 
 interface AdminUser {
   id: string;
@@ -78,7 +78,7 @@ interface AdminUser {
   createdAt: string;
 }
 
-/* ── Swipe-to-delete User Card ──────────────────────────────── */
+/* == Swipe-to-delete User Card ================================ */
 
 interface SwipeableUserCardProps {
   user: AdminUser;
@@ -211,13 +211,13 @@ function SwipeableUserCard({ user, onEdit, onDelete }: SwipeableUserCardProps) {
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminUserManager() {
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
 
-  /* ── Local state ───────────────────────────────────────────── */
+  /* == Local state ============================================= */
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -239,7 +239,7 @@ export function AdminUserManager() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
 
-  /* ── Fetch users ────────────────────────────────────────────── */
+  /* == Fetch users ============================================== */
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -259,7 +259,7 @@ export function AdminUserManager() {
     fetchUsers();
   }, [fetchUsers, refreshKey]);
 
-  /* ── Stats ─────────────────────────────────────────────────── */
+  /* == Stats =================================================== */
   const stats = useMemo(() => {
     const nonDeleted = users.filter((u) => !u.deletedAt);
     return {
@@ -269,7 +269,7 @@ export function AdminUserManager() {
     };
   }, [users]);
 
-  /* ── Filtered users ────────────────────────────────────────── */
+  /* == Filtered users ========================================== */
   const filteredUsers = useMemo(() => {
     let result = users.filter((u) => !u.deletedAt);
 
@@ -288,7 +288,7 @@ export function AdminUserManager() {
     return result;
   }, [users, tabFilter, search]);
 
-  /* ── Dialog handlers ───────────────────────────────────────── */
+  /* == Dialog handlers ========================================= */
 
   const openEditDialog = useCallback((user: AdminUser) => {
     setEditingUser(user);
@@ -362,14 +362,14 @@ export function AdminUserManager() {
     }
   }, [deletingUser]);
 
-  /* ── Tabs ───────────────────────────────────────────────────── */
+  /* == Tabs ===================================================== */
   const tabs = [
     { key: 'all' as const, label: 'Semua', count: stats.total },
     { key: 'active' as const, label: 'Aktif', count: stats.active },
     { key: 'inactive' as const, label: 'Nonaktif', count: stats.total - stats.active },
   ];
 
-  /* ── Header nav items ─────────────────────────────────────── */
+  /* == Header nav items ======================================= */
   const headerNav = [
     { icon: LayoutDashboard, screen: 'admin-dashboard' as const, label: 'Dashboard' },
     { icon: ChefHat, screen: 'admin-recipes' as const, label: 'Resep' },
@@ -379,7 +379,7 @@ export function AdminUserManager() {
     { icon: BarChart3, screen: 'admin-analytics' as const, label: 'Analitik' },
   ];
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* == Render ================================================== */
 
   return (
     <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
@@ -389,7 +389,7 @@ export function AdminUserManager() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* == Header ============================================ */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -435,7 +435,7 @@ export function AdminUserManager() {
           </div>
         </motion.div>
 
-        {/* ── Error Banner ────────────────────────────────────── */}
+        {/* == Error Banner ====================================== */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -462,7 +462,7 @@ export function AdminUserManager() {
           )}
         </AnimatePresence>
 
-        {/* ── Stats Banner ───────────────────────────────────── */}
+        {/* == Stats Banner ===================================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
             <div className="grid grid-cols-3 gap-3">
@@ -493,7 +493,7 @@ export function AdminUserManager() {
           </div>
         </motion.div>
 
-        {/* ── Search Bar ──────────────────────────────────────── */}
+        {/* == Search Bar ======================================== */}
         <motion.div variants={fadeUp} className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
@@ -506,7 +506,7 @@ export function AdminUserManager() {
           </div>
         </motion.div>
 
-        {/* ── Tab Filter ──────────────────────────────────────── */}
+        {/* == Tab Filter ======================================== */}
         <motion.div variants={fadeUp} className="mb-4">
           <div className="flex gap-2">
             {tabs.map((tab) => (
@@ -536,7 +536,7 @@ export function AdminUserManager() {
           </div>
         </motion.div>
 
-        {/* ── Refresh Button ──────────────────────────────────── */}
+        {/* == Refresh Button ==================================== */}
         <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-emerald-500" />
@@ -554,7 +554,7 @@ export function AdminUserManager() {
           </button>
         </motion.div>
 
-        {/* ── Loading State ──────────────────────────────────── */}
+        {/* == Loading State ==================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -573,7 +573,7 @@ export function AdminUserManager() {
           </motion.div>
         )}
 
-        {/* ── User List ────────────────────────────────────────── */}
+        {/* == User List ========================================== */}
         {!loading && filteredUsers.length > 0 && (
           <motion.div variants={fadeUp} className="mb-6 space-y-0">
             {filteredUsers.map((user) => (
@@ -587,7 +587,7 @@ export function AdminUserManager() {
           </motion.div>
         )}
 
-        {/* ── Empty State ─────────────────────────────────────── */}
+        {/* == Empty State ======================================= */}
         {!loading && filteredUsers.length === 0 && (
           <motion.div variants={fadeUp} className="mb-6">
             <Bounce delay={0.2} intensity={2} hover>
@@ -610,7 +610,7 @@ export function AdminUserManager() {
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── EDIT DIALOG ──────────────────────────────────────── */}
+      {/* == EDIT DIALOG ======================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
@@ -733,7 +733,7 @@ export function AdminUserManager() {
       </Dialog>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── DELETE DIALOG ──────────────────────────────────────── */}
+      {/* == DELETE DIALOG ======================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">

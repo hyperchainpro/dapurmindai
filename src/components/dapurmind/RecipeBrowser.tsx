@@ -26,7 +26,7 @@ import { Slider } from '@/components/ui/slider';
 import { Heart, Search, Clock, Star, X, Sparkles, Flame, Globe2, Wifi, WifiOff, RefreshCw, Loader2, Play, ChevronDown } from 'lucide-react';
 import type { Recipe, RecipeCategory } from '@/types';
 
-/* ── Constants ──────────────────────────────────────────────── */
+/* == Constants ================================================ */
 
 const CATEGORIES: { label: string; value: RecipeCategory | 'Semua' }[] = [
   { label: 'Semua', value: 'Semua' },
@@ -94,7 +94,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   Susah: 'bg-rose-100/80 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
 };
 
-/* ── Main Component ────────────────────────────────────────── */
+/* == Main Component ========================================== */
 
 export function RecipeBrowser() {
   const { setSelectedRecipe, setScreen, favoriteRecipes, toggleFavorite } = useAppStore();
@@ -126,7 +126,7 @@ export function RecipeBrowser() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // ── Local filtering ──
+  // == Local filtering ==
   const filteredRecipes = useMemo(() => {
     let result: Recipe[];
     if (activeCategory === 'Semua') {
@@ -155,7 +155,7 @@ export function RecipeBrowser() {
   const paginatedRecipes = filteredRecipes.slice(0, visibleCount);
   const hasMore = visibleCount < filteredRecipes.length;
 
-  // ── API search effect ──
+  // == API search effect ==
   useEffect(() => {
     if (mode !== 'api') return;
 
@@ -192,7 +192,7 @@ export function RecipeBrowser() {
     return () => { cancelled = true; };
   }, [mode, debouncedQuery, apiCategory]);
 
-  // ── Handle recipe click ──
+  // == Handle recipe click ==
   const handleRecipeClick = useCallback(
     (recipe: Recipe) => {
       setSelectedRecipe(recipe);
@@ -201,7 +201,7 @@ export function RecipeBrowser() {
     [setSelectedRecipe, setScreen]
   );
 
-  // ── Handle API recipe click (fetch full detail first) ──
+  // == Handle API recipe click (fetch full detail first) ==
   const handleApiRecipeClick = useCallback(
     async (meal: ApiMeal) => {
       // Show a loading state
@@ -215,7 +215,7 @@ export function RecipeBrowser() {
     [setSelectedRecipe, setScreen]
   );
 
-  // ── Handle favorite toggle ──
+  // == Handle favorite toggle ==
   const handleToggleFavorite = useCallback(
     (e: React.MouseEvent, recipeId: string) => {
       e.stopPropagation();
@@ -224,19 +224,19 @@ export function RecipeBrowser() {
     [toggleFavorite]
   );
 
-  // ── Handle featured tag click ──
+  // == Handle featured tag click ==
   const handleFeaturedTagClick = useCallback((tag: string) => {
     setSearchQuery(tag);
   }, []);
 
-  // ── Clear filters ──
+  // == Clear filters ==
   const clearFilters = useCallback(() => {
     setMaxCookTime(180);
     setSelectedDifficulty(null);
     setShowFilter(false);
   }, []);
 
-  // ── Refresh API ──
+  // == Refresh API ==
   const refreshApi = useCallback(() => {
     setSearchQuery('');
     setApiCategory('Semua');
@@ -247,7 +247,7 @@ export function RecipeBrowser() {
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-24">
-        {/* ── Header ───────────────────────────────────── */}
+        {/* == Header ===================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="space-y-3 px-4 pb-3 pt-4">
             {/* Title row with mode toggle */}
@@ -426,7 +426,7 @@ export function RecipeBrowser() {
           )}
         </header>
 
-        {/* ── API Mode Banner ── */}
+        {/* == API Mode Banner == */}
         {mode === 'api' && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -440,7 +440,7 @@ export function RecipeBrowser() {
           </motion.div>
         )}
 
-        {/* ── Featured Marquee ── */}
+        {/* == Featured Marquee == */}
         <section className="py-3">
           <Marquee speed={35} pauseOnHover gap={12}>
             {FEATURED_TAGS.map((tag, i) => (
@@ -457,7 +457,7 @@ export function RecipeBrowser() {
           </Marquee>
         </section>
 
-        {/* ── Category Tabs ── */}
+        {/* == Category Tabs == */}
         <section className="px-4">
           <div ref={scrollRef} className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
             {(mode === 'api' ? API_CATEGORIES : CATEGORIES).map((cat) => {
@@ -502,7 +502,7 @@ export function RecipeBrowser() {
           </div>
         </section>
 
-        {/* ── Recipe Grid ── */}
+        {/* == Recipe Grid == */}
         <section className="px-4 pt-3">
           {mode === 'local' && (
             /* Local recipes */
@@ -649,7 +649,7 @@ export function RecipeBrowser() {
   );
 }
 
-/* ── Local Recipe Card ────────────────────────────────────── */
+/* == Local Recipe Card ====================================== */
 
 function RecipeCard({
   recipe,
@@ -789,7 +789,7 @@ function RecipeCard({
   );
 }
 
-/* ── API Recipe Card (with real images) ───────────────────── */
+/* == API Recipe Card (with real images) ===================== */
 
 function ApiRecipeCard({
   meal,
@@ -878,7 +878,7 @@ function ApiRecipeCard({
   );
 }
 
-/* ── Empty State ──────────────────────────────────────────── */
+/* == Empty State ============================================ */
 
 function EmptyState({ onReset }: { onReset: () => void }) {
   return (
@@ -910,7 +910,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   );
 }
 
-/* ── ChefHat SVG ──────────────────────────────────────────── */
+/* == ChefHat SVG ============================================ */
 
 function ChefHat({ className }: { className?: string }) {
   return (

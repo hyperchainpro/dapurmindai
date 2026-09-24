@@ -24,7 +24,7 @@ function getInitialDark(): boolean {
   return false;
 }
 
-/* ── Inline script to prevent flash of wrong theme ── */
+/* == Inline script to prevent flash of wrong theme == */
 export function ThemeInitScript() {
   const src = `
     (function(){

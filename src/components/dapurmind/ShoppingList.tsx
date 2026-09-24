@@ -34,7 +34,7 @@ import { Bounce, GlowingText, CountUp, ClickSpark } from '@/components/dapurmind
 import { AffiliatePicker } from '@/components/dapurmind/AffiliatePicker';
 import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl, buildAffiliateUrl } from '@/lib/affiliate';
 
-/* ── Category config ──────────────────────────────────────────── */
+/* == Category config ============================================ */
 
 const CATEGORY_META: Record<
   string,
@@ -68,13 +68,13 @@ function mapToCategory(category: string): string {
   return DEFAULT_CATEGORY;
 }
 
-/* ── Format helpers ───────────────────────────────────────────── */
+/* == Format helpers ============================================= */
 
 function formatRupiah(amount: number): string {
   return `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
 }
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -91,7 +91,7 @@ const fadeUp = {
   },
 };
 
-/* ── ShoppingList component ───────────────────────────────────── */
+/* == ShoppingList component ===================================== */
 
 export function ShoppingList() {
   const shoppingItems = useAppStore((s) => s.shoppingItems);
@@ -107,13 +107,13 @@ export function ShoppingList() {
   const [showBulkAffiliate, setShowBulkAffiliate] = useState(false);
   const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
 
-  /* ── Derived state ──────────────────────────────────── */
+  /* == Derived state ==================================== */
   const uncheckedItems = useMemo(
     () => shoppingItems.filter((i) => !i.checked),
     [shoppingItems]
   );
 
-  /* ── Group by category ─────────────────────────────── */
+  /* == Group by category =============================== */
   const grouped = useMemo(() => {
     const groups: Record<string, ShoppingItem[]> = {};
     shoppingItems.forEach((item) => {
@@ -132,7 +132,7 @@ export function ShoppingList() {
     return sorted;
   }, [shoppingItems]);
 
-  /* ── Stats ─────────────────────────────────────────── */
+  /* == Stats =========================================== */
   const checkedCount = useMemo(
     () => shoppingItems.filter((i) => i.checked).length,
     [shoppingItems]
@@ -146,7 +146,7 @@ export function ShoppingList() {
     [uncheckedItems]
   );
 
-  /* ── Handlers ──────────────────────────────────────── */
+  /* == Handlers ======================================== */
   const handleDeleteItem = useCallback(
     (id: string) => {
       setShoppingItems(shoppingItems.filter((i) => i.id !== id));
@@ -169,7 +169,7 @@ export function ShoppingList() {
     setShowBulkAffiliate(true);
   }, []);
 
-  /* ── Click logging ──────────────────────────────── */
+  /* == Click logging ================================ */
   const logAffiliateClick = useCallback(async (platform: string, context: string, productName?: string) => {
     try {
       await fetch('/api/affiliate/click-log', {
@@ -184,7 +184,7 @@ export function ShoppingList() {
     } catch { /* silent fail */ }
   }, []);
 
-  /* ── Multi-platform buy handler ──────────────────── */
+  /* == Multi-platform buy handler ==================== */
   const handleMultiPlatformBuy = useCallback(() => {
     setShowBuyAllDialog(false);
     const itemNames = uncheckedItems.map((i) => i.name);
@@ -198,7 +198,7 @@ export function ShoppingList() {
     });
   }, [uncheckedItems, logAffiliateClick]);
 
-  /* ── AI Generate Links ───────────────────────────── */
+  /* == AI Generate Links ============================= */
   const handleGenerateAILinks = useCallback(async (itemName: string, category: string) => {
     setIsGeneratingLinks(true);
     try {
@@ -218,7 +218,7 @@ export function ShoppingList() {
     }
   }, [logAffiliateClick]);
 
-  /* ── Empty state ───────────────────────────────────── */
+  /* == Empty state ===================================== */
   if (shoppingItems.length === 0) {
     return (
       <div className="min-h-screen px-4 pb-28 pt-4">
@@ -264,11 +264,11 @@ export function ShoppingList() {
     );
   }
 
-  /* ── Main render ───────────────────────────────────── */
+  /* == Main render ===================================== */
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-40">
-        {/* ── Header ─────────────────────────────────── */}
+        {/* == Header =================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
@@ -303,7 +303,7 @@ export function ShoppingList() {
           </div>
         </header>
 
-        {/* ── Affiliate Marketplace Banner ───────────── */}
+        {/* == Affiliate Marketplace Banner ============= */}
         {uncheckedItems.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -339,7 +339,7 @@ export function ShoppingList() {
           </motion.div>
         )}
 
-        {/* ── Category grouped list ──────────────────── */}
+        {/* == Category grouped list ==================== */}
         <motion.section
           variants={stagger}
           initial="hidden"
@@ -403,7 +403,7 @@ export function ShoppingList() {
         </motion.section>
       </div>
 
-      {/* ── Summary Bar (fixed bottom) ──────────────── */}
+      {/* == Summary Bar (fixed bottom) ================ */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
         <div className="relative overflow-hidden rounded-2xl nm-raised p-4 shadow-lg backdrop-blur-xl">
           <BorderBeam
@@ -465,21 +465,21 @@ export function ShoppingList() {
         </div>
       </div>
 
-      {/* ── Single Item Affiliate Picker ──────────────── */}
+      {/* == Single Item Affiliate Picker ================ */}
       <AffiliatePicker
         open={showSingleAffiliate}
         onOpenChange={setShowSingleAffiliate}
         singleItem={selectedAffiliateItem}
       />
 
-      {/* ── Bulk Affiliate Picker ──────────────────────── */}
+      {/* == Bulk Affiliate Picker ======================== */}
       <AffiliatePicker
         open={showBulkAffiliate}
         onOpenChange={setShowBulkAffiliate}
         bulkItems={uncheckedItems}
       />
 
-      {/* ── Delete Confirmation Dialog ───────────────── */}
+      {/* == Delete Confirmation Dialog ================= */}
       <Dialog
         open={showDeleteDialog !== null}
         onOpenChange={(open) => !open && setShowDeleteDialog(null)}
@@ -513,7 +513,7 @@ export function ShoppingList() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Buy All Confirmation Dialog ────────────────── */}
+      {/* == Buy All Confirmation Dialog ================== */}
       <Dialog open={showBuyAllDialog} onOpenChange={setShowBuyAllDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>
@@ -595,7 +595,7 @@ export function ShoppingList() {
   );
 }
 
-/* ── Shopping Item Row ────────────────────────────────────────── */
+/* == Shopping Item Row ========================================== */
 
 function ShoppingItemRow({
   item,

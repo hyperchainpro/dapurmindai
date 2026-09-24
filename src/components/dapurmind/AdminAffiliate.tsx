@@ -45,7 +45,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AnimatedList } from '@/components/dapurmind/MagicUI';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -62,7 +62,7 @@ const fadeUp = {
   },
 };
 
-/* ── Helpers ─────────────────────────────────────────────────── */
+/* == Helpers =================================================== */
 
 function getMarketplace(platform: string): AffiliateMarketplace | undefined {
   return AFFILIATE_MARKETPLACES.find((mp) => mp.name.toLowerCase().includes(platform.toLowerCase()) || mp.id === platform);
@@ -73,7 +73,7 @@ function maskAffiliateId(id: string): string {
   return id.slice(0, 4) + '****';
 }
 
-/* ── Swipe-to-delete Account Card ────────────────────────────── */
+/* == Swipe-to-delete Account Card ============================== */
 
 interface SwipeableAccountCardProps {
   account: AffiliateAccount;
@@ -183,7 +183,7 @@ function SwipeableAccountCard({ account, onEdit, onDelete }: SwipeableAccountCar
   );
 }
 
-/* ── Quick Setup Card ────────────────────────────────────────── */
+/* == Quick Setup Card ========================================== */
 
 interface QuickSetupCardProps {
   marketplace: AffiliateMarketplace;
@@ -228,10 +228,10 @@ function QuickSetupCard({ marketplace, isConnected, onAdd }: QuickSetupCardProps
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminAffiliate() {
-  /* ── Store hooks ───────────────────────────────────────────── */
+  /* == Store hooks ============================================= */
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
   const affiliateAccounts = useAppStore((s) => s.affiliateAccounts);
@@ -239,7 +239,7 @@ export function AdminAffiliate() {
   const addAffiliateAccount = useAppStore((s) => s.addAffiliateAccount);
   const removeAffiliateAccount = useAppStore((s) => s.removeAffiliateAccount);
 
-  /* ── Local state ───────────────────────────────────────────── */
+  /* == Local state ============================================= */
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -267,7 +267,7 @@ export function AdminAffiliate() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState<AffiliateAccount | null>(null);
 
-  /* ── Derived data ──────────────────────────────────────────── */
+  /* == Derived data ============================================ */
   const totalAvailable = AFFILIATE_MARKETPLACES.length;
   const connectedCount = affiliateAccounts.filter((a) => a.isActive).length;
   const connectedPlatforms = useMemo(
@@ -278,7 +278,7 @@ export function AdminAffiliate() {
   const hasAccounts = affiliateAccounts.length > 0;
   const hasActiveAccounts = connectedCount > 0;
 
-  /* ── Fetch accounts on mount ───────────────────────────────── */
+  /* == Fetch accounts on mount ================================= */
   const fetchAccounts = useCallback(async () => {
     try {
       setLoading(true);
@@ -298,7 +298,7 @@ export function AdminAffiliate() {
     fetchAccounts();
   }, [fetchAccounts, refreshKey]);
 
-  /* ── Dialog handlers ───────────────────────────────────────── */
+  /* == Dialog handlers ========================================= */
 
   const openAddDialog = useCallback((marketplace?: AffiliateMarketplace) => {
     if (marketplace) {
@@ -428,7 +428,7 @@ export function AdminAffiliate() {
     }
   }, [deletingAccount, removeAffiliateAccount]);
 
-  /* ── AnimatedList items ────────────────────────────────────── */
+  /* == AnimatedList items ====================================== */
 
   const accountListItems = useMemo(
     () =>
@@ -445,14 +445,14 @@ export function AdminAffiliate() {
     [affiliateAccounts, openEditDialog, openDeleteDialog],
   );
 
-  /* ── Selected platform for add dialog ──────────────────────── */
+  /* == Selected platform for add dialog ======================== */
 
   const selectedMp = useMemo(
     () => AFFILIATE_MARKETPLACES.find((m) => m.id === addPlatform),
     [addPlatform],
   );
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* == Render ================================================== */
 
   return (
     <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
@@ -463,7 +463,7 @@ export function AdminAffiliate() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* == Header ============================================ */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -508,7 +508,7 @@ export function AdminAffiliate() {
           </div>
         </motion.div>
 
-        {/* ── Error Banner ────────────────────────────────────── */}
+        {/* == Error Banner ====================================== */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -533,7 +533,7 @@ export function AdminAffiliate() {
           )}
         </AnimatePresence>
 
-        {/* ── Connection Status Banner ────────────────────────── */}
+        {/* == Connection Status Banner ========================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div
             className={`rounded-2xl border p-4 ${
@@ -573,7 +573,7 @@ export function AdminAffiliate() {
           </div>
         </motion.div>
 
-        {/* ── Loading State ───────────────────────────────────── */}
+        {/* == Loading State ===================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -592,7 +592,7 @@ export function AdminAffiliate() {
           </motion.div>
         )}
 
-        {/* ── Connected Accounts List ─────────────────────────── */}
+        {/* == Connected Accounts List =========================== */}
         {!loading && hasAccounts && (
           <motion.div variants={fadeUp} className="mb-6">
             <div className="mb-3 flex items-center justify-between">
@@ -619,7 +619,7 @@ export function AdminAffiliate() {
           </motion.div>
         )}
 
-        {/* ── Empty State ─────────────────────────────────────── */}
+        {/* == Empty State ======================================= */}
         {!loading && !hasAccounts && (
           <motion.div variants={fadeUp} className="mb-6">
             <Bounce delay={0.2} intensity={2} hover>
@@ -643,7 +643,7 @@ export function AdminAffiliate() {
           </motion.div>
         )}
 
-        {/* ── Quick Setup Section ─────────────────────────────── */}
+        {/* == Quick Setup Section =============================== */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -671,7 +671,7 @@ export function AdminAffiliate() {
           </div>
         </motion.div>
 
-        {/* ── Info Section ────────────────────────────────────── */}
+        {/* == Info Section ====================================== */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="rounded-xl bg-muted/30 p-4">
             <div className="flex items-start gap-2">
@@ -685,7 +685,7 @@ export function AdminAffiliate() {
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── ADD DIALOG ───────────────────────────────────────── */}
+      {/* == ADD DIALOG ========================================= */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
@@ -821,7 +821,7 @@ export function AdminAffiliate() {
       </Dialog>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── EDIT DIALOG ──────────────────────────────────────── */}
+      {/* == EDIT DIALOG ======================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
@@ -934,7 +934,7 @@ export function AdminAffiliate() {
       </Dialog>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── DELETE DIALOG ────────────────────────────────────── */}
+      {/* == DELETE DIALOG ====================================== */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">

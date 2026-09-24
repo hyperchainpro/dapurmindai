@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── Helper: serialize recipe ────────────────────────── */
+/* == Helper: serialize recipe ========================== */
 function serializeRecipe(r: {
   id: string;
   userId: string;
@@ -51,7 +51,7 @@ function serializeRecipe(r: {
   };
 }
 
-/* ── GET /api/admin/recipes/[id] ──────────────────────── */
+/* == GET /api/admin/recipes/[id] ======================== */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -82,7 +82,7 @@ export async function GET(
   }
 }
 
-/* ── PUT /api/admin/recipes/[id] — Update recipe ──────── */
+/* == PUT /api/admin/recipes/[id] — Update recipe ======== */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -128,7 +128,7 @@ export async function PUT(
   }
 }
 
-/* ── DELETE /api/admin/recipes/[id] — Soft delete ─────── */
+/* == DELETE /api/admin/recipes/[id] — Soft delete ======= */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -159,7 +159,7 @@ export async function DELETE(
   }
 }
 
-/* ── PATCH /api/admin/recipes/[id] — Restore ─────────── */
+/* == PATCH /api/admin/recipes/[id] — Restore =========== */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

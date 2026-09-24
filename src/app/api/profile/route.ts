@@ -4,7 +4,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { requireAuth, AuthError } from '@/lib/auth-server';
 
-/* ── User store (shared with auth) ───────────────────────── */
+/* == User store (shared with auth) ========================= */
 
 interface StoredUser {
   id: string;
@@ -29,7 +29,7 @@ function getUsers(): StoredUser[] {
   return globalThis.__dapurmind_users;
 }
 
-/* ── Allowed file types ──────────────────────────────────── */
+/* == Allowed file types ==================================== */
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg',
@@ -47,7 +47,7 @@ const ALLOWED_EXTENSIONS: Record<string, string> = {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-/* ── POST /api/profile ───────────────────────────────────── */
+/* == POST /api/profile ===================================== */
 
 export async function POST(request: NextRequest) {
   try {

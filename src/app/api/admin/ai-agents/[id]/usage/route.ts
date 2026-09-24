@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── Helper: serialize usage log ─────────────────────── */
+/* == Helper: serialize usage log ======================= */
 function serializeUsageLog(l: {
   id: string;
   agentId: string;
@@ -30,7 +30,7 @@ function serializeUsageLog(l: {
   };
 }
 
-/* ── GET /api/admin/ai-agents/[id]/usage ─────────────── */
+/* == GET /api/admin/ai-agents/[id]/usage =============== */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

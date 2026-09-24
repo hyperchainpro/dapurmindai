@@ -15,7 +15,7 @@ import {
 import { useAppStore } from '@/hooks/useAppState';
 import { MathCaptcha } from '@/components/dapurmind/MathCaptcha';
 
-/* ── Animation variants ──────────────────────────────────── */
+/* == Animation variants ==================================== */
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -26,7 +26,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
 
-/* ── Register component ────────────────────────────────── */
+/* == Register component ================================== */
 
 export function RegisterPage() {
   const setScreen = useAppStore((s) => s.setScreen);

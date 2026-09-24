@@ -13,9 +13,9 @@ import { BorderBeam } from '@/components/dapurmind/MagicUI';
 import { CaptchaInput } from '@/components/dapurmind/CaptchaInput';
 import { authenticateUser } from '@/lib/auth';
 
-/* ── Admin login goes through the server-side API ── */
+/* == Admin login goes through the server-side API == */
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -32,7 +32,7 @@ const fadeUp = {
   },
 };
 
-/* ── LoginScreen ──────────────────────────────────────────────── */
+/* == LoginScreen ================================================ */
 
 export default function LoginScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -142,7 +142,7 @@ export default function LoginScreen() {
         animate="visible"
         className="flex flex-1 flex-col items-center justify-center px-6 py-12"
       >
-        {/* ── Logo ── */}
+        {/* == Logo == */}
         <motion.div variants={fadeUp} className="mb-2">
           <Bounce intensity={3} delay={0.1}>
             <div className="relative">
@@ -160,7 +160,7 @@ export default function LoginScreen() {
           </Bounce>
         </motion.div>
 
-        {/* ── Title ── */}
+        {/* == Title == */}
         <motion.div variants={fadeUp} className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight">
             <GlowingText color="emerald" intensity={2}>
@@ -173,7 +173,7 @@ export default function LoginScreen() {
           </p>
         </motion.div>
 
-        {/* ── Login Card ── */}
+        {/* == Login Card == */}
         <motion.div variants={fadeUp} className="w-full max-w-sm">
           <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 shadow-lg">
             <BorderBeam
@@ -293,7 +293,7 @@ export default function LoginScreen() {
           </div>
         </motion.div>
 
-        {/* ── Footer Links ── */}
+        {/* == Footer Links == */}
         <motion.div variants={fadeUp} className="mt-6 flex flex-col items-center gap-3">
           <button
             onClick={() => setScreen('forgot-password')}

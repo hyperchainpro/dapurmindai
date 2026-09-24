@@ -11,16 +11,16 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 
-/* ── Admin login goes through the server-side API ── */
+/* == Admin login goes through the server-side API == */
 
-/* ── Animation variants ──────────────────────────────────── */
+/* == Animation variants ==================================== */
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
 };
 
-/* ── AdminLogin component ────────────────────────────────── */
+/* == AdminLogin component ================================== */
 
 export function AdminLogin() {
   const setAdminLoggedIn = useAppStore((s) => s.setAdminLoggedIn);

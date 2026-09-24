@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-/* ── Helpers & Constants ─────────────────────────────── */
+/* == Helpers & Constants =============================== */
 
 const formatRupiah = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -69,7 +69,7 @@ const FREQ_LABELS: Record<string, { label: string; badgeCls: string }> = {
   Tahunan: { label: 'Tahunan', badgeCls: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' },
 };
 
-/* ── Component ──────────────────────────────────────── */
+/* == Component ======================================== */
 
 export function FinanceRecurringTab({ userId }: { userId: string }) {
   const [items, setItems] = useState<RecurringTransaction[]>([]);
@@ -87,7 +87,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
   const [fEndDate, setFEndDate] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
 
-  /* ── Fetch ─────────────────────────────────────── */
+  /* == Fetch ======================================= */
   const fetchData = async () => {
     if (!userId) return;
     setLoading(true);
@@ -106,7 +106,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
 
   useEffect(() => { fetchData(); }, [userId]);
 
-  /* ── Grouped by frequency ──────────────────────── */
+  /* == Grouped by frequency ======================== */
   const grouped = useMemo(() => {
     const order: Array<'Mingguan' | 'Bulanan' | 'Tahunan'> = ['Mingguan', 'Bulanan', 'Tahunan'];
     return order
@@ -117,7 +117,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
       .filter((g) => g.items.length > 0);
   }, [items]);
 
-  /* ── Reset form ────────────────────────────────── */
+  /* == Reset form ================================== */
   const resetForm = () => {
     setEditId(null);
     setFType('expense');
@@ -141,7 +141,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
     setDlgOpen(true);
   };
 
-  /* ── Save ──────────────────────────────────────── */
+  /* == Save ======================================== */
   const handleSave = async () => {
     if (!userId || !fAmt || !fCat || !fNextDate) return;
     try {
@@ -170,7 +170,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
     }
   };
 
-  /* ── Delete ────────────────────────────────────── */
+  /* == Delete ====================================== */
   const handleDelete = async () => {
     if (!dlgDelete || !userId) return;
     try {
@@ -188,7 +188,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
     setDlgDelete(null);
   };
 
-  /* ── Toggle active ─────────────────────────────── */
+  /* == Toggle active =============================== */
   const handleToggle = async (item: RecurringTransaction) => {
     if (!userId) return;
     try {
@@ -209,7 +209,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
 
   const cats = fType === 'income' ? INCOME_CATS : EXPENSE_CATS;
 
-  /* ── Render ────────────────────────────────────── */
+  /* == Render ====================================== */
   if (loading) {
     return <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>;
   }
@@ -313,7 +313,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
         )}
       </div>
 
-      {/* ── Add/Edit Dialog ───────────────────────── */}
+      {/* == Add/Edit Dialog ========================= */}
       <Dialog open={dlgOpen} onOpenChange={(o) => { if (!o) { setDlgOpen(false); resetForm(); } }}>
         <DialogContent className="rounded-2xl sm:max-w-sm max-h-[85vh] overflow-y-auto scroll-compact">
           <DialogHeader>
@@ -389,7 +389,7 @@ export function FinanceRecurringTab({ userId }: { userId: string }) {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Dialog ─────────────────────────── */}
+      {/* == Delete Dialog =========================== */}
       <Dialog open={!!dlgDelete} onOpenChange={() => setDlgDelete(null)}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>

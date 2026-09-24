@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-/* ── User store (shared with register/login) ─────────── */
+/* == User store (shared with register/login) =========== */
 
 interface StoredUser {
   id: string;
@@ -25,7 +25,7 @@ function getUsers(): StoredUser[] {
   return globalThis.__dapurmind_users;
 }
 
-/* ── POST /api/auth/reset-password ────────────────────── */
+/* == POST /api/auth/reset-password ====================== */
 
 export async function POST(request: NextRequest) {
   try {

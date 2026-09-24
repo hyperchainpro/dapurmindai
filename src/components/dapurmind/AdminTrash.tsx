@@ -37,7 +37,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -54,7 +54,7 @@ const fadeUp = {
   },
 };
 
-/* ── Types ──────────────────────────────────────────────────── */
+/* == Types ==================================================== */
 
 type TrashItemType = 'users' | 'recipes' | 'affiliate_accounts' | 'product_links';
 
@@ -66,7 +66,7 @@ interface TrashItem {
   [key: string]: unknown;
 }
 
-/* ── Type badge helper ───────────────────────────────────────── */
+/* == Type badge helper ========================================= */
 
 function getTypeBadge(type: TrashItemType) {
   switch (type) {
@@ -83,13 +83,13 @@ function getTypeBadge(type: TrashItemType) {
   }
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminTrash() {
   const setScreen = useAppStore((s) => s.setScreen);
   const goBack = useAppStore((s) => s.goBack);
 
-  /* ── Local state ───────────────────────────────────────────── */
+  /* == Local state ============================================= */
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<TrashItem[]>([]);
@@ -102,7 +102,7 @@ export function AdminTrash() {
   const [showPermaDeleteDialog, setShowPermaDeleteDialog] = useState(false);
   const [permaDeleteItem, setPermaDeleteItem] = useState<TrashItem | null>(null);
 
-  /* ── Fetch trash items ──────────────────────────────────────── */
+  /* == Fetch trash items ======================================== */
   const fetchTrash = useCallback(async () => {
     try {
       setLoading(true);
@@ -122,7 +122,7 @@ export function AdminTrash() {
     fetchTrash();
   }, [fetchTrash, refreshKey]);
 
-  /* ── Stats by type ─────────────────────────────────────────── */
+  /* == Stats by type =========================================== */
   const typeStats = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach((item) => {
@@ -131,13 +131,13 @@ export function AdminTrash() {
     return counts;
   }, [items]);
 
-  /* ── Filtered items ───────────────────────────────────────── */
+  /* == Filtered items ========================================= */
   const filteredItems = useMemo(() => {
     if (typeFilter === 'all') return items;
     return items.filter((item) => item.type === typeFilter);
   }, [items, typeFilter]);
 
-  /* ── Restore handler ───────────────────────────────────────── */
+  /* == Restore handler ========================================= */
   const handleRestore = useCallback(
     async (item: TrashItem) => {
       try {
@@ -181,7 +181,7 @@ export function AdminTrash() {
     []
   );
 
-  /* ── Permanent delete handlers ──────────────────────────────── */
+  /* == Permanent delete handlers ================================ */
   const openPermaDeleteDialog = useCallback((item: TrashItem) => {
     setPermaDeleteItem(item);
     setShowPermaDeleteDialog(true);
@@ -212,7 +212,7 @@ export function AdminTrash() {
     }
   }, [permaDeleteItem]);
 
-  /* ── Tabs ───────────────────────────────────────────────────── */
+  /* == Tabs ===================================================== */
   const tabs: { key: 'all' | TrashItemType; label: string; icon: React.ElementType }[] = [
     { key: 'all', label: 'Semua', icon: ShoppingBag },
     { key: 'users', label: 'User', icon: Users },
@@ -221,7 +221,7 @@ export function AdminTrash() {
     { key: 'product_links', label: 'Produk', icon: Package },
   ];
 
-  /* ── Header nav items ─────────────────────────────────────── */
+  /* == Header nav items ======================================= */
   const headerNav = [
     { icon: LayoutDashboard, screen: 'admin-dashboard' as const, label: 'Dashboard' },
     { icon: Users, screen: 'admin-users' as const, label: 'User' },
@@ -231,7 +231,7 @@ export function AdminTrash() {
     { icon: BarChart3, screen: 'admin-analytics' as const, label: 'Analitik' },
   ];
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* == Render ================================================== */
 
   return (
     <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
@@ -241,7 +241,7 @@ export function AdminTrash() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ──────────────────────────────────────────── */}
+        {/* == Header ============================================ */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -287,7 +287,7 @@ export function AdminTrash() {
           </div>
         </motion.div>
 
-        {/* ── Error Banner ────────────────────────────────────── */}
+        {/* == Error Banner ====================================== */}
         <AnimatePresence>
           {error && (
             <motion.div
@@ -314,7 +314,7 @@ export function AdminTrash() {
           )}
         </AnimatePresence>
 
-        {/* ── Stats Banner ───────────────────────────────────── */}
+        {/* == Stats Banner ===================================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="rounded-2xl border border-red-200/50 bg-red-50/50 backdrop-blur-sm p-4 dark:border-red-800/30 dark:bg-red-500/5">
             <div className="flex items-center gap-3 mb-3">
@@ -354,7 +354,7 @@ export function AdminTrash() {
           </div>
         </motion.div>
 
-        {/* ── Tab Filter ──────────────────────────────────────── */}
+        {/* == Tab Filter ======================================== */}
         <motion.div variants={fadeUp} className="mb-4">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
             {tabs.map((tab) => (
@@ -391,7 +391,7 @@ export function AdminTrash() {
           </div>
         </motion.div>
 
-        {/* ── Refresh Button ──────────────────────────────────── */}
+        {/* == Refresh Button ==================================== */}
         <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trash2 className="h-4 w-4 text-red-500" />
@@ -409,7 +409,7 @@ export function AdminTrash() {
           </button>
         </motion.div>
 
-        {/* ── Loading State ──────────────────────────────────── */}
+        {/* == Loading State ==================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -430,7 +430,7 @@ export function AdminTrash() {
           </motion.div>
         )}
 
-        {/* ── Trash Item List ─────────────────────────────────── */}
+        {/* == Trash Item List =================================== */}
         {!loading && filteredItems.length > 0 && (
           <motion.div variants={fadeUp} className="mb-6 space-y-3">
             {filteredItems.map((item) => {
@@ -510,7 +510,7 @@ export function AdminTrash() {
           </motion.div>
         )}
 
-        {/* ── Empty State ─────────────────────────────────────── */}
+        {/* == Empty State ======================================= */}
         {!loading && filteredItems.length === 0 && (
           <motion.div variants={fadeUp} className="mb-6">
             <Bounce delay={0.2} intensity={2} hover>
@@ -536,7 +536,7 @@ export function AdminTrash() {
           </motion.div>
         )}
 
-        {/* ── Warning Section ──────────────────────────────────── */}
+        {/* == Warning Section ==================================== */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="rounded-xl bg-muted/30 p-4">
             <div className="flex items-start gap-2">
@@ -553,7 +553,7 @@ export function AdminTrash() {
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* ── PERMANENT DELETE DIALOG ───────────────────────────── */}
+      {/* == PERMANENT DELETE DIALOG ============================= */}
       {/* ═══════════════════════════════════════════════════════ */}
       <Dialog open={showPermaDeleteDialog} onOpenChange={setShowPermaDeleteDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">

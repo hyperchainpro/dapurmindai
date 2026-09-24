@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
-/* ── Helpers ─────────────────────────────────────── */
+/* == Helpers ======================================= */
 
 const formatRupiah = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -61,7 +61,7 @@ interface ReportData {
   dailyTrend: DailyTrend[];
 }
 
-/* ── Component ───────────────────────────────────── */
+/* == Component ===================================== */
 
 export function FinanceReportTab({ userId }: { userId: string }) {
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
@@ -146,7 +146,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-4">
-      {/* ── Period Selector ─────────────────────── */}
+      {/* == Period Selector ======================= */}
       <motion.div variants={fadeUp} className="flex gap-2">
         {(['7d', '30d', '90d'] as const).map((p) => (
           <button
@@ -163,7 +163,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         ))}
       </motion.div>
 
-      {/* ── Summary Cards ───────────────────────── */}
+      {/* == Summary Cards ========================= */}
       <div className="grid grid-cols-2 gap-3">
         {[
           { label: 'Total Pemasukan', val: data.totalIncome, icon: ArrowUpRight, bg: 'bg-emerald-50 dark:bg-emerald-500/10', cls: 'text-emerald-600 dark:text-emerald-400' },
@@ -189,7 +189,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         ))}
       </div>
 
-      {/* ── Spending by Category - Pie Chart ─────── */}
+      {/* == Spending by Category - Pie Chart ======= */}
       {pieData.length > 0 && (
         <motion.div
           variants={fadeUp}
@@ -237,7 +237,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         </motion.div>
       )}
 
-      {/* ── Spending by Category - Horizontal Bars ─ */}
+      {/* == Spending by Category - Horizontal Bars = */}
       {data.categoryBreakdown.length > 0 && (
         <motion.div
           variants={fadeUp}
@@ -270,7 +270,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         </motion.div>
       )}
 
-      {/* ── Income vs Expense Monthly Comparison ─── */}
+      {/* == Income vs Expense Monthly Comparison === */}
       {data.monthlyComparison.length > 0 && (
         <motion.div
           variants={fadeUp}
@@ -298,7 +298,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         </motion.div>
       )}
 
-      {/* ── Top Kategori Pengeluaran ─────────────── */}
+      {/* == Top Kategori Pengeluaran =============== */}
       {data.categoryBreakdown.length > 0 && (
         <motion.div
           variants={fadeUp}
@@ -333,7 +333,7 @@ export function FinanceReportTab({ userId }: { userId: string }) {
         </motion.div>
       )}
 
-      {/* ── Tren Pengeluaran Harian (14 hari) ────── */}
+      {/* == Tren Pengeluaran Harian (14 hari) ====== */}
       {data.dailyTrend.length > 0 && (
         <motion.div
           variants={fadeUp}

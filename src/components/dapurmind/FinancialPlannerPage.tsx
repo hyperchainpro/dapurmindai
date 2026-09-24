@@ -24,7 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FinanceReportTab } from './FinanceReportTab';
 import { FinanceRecurringTab } from './FinanceRecurringTab';
 
-/* ── Helpers & Constants ────────────────────────────────────────── */
+/* == Helpers & Constants ========================================== */
 
 const formatRupiah = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
@@ -58,7 +58,7 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
-/* ── Main Component ──────────────────────────────────────────────── */
+/* == Main Component ================================================ */
 
 export function FinancialPlannerPage() {
   const { t } = useTranslation();
@@ -124,7 +124,7 @@ export function FinancialPlannerPage() {
   // Savings input
   const [savAmt, setSavAmt] = useState('');
 
-  /* ── Fetch data ──────────────────────────────────── */
+  /* == Fetch data ==================================== */
   useEffect(() => {
     if (!userId) return;
     (async () => {
@@ -143,14 +143,14 @@ export function FinancialPlannerPage() {
     })();
   }, [userId, setRecords, setBudgets, setGoals, setLoading]);
 
-  /* ── Monthly stats ───────────────────────────────── */
+  /* == Monthly stats ================================= */
   const now = new Date();
   const mon = now.getMonth(), yr = now.getFullYear();
   const monthlyIn = useMemo(() => records.filter((r) => { const d = new Date(r.date); return r.type === 'income' && d.getMonth() === mon && d.getFullYear() === yr; }).reduce((s, r) => s + r.amount, 0), [records, mon, yr]);
   const monthlyOut = useMemo(() => records.filter((r) => { const d = new Date(r.date); return r.type === 'expense' && d.getMonth() === mon && d.getFullYear() === yr; }).reduce((s, r) => s + r.amount, 0), [records, mon, yr]);
   const balance = monthlyIn - monthlyOut;
 
-  /* ── Grouped records ──────────────────────────────── */
+  /* == Grouped records ================================ */
   const grouped = useMemo(() => {
     const m = new Map<string, FinanceRecord[]>();
     records.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).forEach((r) => {
@@ -159,13 +159,13 @@ export function FinancialPlannerPage() {
     return Array.from(m.entries());
   }, [records]);
 
-  /* ── Budgets with computed spent ─────────────────── */
+  /* == Budgets with computed spent =================== */
   const budgetsWithSpent = useMemo(() => budgets.map((b) => ({
     ...b,
     spent: records.filter((r) => r.type === 'expense' && r.category === b.category).reduce((s, r) => s + r.amount, 0),
   })), [budgets, records]);
 
-  /* ── Form helpers ────────────────────────────────── */
+  /* == Form helpers ================================== */
   const resetRec = () => { setEditRecId(null); setRecType('expense'); setRecAmt(''); setRecCat(''); setRecDesc(''); setRecDate(new Date().toISOString().split('T')[0]); };
   const resetBud = () => { setEditBudId(null); setBudCat(''); setBudLimit(''); setBudPeriod('monthly'); };
   const resetGo = () => { setEditGoId(null); setGoTitle(''); setGoTarget(''); setGoSaved(''); setGoDeadline(''); setGoIcon('🏠'); };
@@ -174,7 +174,7 @@ export function FinancialPlannerPage() {
   const openEditBud = (b: FinanceBudget) => { setEditBudId(b.id); setBudCat(b.category); setBudLimit(String(b.limitAmount)); setBudPeriod(b.period); setDlgBudget(true); };
   const openEditGo = (g: FinanceGoal) => { setEditGoId(g.id); setGoTitle(g.title); setGoTarget(String(g.targetAmount)); setGoSaved(String(g.savedAmount)); setGoDeadline(g.deadline); setGoIcon(g.icon); setDlgGoal(true); };
 
-  /* ── Save handlers ───────────────────────────────── */
+  /* == Save handlers ================================= */
   const saveRec = async () => {
     if (!userId || !recAmt || !recCat) return;
     try {
@@ -233,7 +233,7 @@ export function FinancialPlannerPage() {
     setDlgDelete(null);
   };
 
-  /* ── AI Advisor ─────────────────────────────────── */
+  /* == AI Advisor =================================== */
   const handleAiSend = async () => {
     if (!aiQuestion.trim() || !userId || aiLoading) return;
     const q = aiQuestion.trim();
@@ -260,7 +260,7 @@ export function FinancialPlannerPage() {
     }
   };
 
-  /* ── Render ───────────────────────────────────────── */
+  /* == Render ========================================= */
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
       <header className="sticky top-0 z-20 glass">
@@ -273,7 +273,7 @@ export function FinancialPlannerPage() {
       </header>
 
       <div className="flex flex-col pb-24">
-        {/* ── Overview ──────────────────────────────── */}
+        {/* == Overview ================================ */}
         {loading ? (
           <div className="mx-4 mt-4 space-y-3"><Skeleton className="h-24 w-full rounded-xl" /><div className="flex gap-3"><Skeleton className="h-16 flex-1 rounded-xl" /><Skeleton className="h-16 flex-1 rounded-xl" /></div></div>
         ) : (
@@ -296,7 +296,7 @@ export function FinancialPlannerPage() {
           </motion.section>
         )}
 
-        {/* ── Tab Bar ────────────────────────────────── */}
+        {/* == Tab Bar ================================== */}
         <div className="mx-4 mt-4">
           <div className="flex rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-1">
             {(['records', 'budgets', 'goals', 'report', 'recurring'] as const).map((tab) => (
@@ -308,7 +308,7 @@ export function FinancialPlannerPage() {
           </div>
         </div>
 
-        {/* ── Tab Content ───────────────────────────── */}
+        {/* == Tab Content ============================= */}
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="px-4 mt-4">
             {activeTab === 'records' && <RecordsSection grouped={grouped} loading={loading} onAdd={() => { resetRec(); setDlgRecord(true); }} onEdit={openEditRec} onDelete={(id) => setDlgDelete({ type: 'record', id })} />}
@@ -320,7 +320,7 @@ export function FinancialPlannerPage() {
         </AnimatePresence>
       </div>
 
-      {/* ── Dialogs ──────────────────────────────────── */}
+      {/* == Dialogs ==================================== */}
       <RecordFormDialog open={dlgRecord} onClose={() => { setDlgRecord(false); resetRec(); }} recType={recType} setRecType={setRecType} recAmt={recAmt} setRecAmt={setRecAmt} recCat={recCat} setRecCat={setRecCat} recDesc={recDesc} setRecDesc={setRecDesc} recDate={recDate} setRecDate={setRecDate} isEdit={!!editRecId} onSave={saveRec} />
       <BudgetFormDialog open={dlgBudget} onClose={() => { setDlgBudget(false); resetBud(); }} cat={budCat} setCat={setBudCat} limit={budLimit} setLimit={setBudLimit} period={budPeriod} setPeriod={setBudPeriod} isEdit={!!editBudId} onSave={saveBud} />
       <GoalFormDialog open={dlgGoal} onClose={() => { setDlgGoal(false); resetGo(); }} title={goTitle} setTitle={setGoTitle} target={goTarget} setTarget={setGoTarget} saved={goSaved} setSaved={setGoSaved} deadline={goDeadline} setDeadline={setGoDeadline} icon={goIcon} setIcon={setGoIcon} isEdit={!!editGoId} onSave={saveGoal} />
@@ -352,7 +352,7 @@ export function FinancialPlannerPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── AI Financial Advisor Floating Button + Dialog ── */}
+      {/* == AI Financial Advisor Floating Button + Dialog == */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}

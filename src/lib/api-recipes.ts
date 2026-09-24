@@ -1,14 +1,14 @@
-/* ── TheMealDB API Service ────────────────────────────────────
+/* == TheMealDB API Service ====================================
  *  100% gratis, tanpa API key, tanpa batas permintaan.
  *  Data di-cache di Next.js server (revalidate).
  *  Fallback ke resep lokal saat offline / error.
- * ───────────────────────────────────────────────────────────── */
+ * ============================================================= */
 
 import type { Recipe } from '@/types';
 
 const API_BASE = '/api/recipes';
 
-/* ── Search recipes ── */
+/* == Search recipes == */
 export async function searchApiRecipes(query: string): Promise<ApiSearchResult> {
   try {
     const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
@@ -20,7 +20,7 @@ export async function searchApiRecipes(query: string): Promise<ApiSearchResult> 
   }
 }
 
-/* ── Search by category ── */
+/* == Search by category == */
 export async function searchByCategory(category: string): Promise<ApiSearchResult> {
   try {
     const res = await fetch(`${API_BASE}/search?category=${encodeURIComponent(category)}`);
@@ -31,7 +31,7 @@ export async function searchByCategory(category: string): Promise<ApiSearchResul
   }
 }
 
-/* ── Get full recipe detail ── */
+/* == Get full recipe detail == */
 export async function getApiRecipeDetail(id: string): Promise<Recipe | null> {
   try {
     // Strip "api-" prefix if present
@@ -46,7 +46,7 @@ export async function getApiRecipeDetail(id: string): Promise<Recipe | null> {
   }
 }
 
-/* ── Get random recipes ── */
+/* == Get random recipes == */
 export async function getRandomRecipes(): Promise<ApiSearchResult> {
   try {
     const res = await fetch(`${API_BASE}/random`);
@@ -57,7 +57,7 @@ export async function getRandomRecipes(): Promise<ApiSearchResult> {
   }
 }
 
-/* ── Get categories ── */
+/* == Get categories == */
 export async function getApiCategories(): Promise<ApiCategory[]> {
   try {
     const res = await fetch(`${API_BASE}/categories`);
@@ -69,7 +69,7 @@ export async function getApiCategories(): Promise<ApiCategory[]> {
   }
 }
 
-/* ── Types ── */
+/* == Types == */
 export interface ApiSearchResult {
   meals: ApiMeal[] | Recipe[];
   total: number;

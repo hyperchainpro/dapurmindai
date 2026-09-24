@@ -13,7 +13,7 @@ import {
 import { useAppStore } from '@/hooks/useAppState';
 import { MathCaptcha } from '@/components/dapurmind/MathCaptcha';
 
-/* ── Animation variants ──────────────────────────────────── */
+/* == Animation variants ==================================== */
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -24,7 +24,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
 
-/* ── LoginPage component ────────────────────────────────── */
+/* == LoginPage component ================================== */
 
 export function LoginPage() {
   const setScreen = useAppStore((s) => s.setScreen);

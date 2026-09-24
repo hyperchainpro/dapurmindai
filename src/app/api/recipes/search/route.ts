@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/* ── Helper: Convert TheMealDB meal to our Recipe format ── */
+/* == Helper: Convert TheMealDB meal to our Recipe format == */
 function convertMealToRecipe(meal: Record<string, string>) {
   const ingredients: Array<{
     name: string;

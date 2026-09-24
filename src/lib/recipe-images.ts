@@ -3,7 +3,7 @@
  * Maps recipe IDs and name keywords to AI-generated food images.
  */
 
-/* ── Keyword → image path mapping ──────────────────────────────── */
+/* == Keyword → image path mapping ================================ */
 
 interface ImageMapping {
   keywords: string[];
@@ -108,7 +108,7 @@ const IMAGE_MAP: ImageMapping[] = [
   { keywords: ['cookie', 'cupcake', 'donut', 'muffin', 'scone'], image: '/recipes/western-pancake.png' },
 ];
 
-/* ── Category fallback images ──────────────────────────────────── */
+/* == Category fallback images ==================================== */
 
 const CATEGORY_FALLBACKS: Record<string, string> = {
   Sarapan: '/recipes/sarapan-generic.png',
@@ -121,7 +121,7 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   Western: '/recipes/western-generic.png',
 };
 
-/* ── Default fallback ──────────────────────────────────────────── */
+/* == Default fallback ============================================ */
 
 const DEFAULT_IMAGE = '/recipes/nasi-goreng.png';
 

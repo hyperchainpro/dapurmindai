@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── GET /api/admin/trash ─────────────────────────────── */
+/* == GET /api/admin/trash =============================== */
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/* ── DELETE /api/admin/trash — Permanent delete ───────── */
+/* == DELETE /api/admin/trash — Permanent delete ========= */
 export async function DELETE(request: NextRequest) {
   try {
     await requireAdmin(request);

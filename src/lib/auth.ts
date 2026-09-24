@@ -1,4 +1,4 @@
-/* ── User Accounts Storage Helper ────────────────────────────────── */
+/* == User Accounts Storage Helper ================================== */
 /* Client-side only localStorage persistence for DapurMind AI */
 
 const STORAGE_KEY = 'dapurmind-users';

@@ -40,7 +40,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 
-/* ── Helpers ──────────────────────────────────────────────────── */
+/* == Helpers ==================================================== */
 
 function formatDateID(dateStr?: string): string {
   if (!dateStr) return '';
@@ -55,7 +55,7 @@ function formatRupiah(amount: number): string {
   return `Rp ${amount.toLocaleString('id-ID')}`;
 }
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -72,7 +72,7 @@ const fadeUp = {
   },
 };
 
-/* ── ProfilePage component ────────────────────────────────────── */
+/* == ProfilePage component ====================================== */
 
 export function ProfilePage() {
   const user = useAppStore((s) => s.user);
@@ -88,7 +88,7 @@ export function ProfilePage() {
   const setLanguage = useAppStore((s) => s.setLanguage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ── Avatar upload handler ──────────────────────────── */
+  /* == Avatar upload handler ============================ */
   const handleAvatarUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -122,7 +122,7 @@ export function ProfilePage() {
     [achievements]
   );
 
-  /* ── Achievement list items for AnimatedList ──── */
+  /* == Achievement list items for AnimatedList ==== */
   const achievementItems = useMemo(
     () =>
       achievements.map((a) => ({
@@ -134,7 +134,7 @@ export function ProfilePage() {
     [achievements]
   );
 
-  /* ── Handlers ──────────────────────────────────────── */
+  /* == Handlers ======================================== */
   const handleSaveName = useCallback(() => {
     if (user && tempName.trim()) {
       setUser({ ...user, name: tempName.trim() });
@@ -190,7 +190,7 @@ export function ProfilePage() {
     [mealPlans, setCurrentMealPlan, setScreen]
   );
 
-  /* ── Render ────────────────────────────────────────── */
+  /* == Render ========================================== */
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <motion.div
@@ -199,7 +199,7 @@ export function ProfilePage() {
         animate="visible"
         className="flex flex-col pb-28"
       >
-        {/* ── Header ─────────────────────────────────── */}
+        {/* == Header =================================== */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <h1 className="flex items-center gap-2 text-lg font-bold tracking-tight">
@@ -211,7 +211,7 @@ export function ProfilePage() {
           </div>
         </header>
 
-        {/* ── Profile Card ───────────────────────────── */}
+        {/* == Profile Card ============================= */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <div className="relative overflow-hidden rounded-2xl nm-raised p-5">
             {/* Decorative blobs */}
@@ -352,7 +352,7 @@ export function ProfilePage() {
           </div>
         </motion.section>
 
-        {/* ── Preferences ────────────────────────────── */}
+        {/* == Preferences ============================== */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Sparkles className="h-4 w-4 text-amber-500" />
@@ -393,7 +393,7 @@ export function ProfilePage() {
           </div>
         </motion.section>
 
-        {/* ── Achievements ───────────────────────────── */}
+        {/* == Achievements ============================= */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -412,7 +412,7 @@ export function ProfilePage() {
           />
         </motion.section>
 
-        {/* ── Menu History ───────────────────────────── */}
+        {/* == Menu History ============================= */}
         {mealPlans.length > 0 && (
           <motion.section variants={fadeUp} className="px-4 pt-5">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
@@ -454,7 +454,7 @@ export function ProfilePage() {
           </motion.section>
         )}
 
-        {/* ── Settings ───────────────────────────────── */}
+        {/* == Settings ================================= */}
         <motion.section variants={fadeUp} className="px-4 pt-5">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Shield className="h-4 w-4 text-slate-500" />
@@ -555,7 +555,7 @@ export function ProfilePage() {
           </div>
         </motion.section>
 
-        {/* ── Danger Zone ────────────────────────────── */}
+        {/* == Danger Zone ============================== */}
         <motion.section variants={fadeUp} className="px-4 pt-5 pb-4">
           <Button
             variant="outline"
@@ -571,7 +571,7 @@ export function ProfilePage() {
         </motion.section>
       </motion.div>
 
-      {/* ── Allergy Dialog ──────────────────────────── */}
+      {/* == Allergy Dialog ============================ */}
       <Dialog open={showAllergyDialog} onOpenChange={setShowAllergyDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>
@@ -639,7 +639,7 @@ export function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Reset Dialog ────────────────────────────── */}
+      {/* == Reset Dialog ============================== */}
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent className="rounded-2xl sm:max-w-sm">
           <DialogHeader>
@@ -686,7 +686,7 @@ export function ProfilePage() {
   );
 }
 
-/* ── Preference Card ──────────────────────────────────────────── */
+/* == Preference Card ============================================ */
 
 function PreferenceCard({
   label,
@@ -724,7 +724,7 @@ function PreferenceCard({
   );
 }
 
-/* ── Achievement Card ─────────────────────────────────────────── */
+/* == Achievement Card =========================================== */
 
 function AchievementCard({ achievement }: { achievement: Achievement }) {
   const isUnlocked = !!achievement.unlockedAt;

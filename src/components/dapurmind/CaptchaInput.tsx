@@ -5,7 +5,7 @@ import { RefreshCw, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-/* ── Math-based captcha generator ──────────────────────────────── */
+/* == Math-based captcha generator ================================ */
 
 interface CaptchaQuestion {
   question: string;
@@ -42,7 +42,7 @@ function generateCaptcha(): CaptchaQuestion {
   };
 }
 
-/* ── Captcha Input Component ───────────────────────────────────── */
+/* == Captcha Input Component ===================================== */
 
 interface CaptchaInputProps {
   value: string;

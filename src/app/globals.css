@@ -178,7 +178,7 @@
    ══════════════════════════════════════════════════════════════ */
 
 @layer utilities {
-  /* ── Neumorphism Shadows ── */
+  /* == Neumorphism Shadows == */
 
   /* Raised / Convex — the default neumorphic "card" look */
   .nm-raised {
@@ -245,7 +245,7 @@
     background: var(--nm-bg);
   }
 
-  /* ── Neumorphism Input Fields ── */
+  /* == Neumorphism Input Fields == */
   .nm-input {
     box-shadow:
       inset 3px 3px 6px var(--nm-shadow-dark),
@@ -267,7 +267,7 @@
     color: var(--nm-text-light);
   }
 
-  /* ── Neumorphism Buttons ── */
+  /* == Neumorphism Buttons == */
   .nm-btn {
     box-shadow:
       5px 5px 10px var(--nm-shadow-dark),
@@ -320,7 +320,7 @@
       inset -3px -3px 6px rgba(255, 255, 255, 0.1);
   }
 
-  /* ── Glass overlay (still needed for chat header etc.) ── */
+  /* == Glass overlay (still needed for chat header etc.) == */
   .glass {
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -330,7 +330,7 @@
     background: rgba(45, 45, 58, 0.80);
   }
 
-  /* ── Gradient utilities (kept for primary buttons) ── */
+  /* == Gradient utilities (kept for primary buttons) == */
   .gradient-emerald {
     background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
   }
@@ -347,7 +347,7 @@
     background-clip: text;
   }
 
-  /* ── Neumorphic scrollbar hide ── */
+  /* == Neumorphic scrollbar hide == */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -356,7 +356,7 @@
     scrollbar-width: none;
   }
 
-  /* ── Safe area insets ── */
+  /* == Safe area insets == */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -364,7 +364,7 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
-  /* ── Neumorphic separator line ── */
+  /* == Neumorphic separator line == */
   .nm-divider {
     height: 2px;
     box-shadow:
@@ -373,7 +373,7 @@
     background: var(--nm-bg);
   }
 
-  /* ── Neumorphic badge/pill ── */
+  /* == Neumorphic badge/pill == */
   .nm-badge {
     box-shadow:
       2px 2px 4px var(--nm-shadow-dark),

@@ -1,7 +1,7 @@
-/* ── Admin API Fetch Helper ─────────────────────────────────
+/* == Admin API Fetch Helper =================================
    All admin components should use this instead of raw fetch()
    so the x-admin-key header is automatically included.
-   ────────────────────────────────────────────────────────── */
+   ========================================================== */
 
 const ADMIN_API_KEY = process.env.NEXT_PUBLIC_ADMIN_API_KEY || '';
 

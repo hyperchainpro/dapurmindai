@@ -47,7 +47,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-/* ── Constants ──────────────────────────────────────────────── */
+/* == Constants ================================================ */
 
 const CATEGORIES = [
   'Sarapan', 'Makan Siang', 'Makan Malam', 'Snack',
@@ -62,7 +62,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   Susah: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
 };
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -77,7 +77,7 @@ const fadeUp = {
   },
 };
 
-/* ── Form defaults ───────────────────────────────────────────── */
+/* == Form defaults ============================================= */
 
 interface RecipeFormData {
   name: string;
@@ -111,7 +111,7 @@ const EMPTY_FORM: RecipeFormData = {
   isPublished: false,
 };
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function CreatorPage() {
   const authUser = useAppStore((s) => s.authUser);
@@ -158,7 +158,7 @@ export function CreatorPage() {
   const [form, setForm] = useState<RecipeFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
-  // ── Fetch my recipes ──
+  // == Fetch my recipes ==
   const fetchMyRecipes = useCallback(async () => {
     if (!userId) return;
     setLoadingMy(true);
@@ -173,7 +173,7 @@ export function CreatorPage() {
     }
   }, [userId]);
 
-  // ── Fetch community recipes ──
+  // == Fetch community recipes ==
   const fetchCommunityRecipes = useCallback(async () => {
     setLoadingCommunity(true);
     try {
@@ -187,7 +187,7 @@ export function CreatorPage() {
     }
   }, []);
 
-  // ── Fetch creator profile (1A) ──
+  // == Fetch creator profile (1A) ==
   const fetchProfile = useCallback(async () => {
     if (!userId) return;
     setProfileLoading(true);
@@ -211,7 +211,7 @@ export function CreatorPage() {
 
   useEffect(() => { fetchMyRecipes(); fetchCommunityRecipes(); fetchProfile(); }, [fetchMyRecipes, fetchCommunityRecipes, fetchProfile]);
 
-  // ── Fetch ratings for community recipes (1C) ──
+  // == Fetch ratings for community recipes (1C) ==
   useEffect(() => {
     if (communityRecipes.length === 0) return;
     const fetchRatings = async () => {
@@ -237,7 +237,7 @@ export function CreatorPage() {
     fetchRatings();
   }, [communityRecipes]);
 
-  // ── Filter community recipes client-side (1B) ──
+  // == Filter community recipes client-side (1B) ==
   const filteredCommunity = useMemo(() => {
     let result = [...communityRecipes];
 
@@ -263,14 +263,14 @@ export function CreatorPage() {
     return result;
   }, [communityRecipes, searchQuery, categoryFilter, difficultyFilter, sortBy]);
 
-  // ── Open create form ──
+  // == Open create form ==
   const openCreate = () => {
     setEditingRecipe(null);
     setForm(EMPTY_FORM);
     setFormOpen(true);
   };
 
-  // ── Open edit form ──
+  // == Open edit form ==
   const openEdit = (recipe: CreatorRecipeItem) => {
     setEditingRecipe(recipe);
     setForm({
@@ -291,13 +291,13 @@ export function CreatorPage() {
     setFormOpen(true);
   };
 
-  // ── Open recipe detail (1D) ──
+  // == Open recipe detail (1D) ==
   const openDetail = (recipe: CreatorRecipeItem) => {
     setDetailRecipe(recipe);
     setDetailOpen(true);
   };
 
-  // ── Save profile (1A) ──
+  // == Save profile (1A) ==
   const handleSaveProfile = async () => {
     if (!userId) return;
     setProfileSaving(true);
@@ -318,7 +318,7 @@ export function CreatorPage() {
     }
   };
 
-  // ── Save (create or update) ──
+  // == Save (create or update) ==
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error('Nama resep wajib diisi'); return; }
     const ingredientLines = form.ingredients.split('\n').filter(l => l.trim());
@@ -365,7 +365,7 @@ export function CreatorPage() {
     }
   };
 
-  // ── Delete ──
+  // == Delete ==
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -385,7 +385,7 @@ export function CreatorPage() {
     }
   };
 
-  // ── Toggle publish ──
+  // == Toggle publish ==
   const togglePublish = async (recipe: CreatorRecipeItem) => {
     try {
       const res = await fetch('/api/creator/recipes', {
@@ -402,7 +402,7 @@ export function CreatorPage() {
     }
   };
 
-  // ── Like community recipe ──
+  // == Like community recipe ==
   const handleLike = async (recipe: CreatorRecipeItem) => {
     try {
       const res = await fetch('/api/creator/recipes', {
@@ -419,15 +419,15 @@ export function CreatorPage() {
     }
   };
 
-  // ── Stats ──
+  // == Stats ==
   const totalLikes = myRecipes.reduce((sum, r) => sum + r.likes, 0);
   const publishedCount = myRecipes.filter(r => r.isPublished).length;
 
-  // ── Form field updater ──
+  // == Form field updater ==
   const updateForm = (key: keyof RecipeFormData, value: string | boolean) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
-  // ── Star rating display (1C) ──
+  // == Star rating display (1C) ==
   const renderStars = (rating: number) => {
     const full = Math.floor(rating);
     const half = rating % 1 >= 0.5;
@@ -451,7 +451,7 @@ export function CreatorPage() {
       animate="visible"
       className="min-h-screen pb-24"
     >
-      {/* ── Header ─────────────────────────────────────── */}
+      {/* == Header ======================================= */}
       <header className="glass sticky top-0 z-20">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -478,7 +478,7 @@ export function CreatorPage() {
           )}
         </div>
 
-        {/* ── Tab Switcher ─────────────────────────────── */}
+        {/* == Tab Switcher =============================== */}
         <div className="px-4 pb-3">
           <div className="flex rounded-xl border border-emerald-200/50 bg-emerald-50/50 p-1 dark:border-emerald-800/50 dark:bg-emerald-950/20">
             {(['my', 'community'] as const).map((tab) => (
@@ -515,7 +515,7 @@ export function CreatorPage() {
         </div>
       </header>
 
-      {/* ── Tab Content ───────────────────────────────── */}
+      {/* == Tab Content ================================= */}
       <AnimatePresence mode="wait">
         {activeTab === 'my' ? (
           <motion.div
@@ -526,7 +526,7 @@ export function CreatorPage() {
             transition={{ duration: 0.25 }}
             className="px-4 pt-4"
           >
-            {/* ── 1A: Creator Profile Section ──────────────── */}
+            {/* == 1A: Creator Profile Section ================ */}
             {!profileLoading && (
               <motion.div variants={fadeUp} className="mb-4">
                 <div className="rounded-xl border border-emerald-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80">
@@ -587,7 +587,7 @@ export function CreatorPage() {
               </div>
             )}
 
-            {/* ── Stats Row ─────────────────────────────── */}
+            {/* == Stats Row =============================== */}
             {!loadingMy && myRecipes.length > 0 && (
               <motion.div variants={fadeUp} className="mb-4 grid grid-cols-3 gap-2">
                 {[
@@ -609,7 +609,7 @@ export function CreatorPage() {
               </motion.div>
             )}
 
-            {/* ── Loading ──────────────────────────────── */}
+            {/* == Loading ================================ */}
             {loadingMy && (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
@@ -625,7 +625,7 @@ export function CreatorPage() {
               </div>
             )}
 
-            {/* ── Recipe List ───────────────────────────── */}
+            {/* == Recipe List ============================= */}
             {!loadingMy && myRecipes.length > 0 && (
               <motion.div variants={stagger} className="space-y-3">
                 {myRecipes.map((recipe) => (
@@ -725,7 +725,7 @@ export function CreatorPage() {
               </motion.div>
             )}
 
-            {/* ── Empty State ──────────────────────────── */}
+            {/* == Empty State ============================ */}
             {!loadingMy && myRecipes.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -759,7 +759,7 @@ export function CreatorPage() {
             )}
           </motion.div>
         ) : (
-          /* ── Community Tab ─────────────────────────── */
+          /* == Community Tab =========================== */
           <motion.div
             key="community-recipes"
             initial={{ opacity: 0, x: 20 }}
@@ -768,7 +768,7 @@ export function CreatorPage() {
             transition={{ duration: 0.25 }}
             className="px-4 pt-4"
           >
-            {/* ── 1B: Search & Filters ────────────────────── */}
+            {/* == 1B: Search & Filters ====================== */}
             <motion.div variants={fadeUp} className="mb-4 space-y-2.5">
               {/* Search input */}
               <div className="relative">
@@ -979,7 +979,7 @@ export function CreatorPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Create/Edit Dialog ─────────────────────────── */}
+      {/* == Create/Edit Dialog =========================== */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto rounded-2xl sm:max-w-lg border-emerald-200/50 bg-white dark:bg-card">
           <DialogHeader>
@@ -1065,7 +1065,7 @@ export function CreatorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Confirmation Dialog ──────────────────── */}
+      {/* == Delete Confirmation Dialog ==================== */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="max-w-sm rounded-2xl border-emerald-200/50 bg-white dark:bg-card">
           <DialogHeader>
@@ -1088,7 +1088,7 @@ export function CreatorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── 1A: Edit Profile Dialog ─────────────────────── */}
+      {/* == 1A: Edit Profile Dialog ======================= */}
       <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto rounded-2xl sm:max-w-md border-emerald-200/50 bg-white dark:bg-card">
           <DialogHeader>
@@ -1140,7 +1140,7 @@ export function CreatorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── 1D: Recipe Detail Dialog ────────────────────── */}
+      {/* == 1D: Recipe Detail Dialog ====================== */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto rounded-2xl sm:max-w-lg border-emerald-200/50 bg-white dark:bg-card">
           <DialogHeader>

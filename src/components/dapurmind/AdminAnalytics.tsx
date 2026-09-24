@@ -42,7 +42,7 @@ import { NumberTicker } from '@/components/dapurmind/MagicUI';
 import { StarBorder } from '@/components/dapurmind/ReactBits';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation Variants ─────────────────────────────────── */
+/* == Animation Variants =================================== */
 
 const stagger = {
   hidden: {},
@@ -75,7 +75,7 @@ const scaleIn = {
   },
 };
 
-/* ── Label Helpers ──────────────────────────────────────── */
+/* == Label Helpers ======================================== */
 
 const CONTEXT_LABELS: Record<string, { label: string; icon: string; color: string }> = {
   weekly_plan: { label: 'Rencana Mingguan', icon: '📅', color: 'bg-emerald-500' },
@@ -105,7 +105,7 @@ function formatNum(n: number): string {
   return n.toLocaleString('id-ID');
 }
 
-/* ── Loading Skeleton ───────────────────────────────────── */
+/* == Loading Skeleton ===================================== */
 
 function LoadingSkeleton() {
   return (
@@ -144,7 +144,7 @@ function LoadingSkeleton() {
   );
 }
 
-/* ── Empty State ────────────────────────────────────────── */
+/* == Empty State ========================================== */
 
 function EmptyState() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -178,7 +178,7 @@ function EmptyState() {
   );
 }
 
-/* ── Platform Bar Row ───────────────────────────────────── */
+/* == Platform Bar Row ===================================== */
 
 function PlatformBar({
   platformId,
@@ -237,7 +237,7 @@ function PlatformBar({
   );
 }
 
-/* ── Daily Bar ──────────────────────────────────────────── */
+/* == Daily Bar ============================================ */
 
 function DailyBar({
   date,
@@ -299,7 +299,7 @@ function DailyBar({
   );
 }
 
-/* ── Product Row ────────────────────────────────────────── */
+/* == Product Row ========================================== */
 
 function ProductRow({
   rank,
@@ -356,7 +356,7 @@ function ProductRow({
   );
 }
 
-/* ── Tip Card ───────────────────────────────────────────── */
+/* == Tip Card ============================================= */
 
 function TipCard({
   icon,
@@ -383,7 +383,7 @@ function TipCard({
   );
 }
 
-/* ── Main Component ─────────────────────────────────────── */
+/* == Main Component ======================================= */
 
 export function AdminAnalytics() {
   const goBack = useAppStore((s) => s.goBack);
@@ -394,7 +394,7 @@ export function AdminAnalytics() {
   const [period, setPeriod] = useState('7d');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  /* ── Fetch ─────────────────────────────────── */
+  /* == Fetch =================================== */
   const fetchAnalytics = useCallback(async (p: string) => {
     try {
       const res = await fetch(`/api/affiliate/analytics?period=${p}`);
@@ -424,7 +424,7 @@ export function AdminAnalytics() {
     setPeriod(val);
   };
 
-  /* ── Derived data ──────────────────────────── */
+  /* == Derived data ============================ */
   const sortedPlatforms = analytics
     ? Object.entries(analytics.clicksByPlatform)
         .sort((a, b) => b[1] - a[1])
@@ -439,7 +439,7 @@ export function AdminAnalytics() {
     ? Math.max(...analytics.clicksByDay.map((d) => d.count), 1)
     : 1;
 
-  /* ── Generate tips from analytics ──────────── */
+  /* == Generate tips from analytics ============ */
   const generateTips = useCallback((): {
     icon: string;
     title: string;
@@ -500,7 +500,7 @@ export function AdminAnalytics() {
     return tips.slice(0, 3);
   }, [analytics, sortedPlatforms, sortedContexts]);
 
-  /* ── Render ────────────────────────────────── */
+  /* == Render ================================== */
   if (loading) return <LoadingSkeleton />;
   if (!analytics || analytics.totalClicks === 0) {
     return (
@@ -533,7 +533,7 @@ export function AdminAnalytics() {
       variants={stagger}
       className="min-h-screen pb-28 px-4 pt-4 max-w-2xl mx-auto space-y-6"
     >
-      {/* ── 1. Header ─────────────────────────────── */}
+      {/* == 1. Header =============================== */}
       <motion.div variants={fadeUp} className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button
@@ -569,7 +569,7 @@ export function AdminAnalytics() {
         </motion.div>
       </motion.div>
 
-      {/* ── Period Selector ──────────────────────── */}
+      {/* == Period Selector ======================== */}
       <motion.div variants={fadeUp}>
         <Tabs value={period} onValueChange={handlePeriodChange}>
           <TabsList className="bg-muted/60">
@@ -589,7 +589,7 @@ export function AdminAnalytics() {
         </Tabs>
       </motion.div>
 
-      {/* ── 2. Summary Stats BentoGrid ───────────── */}
+      {/* == 2. Summary Stats BentoGrid ============= */}
       <motion.div variants={stagger}>
         <BentoGrid columns={{ default: 2, sm: 2, lg: 4 }} gap={0.75}>
           {/* Total Klik */}
@@ -678,7 +678,7 @@ export function AdminAnalytics() {
         </BentoGrid>
       </motion.div>
 
-      {/* ── 3. Clicks by Platform ─────────────────── */}
+      {/* == 3. Clicks by Platform =================== */}
       <motion.div variants={fadeUp}>
         <Card className="border-border/50">
           <CardHeader className="pb-3">
@@ -712,7 +712,7 @@ export function AdminAnalytics() {
         </Card>
       </motion.div>
 
-      {/* ── 4. Clicks by Context ──────────────────── */}
+      {/* == 4. Clicks by Context ==================== */}
       {sortedContexts.length > 0 && (
         <motion.div variants={fadeUp}>
           <Card className="border-border/50">
@@ -777,7 +777,7 @@ export function AdminAnalytics() {
         </motion.div>
       )}
 
-      {/* ── 5. Daily Clicks Trend ─────────────────── */}
+      {/* == 5. Daily Clicks Trend =================== */}
       {analytics.clicksByDay.length > 0 && (
         <motion.div variants={fadeUp}>
           <Card className="border-border/50">
@@ -833,7 +833,7 @@ export function AdminAnalytics() {
         </motion.div>
       )}
 
-      {/* ── 6. Top Products Table ─────────────────── */}
+      {/* == 6. Top Products Table =================== */}
       {analytics.topProducts.length > 0 && (
         <motion.div variants={fadeUp}>
           <Card className="border-border/50">
@@ -865,7 +865,7 @@ export function AdminAnalytics() {
 
       <Separator className="opacity-40" />
 
-      {/* ── 7. Performance Tips ───────────────────── */}
+      {/* == 7. Performance Tips ===================== */}
       {tips.length > 0 && (
         <motion.div variants={fadeUp} className="space-y-3">
           <div className="flex items-center gap-2 mb-1">
@@ -891,7 +891,7 @@ export function AdminAnalytics() {
         </motion.div>
       )}
 
-      {/* ── Footer Note ───────────────────────────── */}
+      {/* == Footer Note ============================= */}
       <motion.div
         variants={fadeUp}
         className="text-center text-xs text-muted-foreground pt-2 pb-4"

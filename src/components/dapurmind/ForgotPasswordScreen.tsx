@@ -13,10 +13,10 @@ import { BorderBeam } from '@/components/dapurmind/MagicUI';
 import { CaptchaInput } from '@/components/dapurmind/CaptchaInput';
 import { resetPassword, getUserAccounts } from '@/lib/auth';
 
-/* ── Admin credentials (cannot reset from forgot-password page) ── */
+/* == Admin credentials (cannot reset from forgot-password page) == */
 const ADMIN_USERNAME = 'admin';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -33,7 +33,7 @@ const fadeUp = {
   },
 };
 
-/* ── ForgotPasswordScreen ─────────────────────────────────────── */
+/* == ForgotPasswordScreen ======================================= */
 
 export default function ForgotPasswordScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -124,7 +124,7 @@ export default function ForgotPasswordScreen() {
         animate="visible"
         className="flex flex-1 flex-col items-center justify-center px-6 py-12"
       >
-        {/* ── Logo ── */}
+        {/* == Logo == */}
         <motion.div variants={fadeUp} className="mb-2">
           <Bounce intensity={3} delay={0.1}>
             <div className="relative">
@@ -142,7 +142,7 @@ export default function ForgotPasswordScreen() {
           </Bounce>
         </motion.div>
 
-        {/* ── Title ── */}
+        {/* == Title == */}
         <motion.div variants={fadeUp} className="text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight">
             <GlowingText color="emerald" intensity={2}>
@@ -155,7 +155,7 @@ export default function ForgotPasswordScreen() {
           </p>
         </motion.div>
 
-        {/* ── Reset Card ── */}
+        {/* == Reset Card == */}
         <motion.div variants={fadeUp} className="w-full max-w-sm">
           <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 shadow-lg">
             <BorderBeam
@@ -321,7 +321,7 @@ export default function ForgotPasswordScreen() {
           </div>
         </motion.div>
 
-        {/* ── Footer Link ── */}
+        {/* == Footer Link == */}
         <motion.div variants={fadeUp} className="mt-6">
           <button
             onClick={() => setScreen('login')}

@@ -1,7 +1,7 @@
 import type { Recipe } from '@/types';
 
 export const westernRecipes4: Recipe[] = [
-  // ─── Appetizers / Starters (western-234 to western-253) ───
+  // === Appetizers / Starters (western-234 to western-253) ===
   {
     "id": "western-234-classic-bruschetta",
     "name": "Classic Bruschetta",
@@ -656,7 +656,7 @@ export const westernRecipes4: Recipe[] = [
     "tags": ["appetizer", "asia", "healthy", "udang"]
   },
 
-  // ─── Western Drinks / Beverages (western-254 to western-273) ───
+  // === Western Drinks / Beverages (western-254 to western-273) ===
   {
     "id": "western-254-hot-chocolate",
     "name": "Hot Chocolate",
@@ -1267,7 +1267,7 @@ export const westernRecipes4: Recipe[] = [
     "tags": ["minuman", "amerika", "cokelat", "mint"]
   },
 
-  // ─── Light Meals / Sandwiches (western-274 to western-287) ───
+  // === Light Meals / Sandwiches (western-274 to western-287) ===
   {
     "id": "western-274-club-sandwich",
     "name": "Club Sandwich",
@@ -1729,7 +1729,7 @@ export const westernRecipes4: Recipe[] = [
     "tags": ["sandwich", "timur tengah", "vegetarian", "wrap"]
   },
 
-  // ─── More Desserts / Snacks (western-288 to western-300) ───
+  // === More Desserts / Snacks (western-288 to western-300) ===
   {
     "id": "western-288-chocolate-chip-cookies",
     "name": "Chocolate Chip Cookies",

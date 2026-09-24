@@ -49,7 +49,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -78,7 +78,7 @@ const PROVIDER_COLORS: Record<string, string> = {
   'google': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
 };
 
-/* ── Format helpers ──────────────────────────────────────────── */
+/* == Format helpers ============================================ */
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -91,7 +91,7 @@ function formatDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/* ── Mini bar chart component ─────────────────────────────────── */
+/* == Mini bar chart component =================================== */
 
 function MiniBarChart({ data, maxVal }: { data: Array<{ label: string; value: number }>; maxVal: number }) {
   if (data.length === 0) return null;
@@ -119,7 +119,7 @@ function MiniBarChart({ data, maxVal }: { data: Array<{ label: string; value: nu
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminAgents() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -154,7 +154,7 @@ export function AdminAgents() {
   const [addDescription, setAddDescription] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
 
-  // ── Fetch ──
+  // == Fetch ==
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -192,7 +192,7 @@ export function AdminAgents() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // ── Derived ──
+  // == Derived ==
   const totalUsedTokens = agents.reduce((s, a) => s + (a.usedTokens || 0), 0);
   const totalRequests = agents.reduce((s, a) => s + (a.totalRequests || 0), 0);
   const totalFailed = agents.reduce((s, a) => s + (a.failedRequests || 0), 0);
@@ -200,7 +200,7 @@ export function AdminAgents() {
   const activeAgents = agents.filter(a => a.isActive).length;
   const maxTokenVal = Math.max(...tokenTrend.map(d => d.value), 1);
 
-  // ── Set default ──
+  // == Set default ==
   const handleSetDefault = async (agent: AIAgent) => {
     try {
       const res = await adminFetch(`/api/admin/agents/${agent.id}`, {
@@ -216,7 +216,7 @@ export function AdminAgents() {
     }
   };
 
-  // ── Add agent ──
+  // == Add agent ==
   const handleAddAgent = async () => {
     if (!addName.trim() || !addModel.trim()) {
       toast.error('Nama dan model wajib diisi');
@@ -273,7 +273,7 @@ export function AdminAgents() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* == Header ======================================= */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -324,7 +324,7 @@ export function AdminAgents() {
           </div>
         </motion.div>
 
-        {/* ── Alert Banner ───────────────────────────────── */}
+        {/* == Alert Banner ================================= */}
         <AnimatePresence>
           {alerts.length > 0 && (
             <motion.div
@@ -347,7 +347,7 @@ export function AdminAgents() {
           )}
         </AnimatePresence>
 
-        {/* ── Token Overview Cards ────────────────────────── */}
+        {/* == Token Overview Cards ========================== */}
         <motion.div variants={fadeUp} className="mb-5 grid grid-cols-2 gap-2">
           {[
             { emoji: '🪙', value: formatTokens(totalUsedTokens), label: 'Token Terpakai', trend: <TrendingUp className="h-3 w-3 text-emerald-500" /> },
@@ -369,7 +369,7 @@ export function AdminAgents() {
           ))}
         </motion.div>
 
-        {/* ── Loading ────────────────────────────────────── */}
+        {/* == Loading ====================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3 mb-6">
             {[1, 2, 3].map((i) => (
@@ -386,7 +386,7 @@ export function AdminAgents() {
           </motion.div>
         )}
 
-        {/* ── Agent List ────────────────────────────────── */}
+        {/* == Agent List ================================== */}
         {!loading && agents.length > 0 && (
           <motion.div variants={stagger} className="space-y-3 mb-6">
             <div className="flex items-center justify-between">
@@ -507,7 +507,7 @@ export function AdminAgents() {
           </motion.div>
         )}
 
-        {/* ── Token Usage Trend (14 days) ────────────────── */}
+        {/* == Token Usage Trend (14 days) ================== */}
         {tokenTrend.length > 0 && (
           <motion.div variants={fadeUp} className="mb-5">
             <div className="flex items-center gap-2 mb-3">
@@ -520,7 +520,7 @@ export function AdminAgents() {
           </motion.div>
         )}
 
-        {/* ── Usage by Feature ────────────────────────────── */}
+        {/* == Usage by Feature ============================== */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-amber-500" />
@@ -548,7 +548,7 @@ export function AdminAgents() {
           </div>
         </motion.div>
 
-        {/* ── Empty State ──────────────────────────────── */}
+        {/* == Empty State ================================ */}
         {!loading && agents.length === 0 && (
           <motion.div
             variants={fadeUp}
@@ -574,7 +574,7 @@ export function AdminAgents() {
         )}
       </motion.div>
 
-      {/* ── Add Agent Dialog ─────────────────────────────── */}
+      {/* == Add Agent Dialog =============================== */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4 pr-12">

@@ -1,4 +1,4 @@
-/* ── Affiliate Marketplace Configuration ──────────────────────────── */
+/* == Affiliate Marketplace Configuration ============================ */
 
 export interface AffiliateMarketplace {
   id: string;

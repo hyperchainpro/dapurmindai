@@ -128,7 +128,7 @@ export type AppScreen =
   | 'admin-affiliate'
   | 'admin-analytics';
 
-/* ── Auth Types ────────────────────────────────────── */
+/* == Auth Types ====================================== */
 
 export interface AuthUser {
   id: string;
@@ -141,7 +141,7 @@ export interface AuthUser {
   language?: Language;
 }
 
-/* ── Affiliate Types ──────────────────────────────────── */
+/* == Affiliate Types ==================================== */
 
 export interface AffiliateAccount {
   id: string;
@@ -187,7 +187,7 @@ export interface AffiliateAnalytics {
   activePlatforms: string[];
 }
 
-/* ── Finance Types ───────────────────────────────────── */
+/* == Finance Types ===================================== */
 
 export interface FinanceRecord {
   id: string;

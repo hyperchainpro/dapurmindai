@@ -46,7 +46,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -61,7 +61,7 @@ const fadeUp = {
   },
 };
 
-/* ── Role helpers ─────────────────────────────────────────────── */
+/* == Role helpers =============================================== */
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   user: {
@@ -81,7 +81,7 @@ const ROLE_CONFIG: Record<string, { label: string; color: string; icon: React.Re
   },
 };
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminUsers() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -114,7 +114,7 @@ export function AdminUsers() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
 
-  // ── Fetch users ──
+  // == Fetch users ==
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -146,7 +146,7 @@ export function AdminUsers() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  // ── Open edit ──
+  // == Open edit ==
   const openEdit = (user: AdminUser) => {
     setEditingUser(user);
     setEditName(user.name);
@@ -156,7 +156,7 @@ export function AdminUsers() {
     setEditOpen(true);
   };
 
-  // ── Save edit ──
+  // == Save edit ==
   const handleSaveEdit = async () => {
     if (!editingUser) return;
     setSaving(true);
@@ -182,7 +182,7 @@ export function AdminUsers() {
     }
   };
 
-  // ── Toggle active ──
+  // == Toggle active ==
   const toggleActive = async (user: AdminUser) => {
     try {
       const res = await adminFetch(`/api/admin/users/${user.id}`, {
@@ -198,7 +198,7 @@ export function AdminUsers() {
     }
   };
 
-  // ── Delete ──
+  // == Delete ==
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setSaving(true);
@@ -218,7 +218,7 @@ export function AdminUsers() {
     }
   };
 
-  // ── Derived ──
+  // == Derived ==
   const totalPages = Math.ceil(totalUsers / limit);
   const roleConfig = (role: string) => ROLE_CONFIG[role] ?? ROLE_CONFIG.user;
 
@@ -235,7 +235,7 @@ export function AdminUsers() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-4"
       >
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* == Header ======================================= */}
         <motion.div variants={fadeUp} className="mb-5">
           <div className="flex items-center gap-3">
             <motion.button
@@ -286,7 +286,7 @@ export function AdminUsers() {
           </div>
         </motion.div>
 
-        {/* ── Stats Row ──────────────────────────────────── */}
+        {/* == Stats Row ==================================== */}
         <motion.div variants={fadeUp} className="mb-5 grid grid-cols-3 gap-2">
           {[
             { emoji: '👥', value: totalUsers, label: 'Total Pengguna' },
@@ -304,7 +304,7 @@ export function AdminUsers() {
           ))}
         </motion.div>
 
-        {/* ── Search & Filters ────────────────────────────── */}
+        {/* == Search & Filters ============================== */}
         <motion.div variants={fadeUp} className="mb-4 space-y-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -340,7 +340,7 @@ export function AdminUsers() {
           </div>
         </motion.div>
 
-        {/* ── Loading ────────────────────────────────────── */}
+        {/* == Loading ====================================== */}
         {loading && (
           <motion.div variants={fadeUp} className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -358,7 +358,7 @@ export function AdminUsers() {
           </motion.div>
         )}
 
-        {/* ── User List ────────────────────────────────────── */}
+        {/* == User List ====================================== */}
         {!loading && users.length > 0 && (
           <motion.div variants={stagger} className="space-y-3">
             {users.map((user) => {
@@ -444,7 +444,7 @@ export function AdminUsers() {
               );
             })}
 
-            {/* ── Pagination ──────────────────────────── */}
+            {/* == Pagination ============================ */}
             {totalPages > 1 && (
               <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 pt-2">
                 <Button
@@ -482,7 +482,7 @@ export function AdminUsers() {
           </motion.div>
         )}
 
-        {/* ── Empty State ──────────────────────────────── */}
+        {/* == Empty State ================================ */}
         {!loading && users.length === 0 && (
           <motion.div
             variants={fadeUp}
@@ -501,7 +501,7 @@ export function AdminUsers() {
         )}
       </motion.div>
 
-      {/* ── Edit Dialog ─────────────────────────────────── */}
+      {/* == Edit Dialog =================================== */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md gap-0">
           <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4 pr-12">
@@ -575,7 +575,7 @@ export function AdminUsers() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Dialog ────────────────────────────────── */}
+      {/* == Delete Dialog ================================== */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="rounded-2xl sm:max-w-sm gap-0">
           <div className="px-5 pt-5 pb-4">

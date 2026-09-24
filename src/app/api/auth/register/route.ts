@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-/* ── Simple in-memory user store (for demo) ─────────── */
+/* == Simple in-memory user store (for demo) =========== */
 // In production, use a database. We use a global to persist across hot reloads.
 
 interface StoredUser {
@@ -26,7 +26,7 @@ function getUsers(): StoredUser[] {
   return globalThis.__dapurmind_users;
 }
 
-/* ── POST /api/auth/register ──────────────────────────── */
+/* == POST /api/auth/register ============================ */
 
 export async function POST(request: NextRequest) {
   try {

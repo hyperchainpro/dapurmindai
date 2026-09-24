@@ -3,7 +3,7 @@ import type { UserProfile } from '@/types';
 import { recipes } from './recipes';
 import { db } from './db';
 
-/* ── Types ─────────────────────────────────────────────────── */
+/* == Types =================================================== */
 
 interface AgentConfig {
   id: string;
@@ -24,7 +24,7 @@ interface AiUsageResult {
   latencyMs: number;
 }
 
-/* ── Agent Selection ──────────────────────────────────────── */
+/* == Agent Selection ======================================== */
 
 async function getActiveAgent(purpose: string = 'chat'): Promise<AgentConfig | null> {
   try {
@@ -66,7 +66,7 @@ async function getActiveAgent(purpose: string = 'chat'): Promise<AgentConfig | n
   }
 }
 
-/* ── Usage Logging ──────────────────────────────────────── */
+/* == Usage Logging ======================================== */
 
 async function logUsage(
   agentId: string,
@@ -113,7 +113,7 @@ async function logUsage(
   }
 }
 
-/* ── Built-in Agent (z-ai-web-dev-sdk) ───────────────────── */
+/* == Built-in Agent (z-ai-web-dev-sdk) ===================== */
 
 async function callBuiltinAgent(
   systemPrompt: string,
@@ -139,7 +139,7 @@ async function callBuiltinAgent(
   return { content, inputTokens, outputTokens };
 }
 
-/* ── OpenAI-compatible Agent (Anthropic via proxy, OpenAI, Groq, DeepSeek, Mistral, OpenRouter) ───────── */
+/* == OpenAI-compatible Agent (Anthropic via proxy, OpenAI, Groq, DeepSeek, Mistral, OpenRouter) ========= */
 
 async function callOpenAICompatible(
   agent: AgentConfig,
@@ -181,7 +181,7 @@ async function callOpenAICompatible(
   return { content, inputTokens, outputTokens };
 }
 
-/* ── Google Gemini Agent ────────────────────────────────── */
+/* == Google Gemini Agent ================================== */
 
 async function callGoogleGemini(
   agent: AgentConfig,
@@ -223,7 +223,7 @@ async function callGoogleGemini(
   return { content, inputTokens, outputTokens };
 }
 
-/* ── Anthropic Claude Agent ──────────────────────────────── */
+/* == Anthropic Claude Agent ================================ */
 
 async function callAnthropic(
   agent: AgentConfig,
@@ -264,7 +264,7 @@ async function callAnthropic(
   return { content, inputTokens, outputTokens };
 }
 
-/* ── Default Base URLs ────────────────────────────────────── */
+/* == Default Base URLs ====================================== */
 
 function getDefaultBaseUrl(provider: string): string {
   const urls: Record<string, string> = {
@@ -277,7 +277,7 @@ function getDefaultBaseUrl(provider: string): string {
   return urls[provider] || 'https://api.openai.com/v1';
 }
 
-/* ── Core AI Call Function ──────────────────────────────── */
+/* == Core AI Call Function ================================ */
 
 async function callAgent(
   systemPrompt: string,
@@ -380,7 +380,7 @@ async function callAgent(
   }
 }
 
-/* ── Fallback Logic ─────────────────────────────────────── */
+/* == Fallback Logic ======================================= */
 
 async function tryFallbackAgent(
   systemPrompt: string,

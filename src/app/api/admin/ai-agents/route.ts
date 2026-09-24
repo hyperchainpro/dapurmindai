@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── Helper: serialize agent without sensitive fields ──── */
+/* == Helper: serialize agent without sensitive fields ==== */
 function serializeAgent(a: {
   id: string;
   name: string;
@@ -47,7 +47,7 @@ function serializeAgent(a: {
   };
 }
 
-/* ── GET /api/admin/ai-agents ────────────────────────── */
+/* == GET /api/admin/ai-agents ========================== */
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/* ── POST /api/admin/ai-agents ────────────────────────── */
+/* == POST /api/admin/ai-agents ========================== */
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin(request);

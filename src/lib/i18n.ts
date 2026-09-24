@@ -3,14 +3,14 @@ export type Language = 'id' | 'en';
 type TranslationMap = Record<string, string>;
 
 const id: TranslationMap = {
-  // ── Navigation ──
+  // == Navigation ==
   'nav.home': 'Beranda',
   'nav.chat': 'Chat',
   'nav.zeroWaste': 'Zero Waste',
   'nav.recipes': 'Resep',
   'nav.profile': 'Profil',
 
-  // ── Login ──
+  // == Login ==
   'login.title': 'Selamat Datang',
   'login.subtitle': 'Masuk ke DapurMind AI',
   'login.username': 'Username',
@@ -33,7 +33,7 @@ const id: TranslationMap = {
   'login.goRegister': 'Daftar',
   'login.goForgot': 'Lupa Password?',
 
-  // ── Register ──
+  // == Register ==
   'register.title': 'Buat Akun Baru',
   'register.subtitle': 'Daftar untuk mulai menggunakan DapurMind AI',
   'register.username': 'Username',
@@ -56,7 +56,7 @@ const id: TranslationMap = {
   'register.goLogin': 'Sudah punya akun? Masuk',
   'register.terms': 'Dengan mendaftar, kamu menyetujui syarat dan ketentuan DapurMind AI.',
 
-  // ── Forgot Password ──
+  // == Forgot Password ==
   'forgot.title': 'Lupa Password',
   'forgot.subtitle': 'Masukkan username untuk mengatur ulang password',
   'forgot.username': 'Username',
@@ -77,7 +77,7 @@ const id: TranslationMap = {
   'forgot.goLogin': 'Ingat password? Masuk',
   'login.userWelcome': 'Selamat datang!',
 
-  // ── Profile ──
+  // == Profile ==
   'profile.title': 'Profil',
   'profile.myProfile': 'Profil Saya',
   'profile.familyMembers': 'anggota keluarga',
@@ -122,7 +122,7 @@ const id: TranslationMap = {
   'profile.close': 'Tutup',
   'profile.chefNew': 'Chef Baru',
 
-  // ── Onboarding ──
+  // == Onboarding ==
   'onboard.welcome': 'Selamat Datang di DapurMind AI!',
   'onboard.welcomeDesc': 'Asisten perencana makanan cerdas untuk keluarga Indonesia',
   'onboard.whatsName': 'Siapa namamu?',
@@ -149,7 +149,7 @@ const id: TranslationMap = {
   'onboard.startCooking': 'Mulai Memasak!',
   'onboard.maxBudget': 'Maksimal Rp 50.000.000',
 
-  // ── Dashboard ──
+  // == Dashboard ==
   'dashboard.greeting': 'Halo, {name}!',
   'dashboard.subtitle': 'Apa yang ingin kita masak hari ini?',
   'dashboard.quickActions': 'Aksi Cepat',
@@ -166,7 +166,7 @@ const id: TranslationMap = {
   'dashboard.marketplaceHub': 'Marketplace Hub',
   'dashboard.shopSmart': 'Belanja Cerdas',
 
-  // ── Chat ──
+  // == Chat ==
   'chat.title': 'Chef AI',
   'chat.placeholder': 'Tanya tentang resep, menu, atau belanja...',
   'chat.welcome': 'Halo! Saya Chef AI kamu. Tanya apa saja tentang resep, meal planning, atau belanja bahan masakan!',
@@ -176,7 +176,7 @@ const id: TranslationMap = {
   'chat.quickBudget': 'Tips Hemat Belanja',
   'chat.quickWaste': 'Resep Zero Waste',
 
-  // ── Zero Waste ──
+  // == Zero Waste ==
   'zerowaste.title': 'Zero Waste',
   'zerowaste.subtitle': 'Ubah sisa bahan jadi masakan lezat',
   'zerowaste.inputPlaceholder': 'Masukkan bahan yang tersisa...',
@@ -187,7 +187,7 @@ const id: TranslationMap = {
   'zerowaste.noIngredients': 'Tambahkan bahan untuk mendapatkan rekomendasi',
   'zerowaste.results': 'Resep yang Bisa Dibuat',
 
-  // ── Recipes ──
+  // == Recipes ==
   'recipes.title': 'Resep',
   'recipes.search': 'Cari resep...',
   'recipes.all': 'Semua',
@@ -207,7 +207,7 @@ const id: TranslationMap = {
   'recipes.addToFavorite': 'Tambah ke Favorit',
   'recipes.removeFromFavorite': 'Hapus dari Favorit',
 
-  // ── Shopping ──
+  // == Shopping ==
   'shopping.title': 'Daftar Belanja',
   'shopping.unchecked': 'Belum Dibeli',
   'shopping.checked': 'Sudah Dibeli',
@@ -218,7 +218,7 @@ const id: TranslationMap = {
   'shopping.clearChecked': 'Hapus yang Sudah Dibeli',
   'shopping.marketplace': 'Beli di Marketplace',
 
-  // ── Marketplace Hub ──
+  // == Marketplace Hub ==
   'marketplace.title': 'Marketplace Hub',
   'marketplace.itemsReady': 'bahan siap beli',
   'marketplace.marketplaces': 'marketplace',
@@ -252,7 +252,7 @@ const id: TranslationMap = {
   'marketplace.freshFromFarm': 'Segar dari kebun',
   'marketplace.freeShipping': 'Gratis Ongkir XTRA',
 
-  // ── Categories ──
+  // == Categories ==
   'cat.all': 'Semua',
   'cat.vegetables': 'Sayuran',
   'cat.meat': 'Daging',
@@ -261,7 +261,7 @@ const id: TranslationMap = {
   'cat.dairy': 'Susu & Telur',
   'cat.other': 'Lainnya',
 
-  // ── Admin Affiliate ──
+  // == Admin Affiliate ==
   'admin.affiliate.title': 'Akun Afiliasi Saya',
   'admin.affiliate.subtitle': 'Kelola koneksi marketplace',
   'admin.affiliate.connected': 'dari {total} marketplace terhubung',
@@ -295,7 +295,7 @@ const id: TranslationMap = {
   'admin.affiliate.delete': 'Hapus',
   'admin.affiliate.deleteCancel': 'Batal',
 
-  // ── Admin Analytics ──
+  // == Admin Analytics ==
   'admin.analytics.title': 'Analitik Afiliasi',
   'admin.analytics.totalClicks': 'Total Klik',
   'admin.analytics.activeAccounts': 'Akun Aktif',
@@ -320,7 +320,7 @@ const id: TranslationMap = {
   'admin.analytics.contextTop': '{label} Adalah Sumber Klik Terbanyak',
   'admin.analytics.productPopular': '{name} Sedang Populer',
 
-  // ── Context labels ──
+  // == Context labels ==
   'ctx.weekly_plan': 'Rencana Mingguan',
   'ctx.zero_waste': 'Zero Waste',
   'ctx.recommendation': 'Rekomendasi',
@@ -330,7 +330,7 @@ const id: TranslationMap = {
   'ctx.dashboard': 'Dashboard',
   'ctx.marketplace_hub': 'Marketplace Hub',
 
-  // ── Recipe Detail ──
+  // == Recipe Detail ==
   'recipe.ingredients': 'Bahan-bahan',
   'recipe.steps': 'Langkah-langkah',
   'recipe.scaledFor': 'Disederhanakan untuk',
@@ -344,7 +344,7 @@ const id: TranslationMap = {
   'recipe.cookTime': 'Waktu Masak',
   'recipe.totalTime': 'Total Waktu',
 
-  // ── Meal Plan ──
+  // == Meal Plan ==
   'mealplan.title': 'Detail Menu',
   'mealplan.breakfast': 'Sarapan',
   'mealplan.lunch': 'Makan Siang',
@@ -355,7 +355,7 @@ const id: TranslationMap = {
   'mealplan.addToShopping': 'Tambah Semua ke Daftar Belanja',
   'mealplan.day': 'Hari',
 
-  // ── Common ──
+  // == Common ==
   'common.save': 'Simpan',
   'common.cancel': 'Batal',
   'common.delete': 'Hapus',
@@ -373,14 +373,14 @@ const id: TranslationMap = {
 };
 
 const en: TranslationMap = {
-  // ── Navigation ──
+  // == Navigation ==
   'nav.home': 'Home',
   'nav.chat': 'Chat',
   'nav.zeroWaste': 'Zero Waste',
   'nav.recipes': 'Recipes',
   'nav.profile': 'Profile',
 
-  // ── Login ──
+  // == Login ==
   'login.title': 'Welcome',
   'login.subtitle': 'Sign in to DapurMind AI',
   'login.username': 'Username',
@@ -403,7 +403,7 @@ const en: TranslationMap = {
   'login.goRegister': 'Register',
   'login.goForgot': 'Forgot Password?',
 
-  // ── Register ──
+  // == Register ==
   'register.title': 'Create New Account',
   'register.subtitle': 'Register to start using DapurMind AI',
   'register.username': 'Username',
@@ -426,7 +426,7 @@ const en: TranslationMap = {
   'register.goLogin': 'Already have an account? Sign In',
   'register.terms': 'By registering, you agree to DapurMind AI terms and conditions.',
 
-  // ── Forgot Password ──
+  // == Forgot Password ==
   'forgot.title': 'Forgot Password',
   'forgot.subtitle': 'Enter your username to reset your password',
   'forgot.username': 'Username',
@@ -447,7 +447,7 @@ const en: TranslationMap = {
   'forgot.goLogin': 'Remember password? Sign In',
   'login.userWelcome': 'Welcome!',
 
-  // ── Profile ──
+  // == Profile ==
   'profile.title': 'Profile',
   'profile.myProfile': 'My Profile',
   'profile.familyMembers': 'family members',
@@ -492,7 +492,7 @@ const en: TranslationMap = {
   'profile.close': 'Close',
   'profile.chefNew': 'New Chef',
 
-  // ── Onboarding ──
+  // == Onboarding ==
   'onboard.welcome': 'Welcome to DapurMind AI!',
   'onboard.welcomeDesc': 'Your smart meal planning assistant for Indonesian families',
   'onboard.whatsName': "What's your name?",
@@ -519,7 +519,7 @@ const en: TranslationMap = {
   'onboard.startCooking': 'Start Cooking!',
   'onboard.maxBudget': 'Maximum Rp 50,000,000',
 
-  // ── Dashboard ──
+  // == Dashboard ==
   'dashboard.greeting': 'Hello, {name}!',
   'dashboard.subtitle': 'What would you like to cook today?',
   'dashboard.quickActions': 'Quick Actions',
@@ -536,7 +536,7 @@ const en: TranslationMap = {
   'dashboard.marketplaceHub': 'Marketplace Hub',
   'dashboard.shopSmart': 'Shop Smart',
 
-  // ── Chat ──
+  // == Chat ==
   'chat.title': 'AI Chef',
   'chat.placeholder': 'Ask about recipes, meal plans, or shopping...',
   'chat.welcome': 'Hello! I\'m your AI Chef. Ask me anything about recipes, meal planning, or grocery shopping!',
@@ -546,7 +546,7 @@ const en: TranslationMap = {
   'chat.quickBudget': 'Budget Shopping Tips',
   'chat.quickWaste': 'Zero Waste Recipes',
 
-  // ── Zero Waste ──
+  // == Zero Waste ==
   'zerowaste.title': 'Zero Waste',
   'zerowaste.subtitle': 'Turn leftover ingredients into delicious meals',
   'zerowaste.inputPlaceholder': 'Enter available ingredients...',
@@ -557,7 +557,7 @@ const en: TranslationMap = {
   'zerowaste.noIngredients': 'Add ingredients to get recommendations',
   'zerowaste.results': 'Recipes You Can Make',
 
-  // ── Recipes ──
+  // == Recipes ==
   'recipes.title': 'Recipes',
   'recipes.search': 'Search recipes...',
   'recipes.all': 'All',
@@ -577,7 +577,7 @@ const en: TranslationMap = {
   'recipes.addToFavorite': 'Add to Favorites',
   'recipes.removeFromFavorite': 'Remove from Favorites',
 
-  // ── Shopping ──
+  // == Shopping ==
   'shopping.title': 'Shopping List',
   'shopping.unchecked': 'Not Purchased',
   'shopping.checked': 'Purchased',
@@ -588,7 +588,7 @@ const en: TranslationMap = {
   'shopping.clearChecked': 'Clear Purchased',
   'shopping.marketplace': 'Buy on Marketplace',
 
-  // ── Marketplace Hub ──
+  // == Marketplace Hub ==
   'marketplace.title': 'Marketplace Hub',
   'marketplace.itemsReady': 'items ready to buy',
   'marketplace.marketplaces': 'marketplaces',
@@ -622,7 +622,7 @@ const en: TranslationMap = {
   'marketplace.freshFromFarm': 'Fresh from farm',
   'marketplace.freeShipping': 'Free Shipping XTRA',
 
-  // ── Categories ──
+  // == Categories ==
   'cat.all': 'All',
   'cat.vegetables': 'Vegetables',
   'cat.meat': 'Meat',
@@ -631,7 +631,7 @@ const en: TranslationMap = {
   'cat.dairy': 'Dairy & Eggs',
   'cat.other': 'Other',
 
-  // ── Admin Affiliate ──
+  // == Admin Affiliate ==
   'admin.affiliate.title': 'My Affiliate Accounts',
   'admin.affiliate.subtitle': 'Manage marketplace connections',
   'admin.affiliate.connected': 'of {total} marketplaces connected',
@@ -665,7 +665,7 @@ const en: TranslationMap = {
   'admin.affiliate.delete': 'Delete',
   'admin.affiliate.deleteCancel': 'Cancel',
 
-  // ── Admin Analytics ──
+  // == Admin Analytics ==
   'admin.analytics.title': 'Affiliate Analytics',
   'admin.analytics.totalClicks': 'Total Clicks',
   'admin.analytics.activeAccounts': 'Active Accounts',
@@ -690,7 +690,7 @@ const en: TranslationMap = {
   'admin.analytics.contextTop': '{label} is the Top Click Source',
   'admin.analytics.productPopular': '{name} is Trending',
 
-  // ── Context labels ──
+  // == Context labels ==
   'ctx.weekly_plan': 'Weekly Plan',
   'ctx.zero_waste': 'Zero Waste',
   'ctx.recommendation': 'Recommendation',
@@ -700,7 +700,7 @@ const en: TranslationMap = {
   'ctx.dashboard': 'Dashboard',
   'ctx.marketplace_hub': 'Marketplace Hub',
 
-  // ── Recipe Detail ──
+  // == Recipe Detail ==
   'recipe.ingredients': 'Ingredients',
   'recipe.steps': 'Steps',
   'recipe.scaledFor': 'Scaled for',
@@ -714,7 +714,7 @@ const en: TranslationMap = {
   'recipe.cookTime': 'Cook Time',
   'recipe.totalTime': 'Total Time',
 
-  // ── Meal Plan ──
+  // == Meal Plan ==
   'mealplan.title': 'Menu Details',
   'mealplan.breakfast': 'Breakfast',
   'mealplan.lunch': 'Lunch',
@@ -725,7 +725,7 @@ const en: TranslationMap = {
   'mealplan.addToShopping': 'Add All to Shopping List',
   'mealplan.day': 'Day',
 
-  // ── Common ──
+  // == Common ==
   'common.save': 'Save',
   'common.cancel': 'Cancel',
   'common.delete': 'Delete',

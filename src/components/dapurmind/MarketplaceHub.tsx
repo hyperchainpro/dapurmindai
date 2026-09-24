@@ -51,7 +51,7 @@ import {
   Bounce,
 } from '@/components/dapurmind/ReactBits';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -73,7 +73,7 @@ const fadeIn = {
   visible: { opacity: 1, transition: { duration: 0.3 } },
 };
 
-/* ── Constants ────────────────────────────────────────────────── */
+/* == Constants ================================================== */
 
 const CATEGORY_TABS = [
   { id: 'semua', label: 'Semua', emoji: '🔍' },
@@ -116,7 +116,7 @@ function mapToCategory(category: string): string {
   return 'Lainnya';
 }
 
-/* ── Sub-components ───────────────────────────────────────────── */
+/* == Sub-components ============================================= */
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -135,7 +135,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-/* ── Marketplace Horizontal Card ──────────────────────────────── */
+/* == Marketplace Horizontal Card ================================ */
 
 function MarketplaceHCard({
   marketplace,
@@ -208,7 +208,7 @@ function MarketplaceHCard({
   return cardContent;
 }
 
-/* ── Product Recommendation Card ──────────────────────────────── */
+/* == Product Recommendation Card ================================ */
 
 function ProductCard({
   item,
@@ -258,7 +258,7 @@ function ProductCard({
   );
 }
 
-/* ── AI Result Card ───────────────────────────────────────────── */
+/* == AI Result Card ============================================= */
 
 interface AILinkResult {
   platform: string;
@@ -297,7 +297,7 @@ function AILinkResultCard({ result, index }: { result: AILinkResult; index: numb
   );
 }
 
-/* ── Main Component ───────────────────────────────────────────── */
+/* == Main Component ============================================= */
 
 export function MarketplaceHub() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -308,7 +308,7 @@ export function MarketplaceHub() {
   const setAILoading = useAppStore((s) => s.setAILoading);
   const isAILoading = useAppStore((s) => s.isAILoading);
 
-  /* ── Local state ───────────────────────────────────── */
+  /* == Local state ===================================== */
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('semua');
   const [aiResults, setAiResults] = useState<AILinkResult[]>([]);
@@ -317,7 +317,7 @@ export function MarketplaceHub() {
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [isAILinkLoading, setIsAILinkLoading] = useState(false);
 
-  /* ── Derived state ─────────────────────────────────── */
+  /* == Derived state =================================== */
   const uncheckedItems = useMemo(
     () => shoppingItems.filter((i) => !i.checked),
     [shoppingItems]
@@ -366,7 +366,7 @@ export function MarketplaceHub() {
     []
   );
 
-  /* ── Handlers ──────────────────────────────────────── */
+  /* == Handlers ======================================== */
   const handleBuyItem = useCallback((item: ShoppingItem) => {
     const url = buildAffiliateUrl('shopee-grocery', item.name);
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -449,7 +449,7 @@ export function MarketplaceHub() {
     }
   }, [aiProductName, handleAIGenerateLinks]);
 
-  /* ── Empty state ───────────────────────────────────── */
+  /* == Empty state ===================================== */
   if (shoppingItems.length === 0) {
     return (
       <div className="min-h-screen bg-[var(--nm-bg)]">
@@ -522,11 +522,11 @@ export function MarketplaceHub() {
     );
   }
 
-  /* ── Main render ───────────────────────────────────── */
+  /* == Main render ===================================== */
   return (
     <div className="min-h-screen bg-[var(--nm-bg)]">
       <div className="flex flex-col pb-40">
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* == Header ======================================= */}
         <header className="sticky top-0 z-20 glass">
           <div className="flex items-center gap-3 px-4 py-3">
             <motion.button
@@ -555,7 +555,7 @@ export function MarketplaceHub() {
           </div>
         </header>
 
-        {/* ── Search Bar ─────────────────────────────────── */}
+        {/* == Search Bar =================================== */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -581,7 +581,7 @@ export function MarketplaceHub() {
           </div>
         </motion.div>
 
-        {/* ── Category Tabs ──────────────────────────────── */}
+        {/* == Category Tabs ================================ */}
         <div className="mt-3 px-4">
           <div className="relative">
             <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
@@ -614,7 +614,7 @@ export function MarketplaceHub() {
           </div>
         </div>
 
-        {/* ── Featured Marketplaces ─────────────────────── */}
+        {/* == Featured Marketplaces ======================= */}
         <motion.section
           variants={stagger}
           initial="hidden"
@@ -669,7 +669,7 @@ export function MarketplaceHub() {
 
         <Separator className="mx-4 my-4 bg-border/30" />
 
-        {/* ── Product Recommendations Grid ──────────────── */}
+        {/* == Product Recommendations Grid ================ */}
         <motion.section
           variants={stagger}
           initial="hidden"
@@ -745,7 +745,7 @@ export function MarketplaceHub() {
 
         <Separator className="mx-4 my-4 bg-border/30" />
 
-        {/* ── Quick Shopping Actions ────────────────────── */}
+        {/* == Quick Shopping Actions ====================== */}
         <motion.section
           variants={stagger}
           initial="hidden"
@@ -834,7 +834,7 @@ export function MarketplaceHub() {
 
         <Separator className="mx-4 my-4 bg-border/30" />
 
-        {/* ── AI Link Generation Section ────────────────── */}
+        {/* == AI Link Generation Section ================== */}
         <motion.section
           variants={stagger}
           initial="hidden"
@@ -899,7 +899,7 @@ export function MarketplaceHub() {
         </motion.section>
       </div>
 
-      {/* ── Fixed Bottom Bar ──────────────────────────────── */}
+      {/* == Fixed Bottom Bar ================================ */}
       <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
         <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-card p-4 shadow-lg backdrop-blur-xl">
           {/* Animated gradient border replacement */}
@@ -956,7 +956,7 @@ export function MarketplaceHub() {
         </div>
       </div>
 
-      {/* ── AI Results Dialog ────────────────────────────── */}
+      {/* == AI Results Dialog ============================== */}
       <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
         <DialogContent className="max-h-[80vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
           {/* Header */}
@@ -1065,7 +1065,7 @@ export function MarketplaceHub() {
   );
 }
 
-/* ── Small helper icon ─────────────────────────────────────── */
+/* == Small helper icon ======================================= */
 
 function CheckIcon({ className }: { className?: string }) {
   return (

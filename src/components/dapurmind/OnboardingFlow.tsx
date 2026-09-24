@@ -17,7 +17,7 @@ import { NumberTicker } from '@/components/dapurmind/MagicUI';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 import confetti from 'canvas-confetti';
 
-/* ── Constants ────────────────────────────────────────────────── */
+/* == Constants ================================================== */
 
 const ALLERGIES = [
   { id: 'kacang', label: '🥜 Kacang' },
@@ -59,7 +59,7 @@ const slideTransition = {
   damping: 30,
 };
 
-/* ── Step components ──────────────────────────────────────────── */
+/* == Step components ============================================ */
 
 /** Step 1 – Welcome */
 function StepWelcome({
@@ -480,7 +480,7 @@ function SummaryRow({
   );
 }
 
-/* ── Main OnboardingFlow ──────────────────────────────────────── */
+/* == Main OnboardingFlow ======================================== */
 
 export default function OnboardingFlow() {
   const { setScreen, updateOnboarding, isDark } = useAppStore();
@@ -569,7 +569,7 @@ export default function OnboardingFlow() {
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      {/* ── Progress dots ── */}
+      {/* == Progress dots == */}
       <div className="flex justify-center gap-2 pt-6 pb-2">
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <motion.div
@@ -587,7 +587,7 @@ export default function OnboardingFlow() {
         ))}
       </div>
 
-      {/* ── Step content (scrollable) ── */}
+      {/* == Step content (scrollable) == */}
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
@@ -630,7 +630,7 @@ export default function OnboardingFlow() {
         </AnimatePresence>
       </div>
 
-      {/* ── Bottom navigation ── */}
+      {/* == Bottom navigation == */}
       <div className="flex items-center gap-3 px-6 pb-8 pt-4">
         {step > 0 && (
           <motion.button

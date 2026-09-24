@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { db } from './db';
 
-/* ── Constants ─────────────────────────────────────────── */
+/* == Constants =========================================== */
 
 if (!process.env.JWT_SECRET) {
   throw new Error('[AUTH] FATAL: JWT_SECRET env var is not set. Refusing to start with insecure default.');
@@ -17,7 +17,7 @@ if (!ADMIN_API_KEY) {
   console.warn('[AUTH] ADMIN_API_KEY env var not set — admin key auth will be disabled.');
 }
 
-/* ── Password Helpers ──────────────────────────────────── */
+/* == Password Helpers ==================================== */
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -27,7 +27,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-/* ── JWT Helpers ────────────────────────────────────────── */
+/* == JWT Helpers ========================================== */
 
 export async function createToken(payload: { userId: string; role: string }): Promise<string> {
   return new SignJWT({ userId: payload.userId, role: payload.role })
@@ -49,7 +49,7 @@ export async function verifyToken(token: string): Promise<{ userId: string; role
   }
 }
 
-/* ── Session Management ─────────────────────────────────── */
+/* == Session Management =================================== */
 
 export async function createSession(
   userId: string,
@@ -101,7 +101,7 @@ export async function deleteAllUserSessions(userId: string): Promise<void> {
   await db.session.deleteMany({ where: { userId } });
 }
 
-/* ── Auth Request Helper ───────────────────────────────── */
+/* == Auth Request Helper ================================= */
 
 export function getTokenFromRequest(req: Request): string | null {
   const authHeader = req.headers.get('authorization');
@@ -145,7 +145,7 @@ export async function requireAdmin(req: Request): Promise<{ userId: string; role
   return user;
 }
 
-/* ── Activity Logging ──────────────────────────────────── */
+/* == Activity Logging ==================================== */
 
 export async function logActivity(
   userId: string,
@@ -173,7 +173,7 @@ export async function logActivity(
   }
 }
 
-/* ── Auth Error Class ──────────────────────────────────── */
+/* == Auth Error Class ==================================== */
 
 export class AuthError extends Error {
   status: number;

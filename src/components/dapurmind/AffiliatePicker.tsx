@@ -30,7 +30,7 @@ import {
 import type { ShoppingItem } from '@/types';
 import type { AffiliateMarketplace } from '@/lib/affiliate';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -46,7 +46,7 @@ const fadeUp = {
   },
 };
 
-/* ── Props ────────────────────────────────────────────────────── */
+/* == Props ====================================================== */
 
 interface AffiliatePickerProps {
   open: boolean;
@@ -57,7 +57,7 @@ interface AffiliatePickerProps {
   bulkItems?: ShoppingItem[];
 }
 
-/* ── Star Rating Component ───────────────────────────────────── */
+/* == Star Rating Component ===================================== */
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -76,7 +76,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-/* ── Feature Badge ───────────────────────────────────────────── */
+/* == Feature Badge ============================================= */
 
 function FeatureBadge({ text }: { text: string }) {
   return (
@@ -93,7 +93,7 @@ function FeatureBadge({ text }: { text: string }) {
   );
 }
 
-/* ── Marketplace Card ────────────────────────────────────────── */
+/* == Marketplace Card ========================================== */
 
 function MarketplaceCard({
   marketplace,
@@ -208,7 +208,7 @@ function MarketplaceCardContent({
   );
 }
 
-/* ── Main Component ───────────────────────────────────────────── */
+/* == Main Component ============================================= */
 
 export function AffiliatePicker({
   open,

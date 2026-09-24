@@ -7,7 +7,7 @@ import { useAppStore } from '@/hooks/useAppState';
 import { BottomNav } from '@/components/dapurmind/BottomNav';
 import type { AppScreen } from '@/types';
 
-/* ── Lazy-loaded screen components ──────────────────────────── */
+/* == Lazy-loaded screen components ============================ */
 
 const SplashScreen = dynamic(
   () => import('@/components/dapurmind/SplashScreen'),
@@ -86,7 +86,7 @@ const CreatorPage = dynamic(
   { ssr: false }
 );
 
-/* ── Screen renderer ──────────────────────────────────────────── */
+/* == Screen renderer ============================================ */
 
 function ScreenRouter() {
   const currentScreen = useAppStore((s) => s.currentScreen);
@@ -219,7 +219,7 @@ function ScreenRouter() {
   );
 }
 
-/* ── Page ─────────────────────────────────────────────────────── */
+/* == Page ======================================================= */
 
 export default function Home() {
   const currentScreen = useAppStore((s) => s.currentScreen);

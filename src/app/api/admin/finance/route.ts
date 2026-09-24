@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── GET /api/admin/finance ──────────────────────────── */
+/* == GET /api/admin/finance ============================ */
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);

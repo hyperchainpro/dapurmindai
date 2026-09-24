@@ -27,7 +27,7 @@ import { NumberTicker } from '@/components/dapurmind/MagicUI';
 import { Bounce } from '@/components/dapurmind/ReactBits';
 import { Skeleton } from '@/components/ui/skeleton';
 
-/* ── Animation variants ───────────────────────────────────────── */
+/* == Animation variants ========================================= */
 
 const stagger = {
   hidden: {},
@@ -53,7 +53,7 @@ const scaleIn = {
   },
 };
 
-/* ── Module navigation cards config ───────────────────────────── */
+/* == Module navigation cards config ============================= */
 
 interface AdminModule {
   id: string;
@@ -116,7 +116,7 @@ const ADMIN_MODULES: AdminModule[] = [
   },
 ];
 
-/* ── Stat card skeleton ───────────────────────────────────────── */
+/* == Stat card skeleton ========================================= */
 
 function StatCardSkeleton() {
   return (
@@ -131,7 +131,7 @@ function StatCardSkeleton() {
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────── */
+/* == Main Component ============================================ */
 
 export function AdminDashboard() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -148,7 +148,7 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // ── Fetch stats ──
+  // == Fetch stats ==
   const fetchStats = useCallback(async () => {
     try {
       const res = await adminFetch('/api/admin/stats');
@@ -191,12 +191,12 @@ export function AdminDashboard() {
     fetchStats();
   };
 
-  // ── Navigate to module ──
+  // == Navigate to module ==
   const navigateTo = (screen: string) => {
     setScreen(screen as any);
   };
 
-  // ── Logout admin ──
+  // == Logout admin ==
   const handleLogout = () => {
     useAppStore.getState().setAdminLoggedIn(false);
     useAppStore.getState().setScreen('dashboard');
@@ -210,7 +210,7 @@ export function AdminDashboard() {
         animate="visible"
         className="relative z-10 mx-auto max-w-lg px-4 pt-6"
       >
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* == Header ======================================= */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="flex items-center gap-3">
             <motion.div
@@ -238,7 +238,7 @@ export function AdminDashboard() {
           </div>
         </motion.div>
 
-        {/* ── Stats Overview ──────────────────────────────── */}
+        {/* == Stats Overview ================================ */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -346,7 +346,7 @@ export function AdminDashboard() {
           )}
         </motion.div>
 
-        {/* ── Module Navigation Grid ───────────────────────── */}
+        {/* == Module Navigation Grid ========================= */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Database className="h-4 w-4 text-emerald-500" />
@@ -402,7 +402,7 @@ export function AdminDashboard() {
           </motion.div>
         </motion.div>
 
-        {/* ── Quick Info ────────────────────────────────────── */}
+        {/* == Quick Info ====================================== */}
         <motion.div variants={fadeUp} className="mb-6">
           <div className="rounded-xl border border-emerald-200/50 bg-white/80 p-4 dark:border-emerald-800/50 dark:bg-card/80">
             <div className="flex items-start gap-3">
@@ -420,7 +420,7 @@ export function AdminDashboard() {
           </div>
         </motion.div>
 
-        {/* ── System Status ─────────────────────────────────── */}
+        {/* == System Status =================================== */}
         <motion.div variants={fadeUp}>
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="h-4 w-4 text-emerald-500" />
@@ -452,7 +452,7 @@ export function AdminDashboard() {
           </div>
         </motion.div>
 
-        {/* ── Version Footer ────────────────────────────────── */}
+        {/* == Version Footer ================================== */}
         <motion.div variants={fadeUp} className="mt-6 text-center pb-4">
           <p className="text-[10px] text-muted-foreground">
             DapurMind AI Admin Panel v1.0.0

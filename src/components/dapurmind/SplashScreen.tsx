@@ -7,7 +7,7 @@ import { useAppStore } from '@/hooks/useAppState';
 import { GlowingText } from '@/components/dapurmind/ReactBits';
 import { ShineBorder } from '@/components/dapurmind/MagicUI';
 
-/* ── Floating food emojis (deterministic to avoid hydration mismatch) ── */
+/* == Floating food emojis (deterministic to avoid hydration mismatch) == */
 
 interface FloatingEmoji {
   id: number;
@@ -32,7 +32,7 @@ const FLOATING_EMOJIS: FloatingEmoji[] = [
   { id: 7, emoji: '🥘', x: 88,  y: 25, size: 32, duration: 6.3, delay: 2.1, rotateRange: 24 },
 ];
 
-/* ── Component ────────────────────────────────────────────────── */
+/* == Component ================================================== */
 
 export default function SplashScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
@@ -90,12 +90,12 @@ export default function SplashScreen() {
           exit={{ opacity: 0, scale: 1.08 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
-          {/* ── Background gradient ── */}
+          {/* == Background gradient == */}
           <div
             className="absolute inset-0 bg-[var(--nm-bg)]"
           />
 
-          {/* ── Floating emojis ── */}
+          {/* == Floating emojis == */}
           {emojis.map((item) => (
             <motion.span
               key={item.id}
@@ -124,7 +124,7 @@ export default function SplashScreen() {
             </motion.span>
           ))}
 
-          {/* ── Center glass card ── */}
+          {/* == Center glass card == */}
           <motion.div
             className={`relative z-10 flex flex-col items-center gap-4 px-8 py-10 sm:px-12 nm-raised`}
             style={{ borderRadius: 28 }}
@@ -185,7 +185,7 @@ export default function SplashScreen() {
             </motion.div>
           </motion.div>
 
-          {/* ── Progress bar ── */}
+          {/* == Progress bar == */}
           <motion.div
             className="absolute bottom-12 left-8 right-8 z-10"
             initial={{ opacity: 0, y: 20 }}

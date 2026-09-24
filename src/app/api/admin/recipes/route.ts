@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireAdmin, AuthError } from '@/lib/auth-server';
 
-/* ── Helper: serialize recipe ────────────────────────── */
+/* == Helper: serialize recipe ========================== */
 function serializeRecipe(r: {
   id: string;
   userId: string;
@@ -51,7 +51,7 @@ function serializeRecipe(r: {
   };
 }
 
-/* ── GET /api/admin/recipes ────────────────────────────── */
+/* == GET /api/admin/recipes ============================== */
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/* ── POST /api/admin/recipes ───────────────────────────── */
+/* == POST /api/admin/recipes ============================= */
 export async function POST(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/* ── PUT /api/admin/recipes — Update recipe ──────────── */
+/* == PUT /api/admin/recipes — Update recipe ============ */
 export async function PUT(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-/* ── DELETE /api/admin/recipes — Soft delete ─────────── */
+/* == DELETE /api/admin/recipes — Soft delete =========== */
 export async function DELETE(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -206,7 +206,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-/* ── PATCH /api/admin/recipes — Restore ──────────────── */
+/* == PATCH /api/admin/recipes — Restore ================ */
 export async function PATCH(request: NextRequest) {
   try {
     await requireAdmin(request);
