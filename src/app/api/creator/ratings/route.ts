@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    GET/POST/PUT/DELETE — Recipe Ratings CRUD
@@ -8,16 +9,10 @@ import { db } from '@/lib/db';
 // GET - List ratings for a recipe or user's ratings
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
     const recipeId = searchParams.get('recipeId');
-    const userId = searchParams.get('userId');
-
-    if (!recipeId && !userId) {
-      return NextResponse.json(
-        { error: 'recipeId atau userId wajib diisi' },
-        { status: 400 }
-      );
-    }
 
     const where: Record<string, unknown> = {
       isActive: true,
@@ -25,7 +20,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (recipeId) where.recipeId = recipeId;
-    if (userId) where.userId = userId;
+    where.userId = userId;
 
     const ratings = await db.recipeRating.findMany({
       where,
@@ -34,6 +29,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: ratings });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Ratings] GET error:', error);
     return NextResponse.json(
       { error: 'Gagal memuat rating' },
@@ -45,12 +43,14 @@ export async function GET(request: NextRequest) {
 // POST - Create a rating
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { recipeId, userId, rating, comment } = body;
+    const { recipeId, rating, comment } = body;
 
-    if (!recipeId || !userId || rating === undefined) {
+    if (!recipeId || rating === undefined) {
       return NextResponse.json(
-        { error: 'Recipe ID, User ID, dan rating wajib diisi' },
+        { error: 'Recipe ID dan rating wajib diisi' },
         { status: 400 }
       );
     }
@@ -85,6 +85,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: newRating }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Ratings] POST error:', error);
     return NextResponse.json(
       { error: 'Gagal membuat rating' },
@@ -96,12 +99,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update a rating
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, rating, comment } = body;
+    const { id, rating, comment } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -137,6 +142,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Ratings] PUT error:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate rating' },
@@ -148,12 +156,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a rating
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -180,6 +190,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Ratings] DELETE error:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus rating' },

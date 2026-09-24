@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import ZAI from 'z-ai-web-dev-sdk';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 interface GenerateLinkRequest {
   productName: string;
@@ -12,6 +13,7 @@ interface GenerateLinkRequest {
 // POST - Generate affiliate link using template or AI
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const body: GenerateLinkRequest = await request.json();
     const { productName, category, platform: targetPlatform, context } = body;
 
@@ -126,6 +128,9 @@ HARGA: [angka]`,
 
     return NextResponse.json({ links });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error generating affiliate link:', error);
     return NextResponse.json(
       { error: 'Gagal generate tautan afiliasi' },

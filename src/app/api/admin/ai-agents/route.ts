@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-
-/* ── Admin key guard ──────────────────────────────────── */
-function isAdmin(request: NextRequest): boolean {
-  return request.headers.get('X-Admin-Key') === 'dapurmind2025';
-}
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ── Helper: serialize agent without sensitive fields ──── */
 function serializeAgent(a: {
@@ -53,11 +49,9 @@ function serializeAgent(a: {
 
 /* ── GET /api/admin/ai-agents ────────────────────────── */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
     const provider = searchParams.get('provider') || '';
@@ -92,6 +86,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ agents: agents.map(serializeAgent) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching AI agents:', error);
     return NextResponse.json({ error: 'Gagal memuat AI agents' }, { status: 500 });
   }
@@ -99,11 +96,9 @@ export async function GET(request: NextRequest) {
 
 /* ── POST /api/admin/ai-agents ────────────────────────── */
 export async function POST(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const body = await request.json();
     const {
       name,
@@ -148,6 +143,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ agent: serializeAgent(agent) }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating AI agent:', error);
     return NextResponse.json({ error: 'Gagal membuat AI agent' }, { status: 500 });
   }

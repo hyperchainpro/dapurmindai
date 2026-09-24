@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    AI Agent Management API — Single Agent Operations
@@ -7,10 +8,12 @@ import { db } from '@/lib/db';
 
 // GET /api/admin/agents/[id] — Get single agent (includes apiKey masked)
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
     const agent = await db.aiAgent.findUnique({
       where: { id, deletedAt: null },
@@ -30,6 +33,9 @@ export async function GET(
 
     return NextResponse.json({ success: true, agent: maskedAgent });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[AdminAgents GET id]', error);
     return NextResponse.json({ success: false, error: 'Gagal mengambil data agent' }, { status: 500 });
   }
@@ -41,6 +47,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
     const body = await request.json();
     const { name, provider, model, apiKey, apiBaseUrl, maxTokens, description, purpose, isDefault, isActive } = body;
@@ -84,6 +92,9 @@ export async function PUT(
 
     return NextResponse.json({ success: true, agent });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[AdminAgents PUT]', error);
     return NextResponse.json({ success: false, error: 'Gagal mengupdate agent' }, { status: 500 });
   }
@@ -91,10 +102,12 @@ export async function PUT(
 
 // DELETE /api/admin/agents/[id] — Soft delete agent
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const existing = await db.aiAgent.findUnique({ where: { id } });
@@ -109,6 +122,9 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Agent berhasil dihapus' });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[AdminAgents DELETE]', error);
     return NextResponse.json({ success: false, error: 'Gagal menghapus agent' }, { status: 500 });
   }

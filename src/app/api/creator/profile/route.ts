@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - Get creator profile or list all profiles
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const list = searchParams.get('list');
 
     // List all creator profiles with published recipe counts
@@ -39,19 +41,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: { profiles: mapped } });
     }
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
-
     const profile = await db.creatorProfile.findFirst({
       where: { userId, isActive: true },
     });
 
     return NextResponse.json({ success: true, data: profile });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching creator profile:', error);
     return NextResponse.json(
       { error: 'Gagal memuat profil creator' },
@@ -63,15 +61,10 @@ export async function GET(request: NextRequest) {
 // POST - Create or update creator profile (upsert)
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, displayName, bio, avatar } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
+    const { displayName, bio, avatar } = body;
 
     const profile = await db.creatorProfile.upsert({
       where: { userId },
@@ -90,6 +83,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: profile }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating/updating creator profile:', error);
     return NextResponse.json(
       { error: 'Gagal menyimpan profil creator' },
@@ -101,15 +97,10 @@ export async function POST(request: NextRequest) {
 // PUT - Update creator profile
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, displayName, bio, avatar } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
+    const { displayName, bio, avatar } = body;
 
     const existing = await db.creatorProfile.findFirst({
       where: { userId, isActive: true },
@@ -134,6 +125,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: profile });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating creator profile:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate profil creator' },

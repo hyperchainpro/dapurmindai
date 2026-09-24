@@ -122,6 +122,8 @@ export type AppScreen =
   | 'recipe-detail'
   | 'meal-plan-detail'
   | 'marketplace'
+  | 'finance'
+  | 'creator'
   | 'admin-login'
   | 'admin-affiliate'
   | 'admin-analytics';
@@ -183,4 +185,37 @@ export interface AffiliateAnalytics {
   totalAffiliateAccounts: number;
   totalProductLinks: number;
   activePlatforms: string[];
+}
+
+/* ── Finance Types ───────────────────────────────────── */
+
+export interface FinanceRecord {
+  id: string;
+  userId: string;
+  type: 'income' | 'expense';
+  category: string;
+  amount: number;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface FinanceBudget {
+  id: string;
+  userId: string;
+  category: string;
+  limit: number;
+  spent: number;
+  period: 'weekly' | 'monthly';
+  createdAt: string;
+}
+
+export interface FinanceGoal {
+  id: string;
+  userId: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline: string;
+  createdAt: string;
 }

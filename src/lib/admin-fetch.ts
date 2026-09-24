@@ -3,7 +3,7 @@
    so the x-admin-key header is automatically included.
    ────────────────────────────────────────────────────────── */
 
-const ADMIN_API_KEY = 'dapurmind-admin-key-2025';
+const ADMIN_API_KEY = process.env.NEXT_PUBLIC_ADMIN_API_KEY || '';
 
 const ADMIN_HEADERS: Record<string, string> = {
   'x-admin-key': ADMIN_API_KEY,

@@ -1,31 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - List creator recipes
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const includeUnpublished = searchParams.get('includeUnpublished') === 'true';
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
-
-    if (userId === 'all') {
-      // Return all published recipes only
-      const recipes = await db.creatorRecipe.findMany({
-        where: {
-          isActive: true,
-          isPublished: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-      return NextResponse.json({ success: true, data: recipes });
-    }
 
     // Return all published recipes + user's own unpublished recipes
     const recipes = await db.creatorRecipe.findMany({
@@ -50,6 +33,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: recipes });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching creator recipes:', error);
     return NextResponse.json(
       { error: 'Gagal memuat resep creator' },
@@ -61,9 +47,10 @@ export async function GET(request: NextRequest) {
 // POST - Create a new creator recipe
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
     const {
-      userId,
       name,
       description,
       image,
@@ -78,9 +65,9 @@ export async function POST(request: NextRequest) {
       youtubeUrl,
     } = body;
 
-    if (!userId || !name) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'User ID dan nama resep wajib diisi' },
+        { error: 'Nama resep wajib diisi' },
         { status: 400 }
       );
     }
@@ -105,6 +92,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: recipe }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating creator recipe:', error);
     return NextResponse.json(
       { error: 'Gagal membuat resep creator' },
@@ -116,12 +106,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update a creator recipe
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, ...fields } = body;
+    const { id, ...fields } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -161,6 +153,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: recipe });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating creator recipe:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate resep creator' },
@@ -172,12 +167,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a creator recipe
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -204,6 +201,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting creator recipe:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus resep creator' },
@@ -215,6 +215,7 @@ export async function DELETE(request: NextRequest) {
 // PATCH - Like or unlike a recipe
 export async function PATCH(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const body = await request.json();
     const { id, action } = body;
 
@@ -252,6 +253,9 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error liking creator recipe:', error);
     return NextResponse.json(
       { error: 'Gagal memproses like pada resep' },

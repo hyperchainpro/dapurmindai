@@ -1,0 +1,1296 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useEffect, useCallback } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  BarChart3,
+     7→  Users,
+     8→  ChefHat,
+     9→  Trash2,
+    10→  Megaphone,
+    11→  LogOut,
+    12→  Bot,
+    13→  Plus,
+    14→  Pencil,
+    15→  Trash,
+    16→  Power,
+    17→  Star,
+    18→  Activity,
+    19→  Eye,
+    20→  EyeOff,
+    21→  X,
+    22→  Check,
+    23→  AlertTriangle,
+    24→  RefreshCw,
+    25→  ChevronDown,
+    26→  Zap,
+    27→  Globe,
+    28→  BrainCircuit,
+    29→} from 'lucide-react';
+    30→import { useAppStore } from '@/hooks/useAppState';
+    31→
+    32→/* ── Animation variants ───────────────────────────────────────── */
+    33→
+    34→const stagger = {
+    35→  hidden: {},
+    36→  visible: { transition: { staggerChildren: 0.07 } },
+    37→};
+    38→
+    39→const fadeUp = {
+    40→  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+    41→  visible: {
+    42→    opacity: 1,
+    43→    y: 0,
+    44→    filter: 'blur(0px)',
+    45→    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const },
+    46→  },
+    47→};
+    48→
+    49→const fadeIn = {
+    50→  hidden: { opacity: 0 },
+    51→  visible: { opacity: 1, transition: { duration: 0.3 } },
+    52→  exit: { opacity: 0, transition: { duration: 0.2 } },
+    53→};
+    54→
+    55→const slideUp = {
+    56→  hidden: { opacity: 0, y: 40 },
+    57→  visible: {
+    58→    opacity: 1,
+    59→    y: 0,
+    60→    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] },
+    61→  },
+    62→  exit: { opacity: 0, y: 40, transition: { duration: 0.25 } },
+    63→};
+    64→
+    65→/* ── Types ──────────────────────────────────────────────────── */
+    66→
+    67→interface AiAgent {
+    68→  id: string;
+    69→  name: string;
+    70→  provider: string;
+    71→  model: string;
+    72→  apiKey?: string;
+    73→  apiBaseUrl?: string;
+    74→  maxTokens: number;
+    75→  usedTokens: number;
+    76→  purpose: string;
+    77→  description?: string;
+    78→  isActive: boolean;
+    79→  isDefault: boolean;
+    80→  totalRequests: number;
+    81→  failedRequests: number;
+    82→  lastUsedAt?: string;
+    83→  createdAt: string;
+    84→  updatedAt: string;
+    85→}
+    86→
+    87→type AgentProvider =
+    88→  | 'built-in'
+    89→  | 'anthropic'
+    90→  | 'openai'
+    91→  | 'google'
+    92→  | 'groq'
+    93→  | 'deepseek'
+    94→  | 'mistral'
+    95→  | 'openrouter';
+    96→
+    97→type AgentPurpose = 'all' | 'chat' | 'meal-plan' | 'zero-waste' | 'affiliate';
+    98→
+    99→/* ── Constants ──────────────────────────────────────────────── */
+   100→
+   101→const PROVIDER_CONFIG: Record<
+   102→  AgentProvider,
+   103→  { emoji: string; label: string; colorClass: string; bgClass: string }
+   104→> = {
+   105→  'built-in': {
+   106→    emoji: '🤖',
+   107→    label: 'Built-in',
+   108→    colorClass: 'text-emerald-600 dark:text-emerald-400',
+   109→    bgClass: 'bg-emerald-500/15',
+   110→  },
+   111→  anthropic: {
+   112→    emoji: '🟣',
+   113→    label: 'Anthropic / Claude',
+   114→    colorClass: 'text-violet-600 dark:text-violet-400',
+   115→    bgClass: 'bg-violet-500/15',
+   116→  },
+   117→  openai: {
+   118→    emoji: '🟢',
+   119→    label: 'OpenAI / GPT',
+   120→    colorClass: 'text-green-600 dark:text-green-400',
+   121→    bgClass: 'bg-green-500/15',
+   122→  },
+   123→  google: {
+   124→    emoji: '🔵',
+   125→    label: 'Google / Gemini',
+   126→    colorClass: 'text-blue-600 dark:text-blue-400',
+   127→    bgClass: 'bg-blue-500/15',
+   128→  },
+   129→  groq: {
+   130→    emoji: '🟠',
+   131→    label: 'Groq',
+   132→    colorClass: 'text-orange-600 dark:text-orange-400',
+   133→    bgClass: 'bg-orange-500/15',
+   134→  },
+   135→  deepseek: {
+   136→    emoji: '🔴',
+   137→    label: 'DeepSeek',
+   138→    colorClass: 'text-red-600 dark:text-red-400',
+   139→    bgClass: 'bg-red-500/15',
+   140→  },
+   141→  mistral: {
+   142→    emoji: '🌐',
+   143→    label: 'Mistral',
+   144→    colorClass: 'text-cyan-600 dark:text-cyan-400',
+   145→    bgClass: 'bg-cyan-500/15',
+   146→  },
+   147→  openrouter: {
+   148→    emoji: '🔄',
+   149→    label: 'OpenRouter',
+   150→    colorClass: 'text-indigo-600 dark:text-indigo-400',
+   151→    bgClass: 'bg-indigo-500/15',
+   152→  },
+   153→};
+   154→
+   155→const PURPOSE_CONFIG: Record<AgentPurpose, { label: string; colorClass: string; bgClass: string }> = {
+   156→  all: { label: 'All', colorClass: 'text-emerald-600 dark:text-emerald-400', bgClass: 'bg-emerald-500/15 border-emerald-200 dark:border-emerald-800/40' },
+   157→  chat: { label: 'Chat', colorClass: 'text-blue-600 dark:text-blue-400', bgClass: 'bg-blue-500/15 border-blue-200 dark:border-blue-800/40' },
+   158→  'meal-plan': { label: 'Meal Plan', colorClass: 'text-amber-600 dark:text-amber-400', bgClass: 'bg-amber-500/15 border-amber-200 dark:border-amber-800/40' },
+   159→  'zero-waste': { label: 'Zero Waste', colorClass: 'text-green-600 dark:text-green-400', bgClass: 'bg-green-500/15 border-green-200 dark:border-green-800/40' },
+   160→  affiliate: { label: 'Affiliate', colorClass: 'text-purple-600 dark:text-purple-400', bgClass: 'bg-purple-500/15 border-purple-200 dark:border-purple-800/40' },
+   161→};
+   162→
+   163→const PROVIDER_OPTIONS: AgentProvider[] = [
+   164→  'built-in',
+   165→  'anthropic',
+   166→  'openai',
+   167→  'google',
+   168→  'groq',
+   169→  'deepseek',
+   170→  'mistral',
+   171→  'openrouter',
+   172→];
+   173→
+   174→const PURPOSE_OPTIONS: AgentPurpose[] = [
+   175→  'all',
+   176→  'chat',
+   177→  'meal-plan',
+   178→  'zero-waste',
+   179→  'affiliate',
+   180→];
+   181→
+   182→const ADMIN_KEY = 'dapurmind2025';
+   183→
+   184→/* ── Helpers ─────────────────────────────────────────────────── */
+   185→
+   186→function getRelativeTime(dateStr?: string): string {
+   187→  if (!dateStr) return 'Belum pernah';
+   188→  const now = Date.now();
+   189→  const then = new Date(dateStr).getTime();
+   190→  const diffMs = now - then;
+   191→  const diffSec = Math.floor(diffMs / 1000);
+   192→  const diffMin = Math.floor(diffSec / 60);
+   193→  const diffHour = Math.floor(diffMin / 60);
+   194→  const diffDay = Math.floor(diffHour / 24);
+   195→
+   196→  if (diffSec < 60) return 'Baru saja';
+   197→  if (diffMin < 60) return `${diffMin} menit lalu`;
+   198→  if (diffHour < 24) return `${diffHour} jam lalu`;
+   199→  if (diffDay < 30) return `${diffDay} hari lalu`;
+   200→  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+   201→}
+   202→
+   203→function getSuccessRate(agent: AiAgent): number {
+   204→  if (agent.totalRequests === 0) return 100;
+   205→  return Math.round(((agent.totalRequests - agent.failedRequests) / agent.totalRequests) * 100);
+   206→}
+   207→
+   208→function getTokenPercentage(used: number, max: number): number {
+   209→  if (max === 0) return 0;
+   210→  return Math.min(100, Math.round((used / max) * 100));
+   211→}
+   212→
+   213→function getTokenBarColor(pct: number): string {
+   214→  if (pct >= 90) return 'bg-red-500';
+   215→  if (pct >= 70) return 'bg-amber-500';
+   216→  if (pct >= 40) return 'bg-blue-500';
+   217→  return 'bg-emerald-500';
+   218→}
+   219→
+   220→function formatTokens(n: number): string {
+   221→  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+   222→  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+   223→  return String(n);
+   224→}
+   225→
+   226→/* ── Token Progress Bar Component ───────────────────────────── */
+   227→
+   228→interface TokenBarProps {
+   229→  used: number;
+   230→  max: number;
+   231→}
+   232→
+   233→function TokenProgressBar({ used, max }: TokenBarProps) {
+   234→  const pct = getTokenPercentage(used, max);
+   235→  const barColor = getTokenBarColor(pct);
+   236→
+   237→  return (
+   238→    <div className="space-y-1">
+   239→      <div className="flex items-center justify-between">
+   240→        <span className="text-[10px] text-[var(--nm-text-muted)]">
+   241→          Used: {formatTokens(used)} / Max: {formatTokens(max)} tokens
+   242→        </span>
+   243→        <span className={`text-[10px] font-semibold ${pct >= 90 ? 'text-red-500' : pct >= 70 ? 'text-amber-500' : 'text-[var(--nm-text)]'}`}>
+   244→          {pct}%
+   245→        </span>
+   246→      </div>
+   247→      <div className="nm-pressed h-2.5 w-full rounded-full overflow-hidden">
+   248→        <motion.div
+   249→          className={`h-full rounded-full ${barColor}`}
+   250→          initial={{ width: 0 }}
+   251→          animate={{ width: `${pct}%` }}
+   252→          transition={{ duration: 0.6, ease: 'easeOut' }}
+   253→        />
+   254→      </div>
+   255→    </div>
+   256→  );
+   257→}
+   258→
+   259→/* ── Agent Card Component ──────────────────────────────────── */
+   260→
+   261→interface AgentCardProps {
+   262→  agent: AiAgent;
+   263→  onSetDefault: (agent: AiAgent) => void;
+   264→  onToggleActive: (agent: AiAgent) => void;
+   265→  onEdit: (agent: AiAgent) => void;
+   266→  onDelete: (agent: AiAgent) => void;
+   267→}
+   268→
+   269→function AgentCard({ agent, onSetDefault, onToggleActive, onEdit, onDelete }: AgentCardProps) {
+   270→  const provider = PROVIDER_CONFIG[agent.provider as AgentProvider] ?? PROVIDER_CONFIG['built-in'];
+   271→  const purpose = PURPOSE_CONFIG[agent.purpose as AgentPurpose] ?? PURPOSE_CONFIG.all;
+   272→  const successRate = getSuccessRate(agent);
+   273→  const pct = getTokenPercentage(agent.usedTokens, agent.maxTokens);
+   274→
+   275→  return (
+   276→    <motion.div
+   277→      layout
+   278→      initial={{ opacity: 0, y: 12 }}
+   279→      animate={{ opacity: 1, y: 0 }}
+   280→      exit={{ opacity: 0, y: -12, scale: 0.95 }}
+   281→      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+   282→      className="rounded-2xl nm-raised p-4 mb-3"
+   283→    >
+   284→      {/* Top row: icon + name + status */}
+   285→      <div className="flex items-center gap-3 mb-3">
+   286→        <div
+   287→          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl ${provider.bgClass}`}
+   288→        >
+   289→          {provider.emoji}
+   290→        </div>
+   291→
+   292→        <div className="flex-1 min-w-0">
+   293→          <div className="flex items-center gap-2">
+   294→            <h3 className="text-sm font-bold truncate">{agent.name}</h3>
+   295→            {agent.isDefault && (
+   296→              <span className="inline-flex items-center gap-0.5 rounded-md nm-badge px-1.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700/40">
+   297→                <Star className="h-2.5 w-2.5 fill-amber-500" />
+   298→                Default
+   299→              </span>
+   300→            )}
+   301→          </div>
+   302→          <p className="text-[11px] text-[var(--nm-text-muted)] truncate">
+   303→            {provider.label} &middot; {agent.model}
+   304→          </p>
+   305→        </div>
+   306→
+   307→        {/* Status indicator */}
+   308→        <div className="flex items-center gap-2 shrink-0">
+   309→          <span className="relative flex h-2.5 w-2.5">
+   310→            {agent.isActive ? (
+   311→              <>
+   312→                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+   313→                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+   314→              </>
+   315→            ) : (
+   316→              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gray-400" />
+   317→            )}
+   318→          </span>
+   319→          <span
+   320→            className={`text-[10px] font-semibold ${
+   321→              agent.isActive
+   322→                ? 'text-emerald-600 dark:text-emerald-400'
+   323→                : 'text-[var(--nm-text-muted)]'
+   324→            }`}
+   325→          >
+   326→            {agent.isActive ? 'Aktif' : 'Nonaktif'}
+   327→          </span>
+   328→        </div>
+   329→      </div>
+   330→
+   331→      {/* Purpose badge + Stats */}
+   332→      <div className="flex items-center gap-2 mb-3 flex-wrap">
+   333→        <span
+   334→          className={`inline-flex items-center rounded-lg border px-2 py-0.5 text-[10px] font-bold ${purpose.colorClass} ${purpose.bgClass}`}
+   335→        >
+   336→          {purpose.label}
+   337→        </span>
+   338→        <span className="inline-flex items-center gap-0.5 text-[10px] text-[var(--nm-text-muted)]">
+   339→          <Zap className="h-2.5 w-2.5" />
+   340→          {agent.totalRequests.toLocaleString()} req
+   341→        </span>
+   342→        {agent.failedRequests > 0 && (
+   343→          <span className="inline-flex items-center gap-0.5 text-[10px] text-red-500">
+   344→            <AlertTriangle className="h-2.5 w-2.5" />
+   345→            {agent.failedRequests} failed
+   346→          </span>
+   347→        )}
+   348→        <span
+   349→          className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${
+   350→            successRate >= 95
+   351→              ? 'text-emerald-500'
+   352→              : successRate >= 80
+   353→                ? 'text-amber-500'
+   354→                : 'text-red-500'
+   355→          }`}
+   356→        >
+   357→          <Activity className="h-2.5 w-2.5" />
+   358→          {successRate}%
+   359→        </span>
+   360→      </div>
+   361→
+   362→      {/* Token progress bar */}
+   363→      <TokenProgressBar used={agent.usedTokens} max={agent.maxTokens} />
+   364→
+   365→      {/* Last used */}
+   366→      <div className="mt-2 flex items-center gap-1 text-[10px] text-[var(--nm-text-muted)]">
+   367→        <Globe className="h-2.5 w-2.5" />
+   368→        Terakhir: {getRelativeTime(agent.lastUsedAt)}
+   369→      </div>
+   370→
+   371→      {/* Action buttons */}
+   372→      <div className="mt-3 flex items-center gap-2 border-t border-[var(--nm-shadow-dark)]/20 pt-3">
+   373→        {!agent.isDefault && (
+   374→          <motion.button
+   375→            whileTap={{ scale: 0.92 }}
+   376→            onClick={() => onSetDefault(agent)}
+   377→            className="flex items-center gap-1 rounded-xl nm-btn px-2.5 py-1.5 text-[10px] font-medium text-[var(--nm-text-muted)] hover:text-amber-500"
+   378→            title="Set sebagai default"
+   379→          >
+   380→            <Star className="h-3 w-3" />
+   381→            Default
+   382→          </motion.button>
+   383→        )}
+   384→        <motion.button
+   385→          whileTap={{ scale: 0.92 }}
+   386→          onClick={() => onToggleActive(agent)}
+   387→          className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[10px] font-medium ${
+   388→            agent.isActive ? 'nm-btn text-red-400 hover:text-red-500' : 'nm-btn-primary text-white'
+   389→          }`}
+   390→          title={agent.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+   391→        >
+   392→          <Power className="h-3 w-3" />
+   393→          {agent.isActive ? 'Nonaktif' : 'Aktif'}
+   394→        </motion.button>
+   395→        <div className="flex-1" />
+   396→        <motion.button
+   397→          whileTap={{ scale: 0.92 }}
+   398→          onClick={() => onEdit(agent)}
+   399→          className="flex h-8 w-8 items-center justify-center rounded-xl nm-btn-icon"
+   400→          title="Edit agent"
+   401→        >
+   402→          <Pencil className="h-3.5 w-3.5" />
+   403→        </motion.button>
+   404→        <motion.button
+   405→          whileTap={{ scale: 0.92 }}
+   406→          onClick={() => onDelete(agent)}
+   407→          className="flex h-8 w-8 items-center justify-center rounded-xl nm-btn-destructive"
+   408→          title="Hapus agent"
+   409→        >
+   410→          <Trash className="h-3.5 w-3.5" />
+   411→        </motion.button>
+   412→      </div>
+   413→    </motion.div>
+   414→  );
+   415→}
+   416→
+   417→/* ── Main Component ──────────────────────────────────────────── */
+   418→
+   419→export function AdminAiAgents() {
+   420→  const setScreen = useAppStore((s) => s.setScreen);
+   421→
+   422→  /* ── Local state ───────────────────────────────────────────── */
+   423→  const [agents, setAgents] = useState<AiAgent[]>([]);
+   424→  const [loading, setLoading] = useState(true);
+   425→  const [error, setError] = useState<string | null>(null);
+   426→  const [saving, setSaving] = useState(false);
+   427→  const [deleting, setDeleting] = useState(false);
+   428→  const [refreshKey, setRefreshKey] = useState(0);
+   429→
+   430→  // Add/Edit dialog state
+   431→  const [showDialog, setShowDialog] = useState(false);
+   432→  const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
+   433→  const [editingAgent, setEditingAgent] = useState<AiAgent | null>(null);
+   434→
+   435→  // Form fields
+   436→  const [formName, setFormName] = useState('');
+   437→  const [formProvider, setFormProvider] = useState<AgentProvider>('built-in');
+   438→  const [formModel, setFormModel] = useState('');
+   439→  const [formApiKey, setFormApiKey] = useState('');
+   440→  const [formApiBaseUrl, setFormApiBaseUrl] = useState('');
+   441→  const [formMaxTokens, setFormMaxTokens] = useState(100000);
+   442→  const [formPurpose, setFormPurpose] = useState<AgentPurpose>('all');
+   443→  const [formDescription, setFormDescription] = useState('');
+   444→  const [formIsDefault, setFormIsDefault] = useState(false);
+   445→  const [showApiKey, setShowApiKey] = useState(false);
+   446→
+   447→  // Delete confirmation dialog
+   448→  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+   449→  const [deletingAgent, setDeletingAgent] = useState<AiAgent | null>(null);
+   450→
+   451→  /* ── Derived data ──────────────────────────────────────────── */
+   452→  const activeAgents = agents.filter((a) => a.isActive);
+   453→  const defaultAgent = agents.find((a) => a.isDefault);
+   454→  const totalTokensUsed = agents.reduce((sum, a) => sum + a.usedTokens, 0);
+   455→
+   456→  /* ── Fetch agents ─────────────────────────────────────────── */
+   457→  const fetchAgents = useCallback(async () => {
+   458→    try {
+   459→      setLoading(true);
+   460→      setError(null);
+   461→      const res = await fetch('/api/admin/ai-agents', {
+   462→        headers: { 'X-Admin-Key': ADMIN_KEY },
+   463→      });
+   464→      if (!res.ok) {
+   465→        const data = await res.json().catch(() => null);
+   466→        throw new Error(data?.error || 'Gagal memuat data AI agents');
+   467→      }
+   468→      const data = await res.json();
+   469→      setAgents(data.agents ?? data ?? []);
+   470→    } catch (err) {
+   471→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   472→    } finally {
+   473→      setLoading(false);
+   474→    }
+   475→  }, []);
+   476→
+   477→  useEffect(() => {
+   478→    fetchAgents();
+   479→  }, [fetchAgents, refreshKey]);
+   480→
+   481→  /* ── Form helpers ─────────────────────────────────────────── */
+   482→  const resetForm = useCallback(() => {
+   483→    setFormName('');
+   484→    setFormProvider('built-in');
+   485→    setFormModel('');
+   486→    setFormApiKey('');
+   487→    setFormApiBaseUrl('');
+   488→    setFormMaxTokens(100000);
+   489→    setFormPurpose('all');
+   490→    setFormDescription('');
+   491→    setFormIsDefault(false);
+   492→    setShowApiKey(false);
+   493→    setEditingAgent(null);
+   494→  }, []);
+   495→
+   496→  const openAddDialog = useCallback(() => {
+   497→    resetForm();
+   498→    setDialogMode('add');
+   499→    setShowDialog(true);
+   500→  }, [resetForm]);
+   501→
+   502→  const openEditDialog = useCallback((agent: AiAgent) => {
+   503→    setEditingAgent(agent);
+   504→    setFormName(agent.name);
+   505→    setFormProvider(agent.provider as AgentProvider);
+   506→    setFormModel(agent.model);
+   507→    setFormApiKey('');
+   508→    setFormApiBaseUrl(agent.apiBaseUrl ?? '');
+   509→    setFormMaxTokens(agent.maxTokens);
+   510→    setFormPurpose(agent.purpose as AgentPurpose);
+   511→    setFormDescription(agent.description ?? '');
+   512→    setFormIsDefault(agent.isDefault);
+   513→    setShowApiKey(false);
+   514→    setDialogMode('edit');
+   515→    setShowDialog(true);
+   516→  }, []);
+   517→
+   518→  /* ── API actions ──────────────────────────────────────────── */
+   519→  const handleSubmit = useCallback(async () => {
+   520→    if (!formName.trim() || !formModel.trim()) return;
+   521→
+   522→    try {
+   523→      setSaving(true);
+   524→      setError(null);
+   525→
+   526→      const body: Record<string, unknown> = {
+   527→        name: formName.trim(),
+   528→        provider: formProvider,
+   529→        model: formModel.trim(),
+   530→        maxTokens: formMaxTokens,
+   531→        purpose: formPurpose,
+   532→        description: formDescription.trim() || undefined,
+   533→        isDefault: formIsDefault,
+   534→      };
+   535→
+   536→      if (formApiKey.trim()) body.apiKey = formApiKey.trim();
+   537→      if (formApiBaseUrl.trim()) body.apiBaseUrl = formApiBaseUrl.trim();
+   538→
+   539→      const url = '/api/admin/ai-agents';
+   540→      const method = dialogMode === 'edit' && editingAgent ? 'PUT' : 'POST';
+   541→
+   542→      if (dialogMode === 'edit' && editingAgent) {
+   543→        body.id = editingAgent.id;
+   544→      }
+   545→
+   546→      const res = await fetch(url, {
+   547→        method,
+   548→        headers: {
+   549→          'Content-Type': 'application/json',
+   550→          'X-Admin-Key': ADMIN_KEY,
+   551→        },
+   552→        body: JSON.stringify(body),
+   553→      });
+   554→
+   555→      if (!res.ok) {
+   556→        const data = await res.json().catch(() => null);
+   557→        throw new Error(data?.error || `Gagal ${dialogMode === 'edit' ? 'mengupdate' : 'menambahkan'} agent`);
+   558→      }
+   559→
+   560→      setShowDialog(false);
+   561→      resetForm();
+   562→      setRefreshKey((k) => k + 1);
+   563→    } catch (err) {
+   564→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   565→    } finally {
+   566→      setSaving(false);
+   567→    }
+   568→  }, [
+   569→    formName,
+   570→    formProvider,
+   571→    formModel,
+   572→    formApiKey,
+   573→    formApiBaseUrl,
+   574→    formMaxTokens,
+   575→    formPurpose,
+   576→    formDescription,
+   577→    formIsDefault,
+   578→    dialogMode,
+   579→    editingAgent,
+   580→    resetForm,
+   581→  ]);
+   582→
+   583→  const handleSetDefault = useCallback(async (agent: AiAgent) => {
+   584→    try {
+   585→      setSaving(true);
+   586→      setError(null);
+   587→      const res = await fetch('/api/admin/ai-agents', {
+   588→        method: 'PUT',
+   589→        headers: {
+   590→          'Content-Type': 'application/json',
+   591→          'X-Admin-Key': ADMIN_KEY,
+   592→        },
+   593→        body: JSON.stringify({ id: agent.id, isDefault: true }),
+   594→      });
+   595→      if (!res.ok) {
+   596→        const data = await res.json().catch(() => null);
+   597→        throw new Error(data?.error || 'Gagal mengubah default agent');
+   598→      }
+   599→      setRefreshKey((k) => k + 1);
+   600→    } catch (err) {
+   601→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   602→    } finally {
+   603→      setSaving(false);
+   604→    }
+   605→  }, []);
+   606→
+   607→  const handleToggleActive = useCallback(async (agent: AiAgent) => {
+   608→    try {
+   609→      setSaving(true);
+   610→      setError(null);
+   611→      const res = await fetch('/api/admin/ai-agents', {
+   612→        method: 'PUT',
+   613→        headers: {
+   614→          'Content-Type': 'application/json',
+   615→          'X-Admin-Key': ADMIN_KEY,
+   616→        },
+   617→        body: JSON.stringify({ id: agent.id, isActive: !agent.isActive }),
+   618→      });
+   619→      if (!res.ok) {
+   620→        const data = await res.json().catch(() => null);
+   621→        throw new Error(data?.error || 'Gagal mengubah status agent');
+   622→      }
+   623→      setRefreshKey((k) => k + 1);
+   624→    } catch (err) {
+   625→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   626→    } finally {
+   627→      setSaving(false);
+   628→    }
+   629→  }, []);
+   630→
+   631→  const openDeleteDialog = useCallback((agent: AiAgent) => {
+   632→    setDeletingAgent(agent);
+   633→    setShowDeleteDialog(true);
+   634→  }, []);
+   635→
+   636→  const handleDeleteConfirm = useCallback(async () => {
+   637→    if (!deletingAgent) return;
+   638→    try {
+   639→      setDeleting(true);
+   640→      setError(null);
+   641→      const res = await fetch(`/api/admin/ai-agents?id=${encodeURIComponent(deletingAgent.id)}`, {
+   642→        method: 'DELETE',
+   643→        headers: { 'X-Admin-Key': ADMIN_KEY },
+   644→      });
+   645→      if (!res.ok) {
+   646→        const data = await res.json().catch(() => null);
+   647→        throw new Error(data?.error || 'Gagal menghapus agent');
+   648→      }
+   649→      setShowDeleteDialog(false);
+   650→      setDeletingAgent(null);
+   651→      setRefreshKey((k) => k + 1);
+   652→    } catch (err) {
+   653→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   654→    } finally {
+   655→      setDeleting(false);
+   656→    }
+   657→  }, [deletingAgent]);
+   658→
+   659→  /* ── Render ────────────────────────────────────────────────── */
+   660→
+   661→  return (
+   662→    <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+   663→      <motion.div
+   664→        variants={stagger}
+   665→        initial="hidden"
+   666→        animate="visible"
+   667→        className="relative z-10 mx-auto max-w-lg px-4 pt-4"
+   668→      >
+   669→        {/* ── Header ──────────────────────────────────────────── */}
+   670→        <motion.div variants={fadeUp} className="mb-5">
+   671→          <div className="flex items-center gap-3">
+   672→            <div className="flex-1 min-w-0">
+   673→              <h1 className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 leading-tight">
+   674→                AI Agents
+   675→              </h1>
+   676→              <p className="mt-0.5 text-xs text-[var(--nm-text-muted)]">
+   677→                Kelola konfigurasi AI agent
+   678→              </p>
+   679→            </div>
+   680→
+   681→            <div className="flex items-center gap-2">
+   682→              <motion.button
+   683→                whileTap={{ scale: 0.9 }}
+   684→                onClick={() => setScreen('admin-dashboard')}
+   685→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   686→                aria-label="Dashboard admin"
+   687→              >
+   688→                <BarChart3 className="h-5 w-5 text-emerald-500" />
+   689→              </motion.button>
+   690→              <motion.button
+   691→                whileTap={{ scale: 0.9 }}
+   692→                onClick={() => setScreen('admin-users')}
+   693→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   694→                aria-label="Manajemen user"
+   695→              >
+   696→                <Users className="h-5 w-5 text-blue-500" />
+   697→              </motion.button>
+   698→              <motion.button
+   699→                whileTap={{ scale: 0.9 }}
+   700→                onClick={() => setScreen('admin-recipes')}
+   701→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   702→                aria-label="Manajemen resep"
+   703→              >
+   704→                <ChefHat className="h-5 w-5 text-amber-500" />
+   705→              </motion.button>
+   706→              <motion.button
+   707→                whileTap={{ scale: 0.9 }}
+   708→                onClick={() => setScreen('admin-trash')}
+   709→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   710→                aria-label="Tempat sampah"
+   711→              >
+   712→                <Trash2 className="h-5 w-5 text-red-400" />
+   713→              </motion.button>
+   714→              <motion.button
+   715→                whileTap={{ scale: 0.9 }}
+   716→                onClick={() => setScreen('admin-ads')}
+   717→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   718→                aria-label="Manajemen iklan"
+   719→              >
+   720→                <Megaphone className="h-5 w-5 text-amber-500" />
+   721→              </motion.button>
+   722→              {/* Current page button - highlighted */}
+   723→              <motion.button
+   724→                whileTap={{ scale: 0.9 }}
+   725→                onClick={() => setScreen('admin-ai-agents')}
+   726→                className="flex h-10 w-10 items-center justify-center rounded-xl nm-accent"
+   727→                aria-label="AI Agents"
+   728→              >
+   729→                <BrainCircuit className="h-5 w-5 text-white" />
+   730→              </motion.button>
+   731→              <motion.button
+   732→                whileTap={{ scale: 0.9 }}
+   733→                onClick={() => {
+   734→                  useAppStore.getState().setAdminLoggedIn(false);
+   735→                  useAppStore.getState().setScreen('dashboard');
+   736→                }}
+   737→                className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+   738→                aria-label="Logout admin"
+   739→              >
+   740→                <LogOut className="h-5 w-5 text-red-500" />
+   741→              </motion.button>
+   742→            </div>
+   743→          </div>
+   744→        </motion.div>
+   745→
+   746→        {/* ── Error Banner ────────────────────────────────────── */}
+   747→        <AnimatePresence>
+   748→          {error && (
+   749→            <motion.div
+   750→              initial={{ opacity: 0, y: -10 }}
+   751→              animate={{ opacity: 1, y: 0 }}
+   752→              exit={{ opacity: 0, y: -10 }}
+   753→              className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-800/40 dark:bg-red-500/10"
+   754→            >
+   755→              <div className="flex items-start gap-2">
+   756→                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+   757→                <div className="flex-1 min-w-0">
+   758→                  <p className="text-xs font-medium text-red-700 dark:text-red-400">{error}</p>
+   759→                </div>
+   760→                <button
+   761→                  onClick={() => setError(null)}
+   762→                  className="shrink-0 text-red-400 hover:text-red-600"
+   763→                >
+   764→                  <X className="h-4 w-4" />
+   765→                </button>
+   766→              </div>
+   767→            </motion.div>
+   768→          )}
+   769→        </AnimatePresence>
+   770→
+   771→        {/* ── Usage Stats Section ────────────────────────────── */}
+   772→        <motion.div variants={fadeUp} className="mb-5">
+   773→          <div className="rounded-2xl nm-raised p-4">
+   774→            <div className="flex items-center gap-2 mb-3">
+   775→              <Activity className="h-4 w-4 text-emerald-500" />
+   776→              <h2 className="text-sm font-semibold">Ringkasan Agent</h2>
+   777→            </div>
+   778→            <div className="grid grid-cols-2 gap-3">
+   779→              <div className="rounded-xl nm-pressed p-3">
+   780→                <div className="flex items-center gap-2 mb-1">
+   781→                  <Bot className="h-4 w-4 text-[var(--nm-text-muted)]" />
+   782→                  <span className="text-[10px] text-[var(--nm-text-muted)]">Total Agent</span>
+   783→                </div>
+   784→                <p className="text-xl font-bold">{agents.length}</p>
+   785→              </div>
+   786→              <div className="rounded-xl nm-pressed p-3">
+   787→                <div className="flex items-center gap-2 mb-1">
+   788→                  <Zap className="h-4 w-4 text-emerald-500" />
+   789→                  <span className="text-[10px] text-[var(--nm-text-muted)]">Agent Aktif</span>
+   790→                </div>
+   791→                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+   792→                  {activeAgents.length}
+   793→                </p>
+   794→              </div>
+   795→              <div className="rounded-xl nm-pressed p-3">
+   796→                <div className="flex items-center gap-2 mb-1">
+   797→                  <Globe className="h-4 w-4 text-blue-500" />
+   798→                  <span className="text-[10px] text-[var(--nm-text-muted)]">Total Tokens</span>
+   799→                </div>
+   800→                <p className="text-xl font-bold">{formatTokens(totalTokensUsed)}</p>
+   801→              </div>
+   802→              <div className="rounded-xl nm-pressed p-3">
+   803→                <div className="flex items-center gap-2 mb-1">
+   804→                  <Star className="h-4 w-4 text-amber-500" />
+   805→                  <span className="text-[10px] text-[var(--nm-text-muted)]">Default Agent</span>
+   806→                </div>
+   807→                <p className="text-sm font-bold truncate">
+   808→                  {defaultAgent ? defaultAgent.name : '-'}
+   809→                </p>
+   810→              </div>
+   811→            </div>
+   812→          </div>
+   813→        </motion.div>
+   814→
+   815→        {/* ── Loading State ──────────────────────────────────── */}
+   816→        {loading && (
+   817→          <motion.div variants={fadeUp} className="space-y-3 mb-6">
+   818→            {Array.from({ length: 3 }).map((_, i) => (
+   819→              <div key={i} className="rounded-2xl nm-raised p-4">
+   820→                <div className="flex items-center gap-3 mb-3">
+   821→                  <div className="h-11 w-11 rounded-xl nm-pressed animate-pulse" />
+   822→                  <div className="flex-1 space-y-2">
+   823→                    <div className="h-4 w-32 rounded-lg nm-pressed animate-pulse" />
+   824→                    <div className="h-3 w-24 rounded-lg nm-pressed animate-pulse" />
+   825→                  </div>
+   826→                  <div className="h-6 w-14 rounded-lg nm-pressed animate-pulse" />
+   827→                </div>
+   828→                <div className="h-2.5 w-full rounded-full nm-pressed animate-pulse" />
+   829→              </div>
+   830→            ))}
+   831→          </motion.div>
+   832→        )}
+   833→
+   834→        {/* ── Agent List Header + Add Button ─────────────────── */}
+   835→        {!loading && (
+   836→          <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
+   837→            <div className="flex items-center gap-2">
+   838→              <BrainCircuit className="h-4 w-4 text-emerald-500" />
+   839→              <h2 className="text-sm font-semibold">Daftar Agent</h2>
+   840→              <span className="inline-flex items-center justify-center rounded-md nm-badge px-1.5 py-0.5 text-[10px] font-bold">
+   841→                {agents.length}
+   842→              </span>
+   843→            </div>
+   844→            <div className="flex items-center gap-2">
+   845→              <button
+   846→                onClick={() => setRefreshKey((k) => k + 1)}
+   847→                className="flex items-center gap-1 text-xs text-[var(--nm-text-muted)] hover:text-[var(--nm-text)] transition-colors"
+   848→              >
+   849→                <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+   850→                <span className="hidden sm:inline">Segarkan</span>
+   851→              </button>
+   852→              <motion.button
+   853→                whileTap={{ scale: 0.92 }}
+   854→                onClick={openAddDialog}
+   855→                className="flex items-center gap-1.5 rounded-xl nm-btn-primary px-3 py-1.5 text-xs font-medium text-white"
+   856→              >
+   857→                <Plus className="h-3.5 w-3.5" />
+   858→                Tambah
+   859→              </motion.button>
+   860→            </div>
+   861→          </motion.div>
+   862→        )}
+   863→
+   864→        {/* ── Agent List ─────────────────────────────────────── */}
+   865→        {!loading && agents.length > 0 && (
+   866→          <motion.div variants={fadeUp} className="mb-6">
+   867→            <AnimatePresence mode="popLayout">
+   868→              {agents.map((agent) => (
+   869→                <AgentCard
+   870→                  key={agent.id}
+   871→                  agent={agent}
+   872→                  onSetDefault={handleSetDefault}
+   873→                  onToggleActive={handleToggleActive}
+   874→                  onEdit={openEditDialog}
+   875→                  onDelete={openDeleteDialog}
+   876→                />
+   877→              ))}
+   878→            </AnimatePresence>
+   879→          </motion.div>
+   880→        )}
+   881→
+   882→        {/* ── Empty State ─────────────────────────────────────── */}
+   883→        {!loading && agents.length === 0 && (
+   884→          <motion.div variants={fadeUp} className="mb-6">
+   885→            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--nm-shadow-dark)]/20 nm-raised p-10 text-center">
+   886→              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 mb-4">
+   887→                <span className="text-3xl">🤖</span>
+   888→              </div>
+   889→              <h3 className="text-base font-semibold">Belum Ada AI Agent</h3>
+   890→              <p className="mt-1 text-sm text-[var(--nm-text-muted)] max-w-xs">
+   891→                Tambahkan AI agent pertamamu untuk mulai memberikan pengalaman AI yang cerdas kepada pengguna.
+   892→              </p>
+   893→              <motion.button
+   894→                whileTap={{ scale: 0.95 }}
+   895→                onClick={openAddDialog}
+   896→                className="mt-5 flex items-center gap-2 rounded-xl nm-btn-primary px-5 py-2.5 text-sm font-medium text-white"
+   897→              >
+   898→                <Plus className="h-4 w-4" />
+   899→                Tambah Agent Pertama
+   900→              </motion.button>
+   901→            </div>
+   902→          </motion.div>
+   903→        )}
+   904→
+   905→        {/* ── Info Section ────────────────────────────────────── */}
+   906→        <motion.div variants={fadeUp} className="mb-6">
+   907→          <div className="rounded-xl nm-raised-sm p-4">
+   908→            <div className="flex items-start gap-2">
+   909→              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+   910→              <div className="text-[11px] text-[var(--nm-text-muted)] leading-relaxed">
+   911→                <strong className="text-[var(--nm-text)]">Tips:</strong> Pastikan API Key dan Base URL
+   912→                sudah benar. Token usage direset setiap bulan. Agent default akan digunakan untuk semua
+   913→                percakapan jika tidak ada agent khusus yang dipilih.
+   914→              </div>
+   915→            </div>
+   916→          </div>
+   917→        </motion.div>
+   918→      </motion.div>
+   919→
+   920→      {/* ═══════════════════════════════════════════════════════ */}
+   921→      {/* ── ADD / EDIT DIALOG ─────────────────────────────────── */}
+   922→      {/* ═══════════════════════════════════════════════════════ */}
+   923→      <AnimatePresence>
+   924→        {showDialog && (
+   925→          <motion.div
+   926→            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+   927→            initial={{ opacity: 0 }}
+   928→            animate={{ opacity: 1 }}
+   929→            exit={{ opacity: 0 }}
+   930→          >
+   931→            {/* Backdrop */}
+   932→            <motion.div
+   933→              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+   934→              onClick={() => {
+   935→                setShowDialog(false);
+   936→                resetForm();
+   937→              }}
+   938→              initial={{ opacity: 0 }}
+   939→              animate={{ opacity: 1 }}
+   940→              exit={{ opacity: 0 }}
+   941→            />
+   942→
+   943→            {/* Dialog content */}
+   944→            <motion.div
+   945→              className="relative z-10 w-full max-w-md max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden"
+   946→              style={{ background: 'var(--nm-bg)' }}
+   947→              initial={{ y: 100, opacity: 0 }}
+   948→              animate={{ y: 0, opacity: 1 }}
+   949→              exit={{ y: 100, opacity: 0 }}
+   950→              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+   951→            >
+   952→              {/* Handle bar (mobile) */}
+   953→              <div className="flex justify-center pt-3 pb-1 sm:hidden">
+   954→                <div className="h-1.5 w-10 rounded-full bg-[var(--nm-shadow-dark)]" />
+   955→              </div>
+   956→
+   957→              {/* Dialog header */}
+   958→              <div className="px-5 pb-4 pt-2 sm:pt-5">
+   959→                <div className="flex items-center justify-between">
+   960→                  <div className="flex items-center gap-3">
+   961→                    <div
+   962→                      className={`flex h-9 w-9 items-center justify-center rounded-xl text-white ${
+   963→                        dialogMode === 'add'
+   964→                          ? 'bg-gradient-to-br from-emerald-500 to-amber-500'
+   965→                          : 'bg-gradient-to-br from-amber-500 to-emerald-500'
+   966→                      }`}
+   967→                    >
+   968→                      {dialogMode === 'add' ? (
+   969→                        <Plus className="h-4 w-4" />
+   970→                      ) : (
+   971→                        <Pencil className="h-4 w-4" />
+   972→                      )}
+   973→                    </div>
+   974→                    <div>
+   975→                      <h3 className="text-base font-bold">
+   976→                        {dialogMode === 'add' ? 'Tambah AI Agent' : 'Edit AI Agent'}
+   977→                      </h3>
+   978→                      <p className="text-xs text-[var(--nm-text-muted)]">
+   979→                        {dialogMode === 'add'
+   980→                          ? 'Konfigurasi agent baru'
+   981→                          : editingAgent?.name ?? ''}
+   982→                      </p>
+   983→                    </div>
+   984→                  </div>
+   985→                  <motion.button
+   986→                    whileTap={{ scale: 0.9 }}
+   987→                    onClick={() => {
+   988→                      setShowDialog(false);
+   989→                      resetForm();
+   990→                    }}
+   991→                    className="flex h-8 w-8 items-center justify-center rounded-xl nm-btn-icon"
+   992→                  >
+   993→                    <X className="h-4 w-4" />
+   994→                  </motion.button>
+   995→                </div>
+   996→              </div>
+   997→
+   998→              {/* Scrollable form */}
+   999→              <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-4">
+  1000→                {/* Name */}
+  1001→                <div className="space-y-1.5">
+  1002→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1003→                    Nama Agent <span className="text-red-500">*</span>
+  1004→                  </label>
+  1005→                  <input
+  1006→                    type="text"
+  1007→                    placeholder="Contoh: ChefAI Pro"
+  1008→                    value={formName}
+  1009→                    onChange={(e) => setFormName(e.target.value)}
+  1010→                    className="w-full rounded-xl nm-input px-4 py-2.5 text-sm"
+  1011→                  />
+  1012→                </div>
+  1013→
+  1014→                {/* Provider dropdown */}
+  1015→                <div className="space-y-1.5">
+  1016→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1017→                    Provider <span className="text-red-500">*</span>
+  1018→                  </label>
+  1019→                  <div className="relative">
+  1020→                    <select
+  1021→                      value={formProvider}
+  1022→                      onChange={(e) => setFormProvider(e.target.value as AgentProvider)}
+  1023→                      className="w-full appearance-none rounded-xl nm-input px-4 py-2.5 text-sm pr-10"
+  1024→                    >
+  1025→                      {PROVIDER_OPTIONS.map((p) => (
+  1026→                        <option key={p} value={p}>
+  1027→                          {PROVIDER_CONFIG[p].emoji} {PROVIDER_CONFIG[p].label}
+  1028→                        </option>
+  1029→                      ))}
+  1030→                    </select>
+  1031→                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--nm-text-muted)] pointer-events-none" />
+  1032→                  </div>
+  1033→                </div>
+  1034→
+  1035→                {/* Model name */}
+  1036→                <div className="space-y-1.5">
+  1037→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1038→                    Model <span className="text-red-500">*</span>
+  1039→                  </label>
+  1040→                  <input
+  1041→                    type="text"
+  1042→                    placeholder="Contoh: claude-3-5-sonnet-20241022"
+  1043→                    value={formModel}
+  1044→                    onChange={(e) => setFormModel(e.target.value)}
+  1045→                    className="w-full rounded-xl nm-input px-4 py-2.5 text-sm font-mono"
+  1046→                  />
+  1047→                </div>
+  1048→
+  1049→                {/* API Key */}
+  1050→                {formProvider !== 'built-in' && (
+  1051→                  <div className="space-y-1.5">
+  1052→                    <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1053→                      API Key{' '}
+  1054→                      <span className="font-normal text-[var(--nm-text-muted)]">
+  1055→                        {dialogMode === 'edit' ? '(kosongkan jika tidak ingin diubah)' : '(opsional)'}
+  1056→                      </span>
+  1057→                    </label>
+  1058→                    <div className="relative">
+  1059→                      <input
+  1060→                        type={showApiKey ? 'text' : 'password'}
+  1061→                        placeholder="sk-xxxxxxxxxxxxxxxx"
+  1062→                        value={formApiKey}
+  1063→                        onChange={(e) => setFormApiKey(e.target.value)}
+  1064→                        className="w-full rounded-xl nm-input px-4 py-2.5 text-sm font-mono pr-10"
+  1065→                      />
+  1066→                      <button
+  1067→                        type="button"
+  1068→                        onClick={() => setShowApiKey(!showApiKey)}
+  1069→                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nm-text-muted)] hover:text-[var(--nm-text)]"
+  1070→                      >
+  1071→                        {showApiKey ? (
+  1072→                          <EyeOff className="h-4 w-4" />
+  1073→                        ) : (
+  1074→                          <Eye className="h-4 w-4" />
+  1075→                        )}
+  1076→                      </button>
+  1077→                    </div>
+  1078→                  </div>
+  1079→                )}
+  1080→
+  1081→                {/* API Base URL */}
+  1082→                <div className="space-y-1.5">
+  1083→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1084→                    API Base URL{' '}
+  1085→                    <span className="font-normal text-[var(--nm-text-muted)]">(opsional)</span>
+  1086→                  </label>
+  1087→                  <input
+  1088→                    type="text"
+  1089→                    placeholder="https://api.openai.com/v1"
+  1090→                    value={formApiBaseUrl}
+  1091→                    onChange={(e) => setFormApiBaseUrl(e.target.value)}
+  1092→                    className="w-full rounded-xl nm-input px-4 py-2.5 text-sm font-mono"
+  1093→                  />
+  1094→                </div>
+  1095→
+  1096→                {/* Max Tokens */}
+  1097→                <div className="space-y-1.5">
+  1098→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1099→                    Max Tokens <span className="text-red-500">*</span>
+  1100→                  </label>
+  1101→                  <input
+  1102→                    type="number"
+  1103→                    min={1000}
+  1104→                    step={1000}
+  1105→                    value={formMaxTokens}
+  1106→                    onChange={(e) => setFormMaxTokens(Number(e.target.value))}
+  1107→                    className="w-full rounded-xl nm-input px-4 py-2.5 text-sm"
+  1108→                  />
+  1109→                  <p className="text-[10px] text-[var(--nm-text-muted)]">
+  1110→                    Batas maksimal token per bulan (min. 1,000)
+  1111→                  </p>
+  1112→                </div>
+  1113→
+  1114→                {/* Purpose dropdown */}
+  1115→                <div className="space-y-1.5">
+  1116→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1117→                    Purpose <span className="text-red-500">*</span>
+  1118→                  </label>
+  1119→                  <div className="relative">
+  1120→                    <select
+  1121→                      value={formPurpose}
+  1122→                      onChange={(e) => setFormPurpose(e.target.value as AgentPurpose)}
+  1123→                      className="w-full appearance-none rounded-xl nm-input px-4 py-2.5 text-sm pr-10"
+  1124→                    >
+  1125→                      {PURPOSE_OPTIONS.map((p) => (
+  1126→                        <option key={p} value={p}>
+  1127→                          {PURPOSE_CONFIG[p].label}
+  1128→                        </option>
+  1129→                      ))}
+  1130→                    </select>
+  1131→                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--nm-text-muted)] pointer-events-none" />
+  1132→                  </div>
+  1133→                </div>
+  1134→
+  1135→                {/* Description */}
+  1136→                <div className="space-y-1.5">
+  1137→                  <label className="text-xs font-semibold text-[var(--nm-text)]">
+  1138→                    Deskripsi{' '}
+  1139→                    <span className="font-normal text-[var(--nm-text-muted)]">(opsional)</span>
+  1140→                  </label>
+  1141→                  <textarea
+  1142→                    placeholder="Deskripsi singkat tentang agent ini..."
+  1143→                    value={formDescription}
+  1144→                    onChange={(e) => setFormDescription(e.target.value)}
+  1145→                    rows={3}
+  1146→                    className="w-full rounded-xl nm-input px-4 py-2.5 text-sm resize-none"
+  1147→                  />
+  1148→                </div>
+  1149→
+  1150→                {/* Set as Default toggle */}
+  1151→                <div className="flex items-center justify-between rounded-xl nm-raised-sm p-4">
+  1152→                  <div className="flex items-center gap-3">
+  1153→                    <Star className="h-5 w-5 text-amber-500" />
+  1154→                    <div>
+  1155→                      <p className="text-sm font-semibold">Set sebagai Default</p>
+  1156→                      <p className="text-[11px] text-[var(--nm-text-muted)]">
+  1157→                        Agent ini akan digunakan untuk semua percakapan
+  1158→                      </p>
+  1159→                    </div>
+  1160→                  </div>
+  1161→                  <button
+  1162→                    type="button"
+  1163→                    onClick={() => setFormIsDefault(!formIsDefault)}
+  1164→                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 ${
+  1165→                      formIsDefault ? 'nm-toggle-active' : 'nm-toggle'
+  1166→                    }`}
+  1167→                  >
+  1168→                    <motion.span
+  1169→                      className="inline-block h-5 w-5 rounded-full bg-white shadow-md"
+  1170→                      animate={{ x: formIsDefault ? 20 : 4 }}
+  1171→                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+  1172→                    />
+  1173→                  </button>
+  1174→                </div>
+  1175→              </div>
+  1176→
+  1177→              {/* Dialog footer */}
+  1178→              <div className="px-5 pb-5 pt-2 sm:pt-3">
+  1179→                <div className="flex gap-3">
+  1180→                  <motion.button
+  1181→                    whileTap={{ scale: 0.97 }}
+  1182→                    onClick={() => {
+  1183→                      setShowDialog(false);
+  1184→                      resetForm();
+  1185→                    }}
+  1186→                    className="flex-1 rounded-xl nm-btn px-4 py-2.5 text-sm font-medium"
+  1187→                  >
+  1188→                    Batal
+  1189→                  </motion.button>
+  1190→                  <motion.button
+  1191→                    whileTap={{ scale: 0.97 }}
+  1192→                    onClick={handleSubmit}
+  1193→                    disabled={!formName.trim() || !formModel.trim() || saving}
+  1194→                    className="flex-1 flex items-center justify-center gap-2 rounded-xl nm-btn-primary px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+  1195→                  >
+  1196→                    {saving ? (
+  1197→                      <RefreshCw className="h-4 w-4 animate-spin" />
+  1198→                    ) : dialogMode === 'add' ? (
+  1199→                      <Plus className="h-4 w-4" />
+  1200→                    ) : (
+  1201→                      <Check className="h-4 w-4" />
+  1202→                    )}
+  1203→                    {saving
+  1204→                      ? 'Menyimpan...'
+  1205→                      : dialogMode === 'add'
+  1206→                        ? 'Tambah Agent'
+  1207→                        : 'Simpan Perubahan'}
+  1208→                  </motion.button>
+  1209→                </div>
+  1210→              </div>
+  1211→            </motion.div>
+  1212→          </motion.div>
+  1213→        )}
+  1214→      </AnimatePresence>
+  1215→
+  1216→      {/* ═══════════════════════════════════════════════════════ */}
+  1217→      {/* ── DELETE CONFIRMATION DIALOG ────────────────────────── */}
+  1218→      {/* ═══════════════════════════════════════════════════════ */}
+  1219→      <AnimatePresence>
+  1220→        {showDeleteDialog && deletingAgent && (
+  1221→          <motion.div
+  1222→            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+  1223→            initial={{ opacity: 0 }}
+  1224→            animate={{ opacity: 1 }}
+  1225→            exit={{ opacity: 0 }}
+  1226→          >
+  1227→            <motion.div
+  1228→              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+  1229→              onClick={() => {
+  1230→                setShowDeleteDialog(false);
+  1231→                setDeletingAgent(null);
+  1232→              }}
+  1233→              initial={{ opacity: 0 }}
+  1234→              animate={{ opacity: 1 }}
+  1235→              exit={{ opacity: 0 }}
+  1236→            />
+  1237→
+  1238→            <motion.div
+  1239→              className="relative z-10 w-full max-w-sm rounded-2xl p-6"
+  1240→              style={{ background: 'var(--nm-bg)' }}
+  1241→              initial={{ scale: 0.9, opacity: 0 }}
+  1242→              animate={{ scale: 1, opacity: 1 }}
+  1243→              exit={{ scale: 0.9, opacity: 0 }}
+  1244→              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+  1245→            >
+  1246→              <div className="flex flex-col items-center text-center">
+  1247→                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/15 mb-4">
+  1248→                  <Trash className="h-7 w-7 text-red-500" />
+  1249→                </div>
+  1250→                <h3 className="text-base font-bold mb-1">Hapus Agent?</h3>
+  1251→                <p className="text-sm text-[var(--nm-text-muted)] mb-1">
+  1252→                  Apakah kamu yakin ingin menghapus agent:
+  1253→                </p>
+  1254→                <p className="text-sm font-bold text-red-500 mb-4">
+  1255→                  &quot;{deletingAgent.name}&quot;
+  1256→                </p>
+  1257→                <p className="text-xs text-[var(--nm-text-muted)] mb-5">
+  1258→                  Tindakan ini tidak dapat dibatalkan. Semua konfigurasi dan statistik akan dihapus
+  1259→                  secara permanen.
+  1260→                </p>
+  1261→                <div className="flex gap-3 w-full">
+  1262→                  <motion.button
+  1263→                    whileTap={{ scale: 0.97 }}
+  1264→                    onClick={() => {
+  1265→                      setShowDeleteDialog(false);
+  1266→                      setDeletingAgent(null);
+  1267→                    }}
+  1268→                    className="flex-1 rounded-xl nm-btn px-4 py-2.5 text-sm font-medium"
+  1269→                  >
+  1270→                    Batal
+  1271→                  </motion.button>
+  1272→                  <motion.button
+  1273→                    whileTap={{ scale: 0.97 }}
+  1274→                    onClick={handleDeleteConfirm}
+  1275→                    disabled={deleting}
+  1276→                    className="flex-1 flex items-center justify-center gap-2 rounded-xl nm-btn-destructive px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+  1277→                  >
+  1278→                    {deleting ? (
+  1279→                      <RefreshCw className="h-4 w-4 animate-spin" />
+  1280→                    ) : (
+  1281→                      <Trash className="h-4 w-4" />
+  1282→                    )}
+  1283→                    {deleting ? 'Menghapus...' : 'Hapus'}
+  1284→                  </motion.button>
+  1285→                </div>
+  1286→              </div>
+  1287→            </motion.div>
+  1288→          </motion.div>
+  1289→        )}
+  1290→      </AnimatePresence>
+  1291→    </div>
+  1292→  );
+  1293→}
+  1294→
+  1295→export default AdminAiAgents;
+  1296→

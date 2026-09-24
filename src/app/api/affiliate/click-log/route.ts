@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 interface ClickLogRequest {
   productLinkId: string;
@@ -8,7 +9,7 @@ interface ClickLogRequest {
   context: string;
 }
 
-// POST - Log a click on an affiliate link
+// POST - Log a click on an affiliate link (permissive - no auth required for logging clicks)
 export async function POST(request: NextRequest) {
   try {
     const body: ClickLogRequest = await request.json();
@@ -41,9 +42,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Get recent click logs
+// GET - Get recent click logs (requires auth)
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const platform = searchParams.get('platform');
@@ -73,6 +75,9 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching click logs:', error);
     return NextResponse.json(
       { error: 'Gagal memuat log klik' },

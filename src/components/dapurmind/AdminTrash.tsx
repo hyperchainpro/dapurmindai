@@ -22,6 +22,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import {
   Dialog,
   DialogContent,
@@ -106,9 +107,7 @@ export function AdminTrash() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/admin/trash', {
-        headers: { 'X-Admin-Key': 'dapurmind2025' },
-      });
+      const res = await adminFetch('/api/admin/trash');
       if (!res.ok) throw new Error('Gagal memuat tempat sampah');
       const data = await res.json();
       setItems(data.items || []);
@@ -161,11 +160,10 @@ export function AdminTrash() {
             break;
         }
 
-        const res = await fetch(endpoint, {
+        const res = await adminFetch(endpoint, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'X-Admin-Key': 'dapurmind2025',
           },
           body: JSON.stringify({ id: item.id }),
         });
@@ -194,11 +192,10 @@ export function AdminTrash() {
     try {
       setPermaDeleting(true);
       setError(null);
-      const res = await fetch(
+      const res = await adminFetch(
         `/api/admin/trash?type=${permaDeleteItem.type}&id=${encodeURIComponent(permaDeleteItem.id)}`,
         {
           method: 'DELETE',
-          headers: { 'X-Admin-Key': 'dapurmind2025' },
         }
       );
       if (!res.ok) {

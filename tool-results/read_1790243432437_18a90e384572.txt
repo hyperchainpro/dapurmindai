@@ -1,0 +1,856 @@
+     1→'use client';
+     2→
+     3→import React, { useEffect, useState, useCallback, useMemo } from 'react';
+     4→import {
+     5→  motion,
+     6→  AnimatePresence,
+     7→  useMotionValue,
+     8→  useTransform,
+     9→  PanInfo,
+    10→} from 'framer-motion';
+    11→import {
+    12→  ArrowLeft,
+    13→  ChefHat,
+    14→  Trash2,
+    15→  Edit3,
+    16→  Search,
+    17→  CheckCircle2,
+    18→  XCircle,
+    19→  Loader2,
+    20→  AlertTriangle,
+    21→  RefreshCw,
+    22→  Heart,
+    23→  Eye,
+    24→  EyeOff,
+    25→  Clock,
+    26→  Flame,
+    27→  LogOut,
+    28→  Users,
+    29→  Link2,
+    30→  BarChart3,
+    31→  Megaphone,
+    32→  LayoutDashboard,
+    33→} from 'lucide-react';
+    34→import { useAppStore } from '@/hooks/useAppState';
+    35→import {
+    36→  Dialog,
+    37→  DialogContent,
+    38→  DialogHeader,
+    39→  DialogTitle,
+    40→  DialogDescription,
+    41→  DialogFooter,
+    42→} from '@/components/ui/dialog';
+    43→import { Button } from '@/components/ui/button';
+    44→import { Badge } from '@/components/ui/badge';
+    45→import { Input } from '@/components/ui/input';
+    46→import { Label } from '@/components/ui/label';
+    47→import { Switch } from '@/components/ui/switch';
+    48→import { Card, CardContent } from '@/components/ui/card';
+    49→import { Skeleton } from '@/components/ui/skeleton';
+    50→import { Bounce } from '@/components/dapurmind/ReactBits';
+    51→
+    52→/* ── Animation variants ───────────────────────────────────────── */
+    53→
+    54→const stagger = {
+    55→  hidden: {},
+    56→  visible: { transition: { staggerChildren: 0.07 } },
+    57→};
+    58→
+    59→const fadeUp = {
+    60→  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+    61→  visible: {
+    62→    opacity: 1,
+    63→    y: 0,
+    64→    filter: 'blur(0px)',
+    65→    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    66→  },
+    67→};
+    68→
+    69→/* ── Types ──────────────────────────────────────────────────── */
+    70→
+    71→interface AdminRecipe {
+    72→  id: string;
+    73→  name: string;
+    74→  description: string;
+    75→  category: string;
+    76→  difficulty: string;
+    77→  cookTime: number;
+    78→  prepTime: number;
+    79→  likes: number;
+    80→  isPublished: boolean;
+    81→  userId: string;
+    82→  user?: { id: string; name: string | null; email: string } | null;
+    83→  deletedAt: string | null;
+    84→  createdAt: string;
+    85→  updatedAt: string;
+    86→}
+    87→
+    88→/* ── Difficulty color helper ─────────────────────────────────── */
+    89→
+    90→function getDifficultyColor(difficulty: string) {
+    91→  switch (difficulty) {
+    92→    case 'Mudah':
+    93→      return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40';
+    94→    case 'Sedang':
+    95→      return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/40';
+    96→    case 'Susah':
+    97→      return 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/40';
+    98→    default:
+    99→      return '';
+   100→  }
+   101→}
+   102→
+   103→/* ── Swipe-to-delete Recipe Card ────────────────────────────── */
+   104→
+   105→interface SwipeableRecipeCardProps {
+   106→  recipe: AdminRecipe;
+   107→  onEdit: (recipe: AdminRecipe) => void;
+   108→  onDelete: (recipe: AdminRecipe) => void;
+   109→}
+   110→
+   111→function SwipeableRecipeCard({
+   112→  recipe,
+   113→  onEdit,
+   114→  onDelete,
+   115→}: SwipeableRecipeCardProps) {
+   116→  const x = useMotionValue(0);
+   117→  const deleteOpacity = useTransform(x, [-80, -40], [1, 0]);
+   118→  const deleteScale = useTransform(x, [-80, -40], [1, 0.8]);
+   119→
+   120→  const handleDragEnd = (
+   121→    _event: MouseEvent | TouchEvent | PointerEvent,
+   122→    info: PanInfo
+   123→  ) => {
+   124→    if (info.offset.x < -60) {
+   125→      onDelete(recipe);
+   126→    } else {
+   127→      x.set(0);
+   128→    }
+   129→  };
+   130→
+   131→  const totalTime = recipe.cookTime + recipe.prepTime;
+   132→
+   133→  return (
+   134→    <div className="relative overflow-hidden rounded-2xl mb-3">
+   135→      {/* Red delete background */}
+   136→      <motion.div
+   137→        className="absolute inset-0 z-0 flex items-center justify-end pr-5 bg-gradient-to-r from-transparent to-red-500 rounded-2xl"
+   138→        style={{ opacity: deleteOpacity }}
+   139→      >
+   140→        <motion.div
+   141→          style={{ scale: deleteScale }}
+   142→          className="flex items-center gap-2 text-white font-semibold text-sm"
+   143→        >
+   144→          <Trash2 className="h-5 w-5" />
+   145→          Hapus
+   146→        </motion.div>
+   147→      </motion.div>
+   148→
+   149→      {/* Card content */}
+   150→      <motion.div
+   151→        className="relative z-10 cursor-grab active:cursor-grabbing"
+   152→        style={{ x }}
+   153→        drag="x"
+   154→        dragConstraints={{ left: -80, right: 0 }}
+   155→        dragElastic={{ left: 0.1, right: 0 }}
+   156→        onDragEnd={handleDragEnd}
+   157→      >
+   158→        <Card className="border-border/50 bg-card/90 backdrop-blur-sm transition-shadow hover:shadow-md">
+   159→          <CardContent className="p-4">
+   160→            <div className="flex items-start gap-3">
+   161→              {/* Icon */}
+   162→              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
+   163→                <ChefHat className="h-5 w-5 text-amber-600" />
+   164→              </div>
+   165→
+   166→              {/* Info */}
+   167→              <div className="flex-1 min-w-0">
+   168→                <div className="flex items-center gap-2">
+   169→                  <h3 className="text-sm font-semibold truncate">
+   170→                    {recipe.name}
+   171→                  </h3>
+   172→                  {recipe.isPublished ? (
+   173→                    <Eye className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+   174→                  ) : (
+   175→                    <EyeOff className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+   176→                  )}
+   177→                </div>
+   178→                <p className="mt-0.5 text-xs text-muted-foreground truncate">
+   179→                  oleh {recipe.user?.name || recipe.user?.email || 'Anonim'}
+   180→                </p>
+   181→                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+   182→                  <Badge
+   183→                    variant="secondary"
+   184→                    className={`text-[10px] px-1.5 border ${getDifficultyColor(
+   185→                      recipe.difficulty
+   186→                    )}`}
+   187→                  >
+   188→                    <Flame className="h-3 w-3 mr-0.5" />
+   189→                    {recipe.difficulty}
+   190→                  </Badge>
+   191→                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+   192→                    <Clock className="h-3 w-3" />
+   193→                    {totalTime} menit
+   194→                  </span>
+   195→                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+   196→                    <Heart className="h-3 w-3" />
+   197→                    {recipe.likes}
+   198→                  </span>
+   199→                </div>
+   200→                <div className="mt-1 flex items-center gap-2">
+   201→                  <Badge variant="secondary" className="text-[10px] px-1.5">
+   202→                    {recipe.category}
+   203→                  </Badge>
+   204→                  <span className="text-[10px] text-muted-foreground">
+   205→                    {new Date(recipe.createdAt).toLocaleDateString('id-ID', {
+   206→                      day: 'numeric',
+   207→                      month: 'short',
+   208→                      year: 'numeric',
+   209→                    })}
+   210→                  </span>
+   211→                </div>
+   212→              </div>
+   213→
+   214→              {/* Edit button */}
+   215→              <motion.button
+   216→                whileTap={{ scale: 0.9 }}
+   217→                onClick={(e) => {
+   218→                  e.stopPropagation();
+   219→                  onEdit(recipe);
+   220→                }}
+   221→                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/50 transition-colors hover:bg-accent"
+   222→                aria-label="Edit resep"
+   223→              >
+   224→                <Edit3 className="h-4 w-4 text-muted-foreground" />
+   225→              </motion.button>
+   226→            </div>
+   227→          </CardContent>
+   228→        </Card>
+   229→      </motion.div>
+   230→    </div>
+   231→  );
+   232→}
+   233→
+   234→/* ── Main Component ──────────────────────────────────────────── */
+   235→
+   236→export function AdminRecipeManager() {
+   237→  const setScreen = useAppStore((s) => s.setScreen);
+   238→  const goBack = useAppStore((s) => s.goBack);
+   239→
+   240→  /* ── Local state ───────────────────────────────────────────── */
+   241→  const [loading, setLoading] = useState(true);
+   242→  const [error, setError] = useState<string | null>(null);
+   243→  const [recipes, setRecipes] = useState<AdminRecipe[]>([]);
+   244→  const [search, setSearch] = useState('');
+   245→  const [categoryFilter, setCategoryFilter] = useState('all');
+   246→  const [saving, setSaving] = useState(false);
+   247→  const [deleting, setDeleting] = useState(false);
+   248→  const [refreshKey, setRefreshKey] = useState(0);
+   249→
+   250→  // Edit dialog state
+   251→  const [showEditDialog, setShowEditDialog] = useState(false);
+   252→  const [editingRecipe, setEditingRecipe] = useState<AdminRecipe | null>(null);
+   253→  const [editName, setEditName] = useState('');
+   254→  const [editDescription, setEditDescription] = useState('');
+   255→  const [editCategory, setEditCategory] = useState('');
+   256→  const [editDifficulty, setEditDifficulty] = useState('Mudah');
+   257→  const [editCookTime, setEditCookTime] = useState(30);
+   258→  const [editPrepTime, setEditPrepTime] = useState(15);
+   259→  const [editIsPublished, setEditIsPublished] = useState(false);
+   260→
+   261→  // Delete dialog state
+   262→  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+   263→  const [deletingRecipe, setDeletingRecipe] = useState<AdminRecipe | null>(null);
+   264→
+   265→  /* ── Fetch recipes ──────────────────────────────────────────── */
+   266→  const fetchRecipes = useCallback(async () => {
+   267→    try {
+   268→      setLoading(true);
+   269→      setError(null);
+   270→      const res = await fetch('/api/admin/recipes', {
+   271→        headers: { 'X-Admin-Key': 'dapurmind2025' },
+   272→      });
+   273→      if (!res.ok) throw new Error('Gagal memuat data resep');
+   274→      const data = await res.json();
+   275→      setRecipes(data.recipes || []);
+   276→    } catch (err) {
+   277→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   278→    } finally {
+   279→      setLoading(false);
+   280→    }
+   281→  }, []);
+   282→
+   283→  useEffect(() => {
+   284→    fetchRecipes();
+   285→  }, [fetchRecipes, refreshKey]);
+   286→
+   287→  /* ── Stats ─────────────────────────────────────────────────── */
+   288→  const stats = useMemo(() => {
+   289→    const nonDeleted = recipes.filter((r) => !r.deletedAt);
+   290→    return {
+   291→      total: nonDeleted.length,
+   292→      published: nonDeleted.filter((r) => r.isPublished).length,
+   293→      draft: nonDeleted.filter((r) => !r.isPublished).length,
+   294→      deleted: recipes.filter((r) => r.deletedAt).length,
+   295→    };
+   296→  }, [recipes]);
+   297→
+   298→  /* ── Categories ────────────────────────────────────────────── */
+   299→  const categories = useMemo(() => {
+   300→    const cats = new Set(recipes.map((r) => r.category));
+   301→    return ['all', ...Array.from(cats).sort()];
+   302→  }, [recipes]);
+   303→
+   304→  /* ── Filtered recipes ─────────────────────────────────────── */
+   305→  const filteredRecipes = useMemo(() => {
+   306→    let result = recipes.filter((r) => !r.deletedAt);
+   307→
+   308→    if (categoryFilter !== 'all') {
+   309→      result = result.filter((r) => r.category === categoryFilter);
+   310→    }
+   311→
+   312→    if (search.trim()) {
+   313→      const q = search.toLowerCase();
+   314→      result = result.filter(
+   315→        (r) =>
+   316→          r.name.toLowerCase().includes(q) ||
+   317→          (r.user?.name || '').toLowerCase().includes(q) ||
+   318→          r.category.toLowerCase().includes(q)
+   319→      );
+   320→    }
+   321→
+   322→    return result;
+   323→  }, [recipes, categoryFilter, search]);
+   324→
+   325→  /* ── Dialog handlers ───────────────────────────────────────── */
+   326→
+   327→  const openEditDialog = useCallback((recipe: AdminRecipe) => {
+   328→    setEditingRecipe(recipe);
+   329→    setEditName(recipe.name);
+   330→    setEditDescription(recipe.description);
+   331→    setEditCategory(recipe.category);
+   332→    setEditDifficulty(recipe.difficulty);
+   333→    setEditCookTime(recipe.cookTime);
+   334→    setEditPrepTime(recipe.prepTime);
+   335→    setEditIsPublished(recipe.isPublished);
+   336→    setShowEditDialog(true);
+   337→  }, []);
+   338→
+   339→  const handleEditSubmit = useCallback(async () => {
+   340→    if (!editingRecipe) return;
+   341→    try {
+   342→      setSaving(true);
+   343→      setError(null);
+   344→      const res = await fetch('/api/admin/recipes', {
+   345→        method: 'PUT',
+   346→        headers: {
+   347→          'Content-Type': 'application/json',
+   348→          'X-Admin-Key': 'dapurmind2025',
+   349→        },
+   350→        body: JSON.stringify({
+   351→          id: editingRecipe.id,
+   352→          name: editName.trim(),
+   353→          description: editDescription.trim(),
+   354→          category: editCategory,
+   355→          difficulty: editDifficulty,
+   356→          cookTime: editCookTime,
+   357→          prepTime: editPrepTime,
+   358→          isPublished: editIsPublished,
+   359→        }),
+   360→      });
+   361→      if (!res.ok) {
+   362→        const data = await res.json();
+   363→        throw new Error(data.error || 'Gagal mengupdate resep');
+   364→      }
+   365→      setShowEditDialog(false);
+   366→      setEditingRecipe(null);
+   367→      setRefreshKey((k) => k + 1);
+   368→    } catch (err) {
+   369→      setError(err instanceof Error ? err.message : 'Gagal mengupdate resep');
+   370→    } finally {
+   371→      setSaving(false);
+   372→    }
+   373→  }, [
+   374→    editingRecipe,
+   375→    editName,
+   376→    editDescription,
+   377→    editCategory,
+   378→    editDifficulty,
+   379→    editCookTime,
+   380→    editPrepTime,
+   381→    editIsPublished,
+   382→  ]);
+   383→
+   384→  const openDeleteDialog = useCallback((recipe: AdminRecipe) => {
+   385→    setDeletingRecipe(recipe);
+   386→    setShowDeleteDialog(true);
+   387→  }, []);
+   388→
+   389→  const handleDeleteConfirm = useCallback(async () => {
+   390→    if (!deletingRecipe) return;
+   391→    try {
+   392→      setDeleting(true);
+   393→      setError(null);
+   394→      const res = await fetch('/api/admin/recipes', {
+   395→        method: 'DELETE',
+   396→        headers: {
+   397→          'Content-Type': 'application/json',
+   398→          'X-Admin-Key': 'dapurmind2025',
+   399→        },
+   400→        body: JSON.stringify({ id: deletingRecipe.id }),
+   401→      });
+   402→      if (!res.ok) {
+   403→        const data = await res.json();
+   404→        throw new Error(data.error || 'Gagal menghapus resep');
+   405→      }
+   406→      setShowDeleteDialog(false);
+   407→      setDeletingRecipe(null);
+   408→      setRefreshKey((k) => k + 1);
+   409→    } catch (err) {
+   410→      setError(err instanceof Error ? err.message : 'Gagal menghapus resep');
+   411→    } finally {
+   412→      setDeleting(false);
+   413→    }
+   414→  }, [deletingRecipe]);
+   415→
+   416→  /* ── Header nav items ─────────────────────────────────────── */
+   417→  const headerNav = [
+   418→    { icon: LayoutDashboard, screen: 'admin-dashboard' as const, label: 'Dashboard' },
+   419→    { icon: Users, screen: 'admin-users' as const, label: 'User' },
+   420→    { icon: Trash2, screen: 'admin-trash' as const, label: 'Sampah' },
+   421→    { icon: Link2, screen: 'admin-affiliate' as const, label: 'Afiliasi' },
+   422→    { icon: Megaphone, screen: 'admin-ads' as const, label: 'Iklan' },
+   423→    { icon: BarChart3, screen: 'admin-analytics' as const, label: 'Analitik' },
+   424→  ];
+   425→
+   426→  /* ── Render ────────────────────────────────────────────────── */
+   427→
+   428→  return (
+   429→    <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+   430→      <motion.div
+   431→        variants={stagger}
+   432→        initial="hidden"
+   433→        animate="visible"
+   434→        className="relative z-10 mx-auto max-w-lg px-4 pt-4"
+   435→      >
+   436→        {/* ── Header ──────────────────────────────────────────── */}
+   437→        <motion.div variants={fadeUp} className="mb-5">
+   438→          <div className="flex items-center gap-3">
+   439→            <motion.button
+   440→              whileTap={{ scale: 0.9 }}
+   441→              onClick={goBack}
+   442→              className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   443→              aria-label="Kembali"
+   444→            >
+   445→              <ArrowLeft className="h-5 w-5" />
+   446→            </motion.button>
+   447→            <div className="flex-1 min-w-0">
+   448→              <h1 className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 leading-tight">
+   449→                Manajemen Resep
+   450→              </h1>
+   451→              <p className="mt-0.5 text-xs text-muted-foreground">
+   452→                Kelola semua resep kreator
+   453→              </p>
+   454→            </div>
+   455→            <div className="flex items-center gap-1.5">
+   456→              {headerNav.map((item) => (
+   457→                <motion.button
+   458→                  key={item.screen}
+   459→                  whileTap={{ scale: 0.9 }}
+   460→                  onClick={() => setScreen(item.screen)}
+   461→                  className="flex h-9 w-9 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   462→                  aria-label={item.label}
+   463→                >
+   464→                  <item.icon className="h-4 w-4 text-muted-foreground" />
+   465→                </motion.button>
+   466→              ))}
+   467→              <motion.button
+   468→                whileTap={{ scale: 0.9 }}
+   469→                onClick={() => {
+   470→                  useAppStore.getState().setAdminLoggedIn(false);
+   471→                  useAppStore.getState().setScreen('dashboard');
+   472→                }}
+   473→                className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+   474→                aria-label="Logout"
+   475→              >
+   476→                <LogOut className="h-4 w-4 text-red-500" />
+   477→              </motion.button>
+   478→            </div>
+   479→          </div>
+   480→        </motion.div>
+   481→
+   482→        {/* ── Error Banner ────────────────────────────────────── */}
+   483→        <AnimatePresence>
+   484→          {error && (
+   485→            <motion.div
+   486→              initial={{ opacity: 0, y: -10 }}
+   487→              animate={{ opacity: 1, y: 0 }}
+   488→              exit={{ opacity: 0, y: -10 }}
+   489→              className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-800/40 dark:bg-red-500/10"
+   490→            >
+   491→              <div className="flex items-start gap-2">
+   492→                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+   493→                <div className="flex-1 min-w-0">
+   494→                  <p className="text-xs font-medium text-red-700 dark:text-red-400">
+   495→                    {error}
+   496→                  </p>
+   497→                </div>
+   498→                <button
+   499→                  onClick={() => setError(null)}
+   500→                  className="shrink-0 text-red-400 hover:text-red-600"
+   501→                >
+   502→                  <XCircle className="h-4 w-4" />
+   503→                </button>
+   504→              </div>
+   505→            </motion.div>
+   506→          )}
+   507→        </AnimatePresence>
+   508→
+   509→        {/* ── Stats Banner ───────────────────────────────────── */}
+   510→        <motion.div variants={fadeUp} className="mb-5">
+   511→          <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
+   512→            <div className="grid grid-cols-4 gap-2">
+   513→              <div className="text-center">
+   514→                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+   515→                  {stats.total}
+   516→                </span>
+   517→                <p className="mt-0.5 text-[10px] text-muted-foreground">Total</p>
+   518→              </div>
+   519→              <div className="text-center">
+   520→                <span className="text-base font-bold">{stats.published}</span>
+   521→                <p className="mt-0.5 text-[10px] text-muted-foreground">Terbit</p>
+   522→              </div>
+   523→              <div className="text-center">
+   524→                <span className="text-base font-bold text-amber-600">
+   525→                  {stats.draft}
+   526→                </span>
+   527→                <p className="mt-0.5 text-[10px] text-muted-foreground">Draft</p>
+   528→              </div>
+   529→              <div className="text-center">
+   530→                <span className="text-base font-bold text-red-500">
+   531→                  {stats.deleted}
+   532→                </span>
+   533→                <p className="mt-0.5 text-[10px] text-muted-foreground">Dihapus</p>
+   534→              </div>
+   535→            </div>
+   536→          </div>
+   537→        </motion.div>
+   538→
+   539→        {/* ── Search Bar ──────────────────────────────────────── */}
+   540→        <motion.div variants={fadeUp} className="mb-4">
+   541→          <div className="relative">
+   542→            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+   543→            <Input
+   544→              placeholder="Cari resep berdasarkan nama, penulis, kategori..."
+   545→              value={search}
+   546→              onChange={(e) => setSearch(e.target.value)}
+   547→              className="rounded-xl pl-10"
+   548→            />
+   549→          </div>
+   550→        </motion.div>
+   551→
+   552→        {/* ── Category Filter ──────────────────────────────────── */}
+   553→        <motion.div variants={fadeUp} className="mb-4">
+   554→          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+   555→            {categories.map((cat) => (
+   556→              <motion.button
+   557→                key={cat}
+   558→                whileTap={{ scale: 0.96 }}
+   559→                onClick={() => setCategoryFilter(cat)}
+   560→                className={`shrink-0 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap ${
+   561→                  categoryFilter === cat
+   562→                    ? 'border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800/40'
+   563→                    : 'border-border/40 bg-card text-muted-foreground hover:bg-muted/50'
+   564→                }`}
+   565→              >
+   566→                {cat === 'all' ? 'Semua' : cat}
+   567→              </motion.button>
+   568→            ))}
+   569→          </div>
+   570→        </motion.div>
+   571→
+   572→        {/* ── Refresh Button ──────────────────────────────────── */}
+   573→        <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
+   574→          <div className="flex items-center gap-2">
+   575→            <ChefHat className="h-4 w-4 text-amber-500" />
+   576→            <h2 className="text-sm font-semibold">Daftar Resep</h2>
+   577→            <Badge variant="secondary" className="text-[10px] px-1.5">
+   578→              {filteredRecipes.length}
+   579→            </Badge>
+   580→          </div>
+   581→          <button
+   582→            onClick={() => setRefreshKey((k) => k + 1)}
+   583→            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+   584→          >
+   585→            <RefreshCw className="h-3 w-3" />
+   586→            Segarkan
+   587→          </button>
+   588→        </motion.div>
+   589→
+   590→        {/* ── Loading State ──────────────────────────────────── */}
+   591→        {loading && (
+   592→          <motion.div variants={fadeUp} className="space-y-3 mb-6">
+   593→            {Array.from({ length: 4 }).map((_, i) => (
+   594→              <div key={i} className="rounded-2xl nm-raised p-4">
+   595→                <div className="flex items-center gap-3">
+   596→                  <Skeleton className="h-11 w-11 rounded-xl" />
+   597→                  <div className="flex-1 space-y-2">
+   598→                    <Skeleton className="h-4 w-32" />
+   599→                    <Skeleton className="h-3 w-24" />
+   600→                    <Skeleton className="h-3 w-16" />
+   601→                  </div>
+   602→                  <Skeleton className="h-9 w-9 rounded-xl" />
+   603→                </div>
+   604→              </div>
+   605→            ))}
+   606→          </motion.div>
+   607→        )}
+   608→
+   609→        {/* ── Recipe List ───────────────────────────────────────── */}
+   610→        {!loading && filteredRecipes.length > 0 && (
+   611→          <motion.div variants={fadeUp} className="mb-6 space-y-0">
+   612→            {filteredRecipes.map((recipe) => (
+   613→              <SwipeableRecipeCard
+   614→                key={recipe.id}
+   615→                recipe={recipe}
+   616→                onEdit={openEditDialog}
+   617→                onDelete={openDeleteDialog}
+   618→              />
+   619→            ))}
+   620→          </motion.div>
+   621→        )}
+   622→
+   623→        {/* ── Empty State ─────────────────────────────────────── */}
+   624→        {!loading && filteredRecipes.length === 0 && (
+   625→          <motion.div variants={fadeUp} className="mb-6">
+   626→            <Bounce delay={0.2} intensity={2} hover>
+   627→              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/20 px-6 py-10 text-center">
+   628→                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 mb-4">
+   629→                  <span className="text-3xl">🍳</span>
+   630→                </div>
+   631→                <h3 className="text-base font-semibold">
+   632→                  {search.trim() || categoryFilter !== 'all'
+   633→                    ? 'Resep Tidak Ditemukan'
+   634→                    : 'Belum Ada Resep'}
+   635→                </h3>
+   636→                <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+   637→                  {search.trim() || categoryFilter !== 'all'
+   638→                    ? 'Coba ubah filter atau kata kunci pencarian'
+   639→                    : 'Resep dari kreator akan muncul di sini'}
+   640→                </p>
+   641→              </div>
+   642→            </Bounce>
+   643→          </motion.div>
+   644→        )}
+   645→      </motion.div>
+   646→
+   647→      {/* ═══════════════════════════════════════════════════════ */}
+   648→      {/* ── EDIT DIALOG ──────────────────────────────────────── */}
+   649→      {/* ═══════════════════════════════════════════════════════ */}
+   650→      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+   651→        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+   652→          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
+   653→            <DialogHeader className="text-left">
+   654→              <DialogTitle className="flex items-center gap-2 text-lg">
+   655→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
+   656→                  <Edit3 className="h-4 w-4" />
+   657→                </div>
+   658→                <span className="font-bold text-amber-600 dark:text-amber-400">
+   659→                  Edit Resep
+   660→                </span>
+   661→              </DialogTitle>
+   662→              <DialogDescription className="mt-1 text-sm">
+   663→                {editingRecipe ? editingRecipe.name : ''}
+   664→              </DialogDescription>
+   665→            </DialogHeader>
+   666→          </div>
+   667→
+   668→          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5">
+   669→            {/* Published Status Toggle */}
+   670→            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-4">
+   671→              <div className="flex items-center gap-3">
+   672→                {editIsPublished ? (
+   673→                  <Eye className="h-5 w-5 text-emerald-500" />
+   674→                ) : (
+   675→                  <EyeOff className="h-5 w-5 text-muted-foreground" />
+   676→                )}
+   677→                <div>
+   678→                  <p className="text-sm font-semibold">Status Terbit</p>
+   679→                  <p className="text-[11px] text-muted-foreground">
+   680→                    {editIsPublished
+   681→                      ? 'Resep terlihat oleh semua pengguna'
+   682→                      : 'Resep hanya terlihat oleh penulis'}
+   683→                  </p>
+   684→                </div>
+   685→              </div>
+   686→              <Switch
+   687→                checked={editIsPublished}
+   688→                onCheckedChange={setEditIsPublished}
+   689→              />
+   690→            </div>
+   691→
+   692→            {/* Name */}
+   693→            <div className="space-y-2">
+   694→              <Label htmlFor="edit-recipe-name" className="text-xs font-semibold">
+   695→                Nama Resep <span className="text-red-500">*</span>
+   696→              </Label>
+   697→              <Input
+   698→                id="edit-recipe-name"
+   699→                placeholder="Nama resep"
+   700→                value={editName}
+   701→                onChange={(e) => setEditName(e.target.value)}
+   702→                className="rounded-xl"
+   703→              />
+   704→            </div>
+   705→
+   706→            {/* Description */}
+   707→            <div className="space-y-2">
+   708→              <Label htmlFor="edit-recipe-desc" className="text-xs font-semibold">
+   709→                Deskripsi
+   710→              </Label>
+   711→              <Input
+   712→                id="edit-recipe-desc"
+   713→                placeholder="Deskripsi singkat resep"
+   714→                value={editDescription}
+   715→                onChange={(e) => setEditDescription(e.target.value)}
+   716→                className="rounded-xl"
+   717→              />
+   718→            </div>
+   719→
+   720→            {/* Category */}
+   721→            <div className="space-y-2">
+   722→              <Label htmlFor="edit-recipe-category" className="text-xs font-semibold">
+   723→                Kategori
+   724→              </Label>
+   725→              <Input
+   726→                id="edit-recipe-category"
+   727→                placeholder="Kategori resep"
+   728→                value={editCategory}
+   729→                onChange={(e) => setEditCategory(e.target.value)}
+   730→                className="rounded-xl"
+   731→              />
+   732→            </div>
+   733→
+   734→            {/* Difficulty */}
+   735→            <div className="space-y-2">
+   736→              <Label className="text-xs font-semibold">Tingkat Kesulitan</Label>
+   737→              <div className="grid grid-cols-3 gap-2">
+   738→                {['Mudah', 'Sedang', 'Susah'].map((diff) => (
+   739→                  <motion.button
+   740→                    key={diff}
+   741→                    whileTap={{ scale: 0.96 }}
+   742→                    onClick={() => setEditDifficulty(diff)}
+   743→                    className={`rounded-xl border px-3 py-2.5 text-xs font-medium transition-all ${
+   744→                      editDifficulty === diff
+   745→                        ? diff === 'Mudah'
+   746→                          ? 'border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+   747→                          : diff === 'Sedang'
+   748→                            ? 'border-amber-500 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+   749→                            : 'border-red-500 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+   750→                        : 'border-border/40 bg-card text-muted-foreground hover:border-border'
+   751→                    }`}
+   752→                  >
+   753→                    {diff}
+   754→                  </motion.button>
+   755→                ))}
+   756→              </div>
+   757→            </div>
+   758→
+   759→            {/* Times */}
+   760→            <div className="grid grid-cols-2 gap-3">
+   761→              <div className="space-y-2">
+   762→                <Label htmlFor="edit-prep-time" className="text-xs font-semibold">
+   763→                  Waktu Persiapan (menit)
+   764→                </Label>
+   765→                <Input
+   766→                  id="edit-prep-time"
+   767→                  type="number"
+   768→                  min={0}
+   769→                  value={editPrepTime}
+   770→                  onChange={(e) => setEditPrepTime(Number(e.target.value))}
+   771→                  className="rounded-xl"
+   772→                />
+   773→              </div>
+   774→              <div className="space-y-2">
+   775→                <Label htmlFor="edit-cook-time" className="text-xs font-semibold">
+   776→                  Waktu Masak (menit)
+   777→                </Label>
+   778→                <Input
+   779→                  id="edit-cook-time"
+   780→                  type="number"
+   781→                  min={0}
+   782→                  value={editCookTime}
+   783→                  onChange={(e) => setEditCookTime(Number(e.target.value))}
+   784→                  className="rounded-xl"
+   785→                />
+   786→              </div>
+   787→            </div>
+   788→          </div>
+   789→
+   790→          <div className="bg-muted/30 px-5 py-4">
+   791→            <Button
+   792→              onClick={handleEditSubmit}
+   793→              disabled={!editName.trim() || saving}
+   794→              className="w-full gap-2 rounded-xl bg-amber-500 text-white shadow-sm shadow-amber-500/25 hover:bg-amber-600 disabled:opacity-50"
+   795→            >
+   796→              {saving ? (
+   797→                <Loader2 className="h-4 w-4 animate-spin" />
+   798→              ) : (
+   799→                <CheckCircle2 className="h-4 w-4" />
+   800→              )}
+   801→              Simpan Perubahan
+   802→            </Button>
+   803→          </div>
+   804→        </DialogContent>
+   805→      </Dialog>
+   806→
+   807→      {/* ═══════════════════════════════════════════════════════ */}
+   808→      {/* ── DELETE DIALOG ──────────────────────────────────────── */}
+   809→      {/* ═══════════════════════════════════════════════════════ */}
+   810→      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+   811→        <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">
+   812→          <div className="px-5 pt-5 pb-4">
+   813→            <DialogHeader className="text-left">
+   814→              <DialogTitle className="flex items-center gap-2 text-lg">
+   815→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15">
+   816→                  <Trash2 className="h-4 w-4 text-red-500" />
+   817→                </div>
+   818→                <span className="font-bold text-red-600 dark:text-red-400">
+   819→                  Pindahkan ke Tempat Sampah?
+   820→                </span>
+   821→              </DialogTitle>
+   822→              <DialogDescription className="mt-2 text-sm text-muted-foreground">
+   823→                Resep &quot;{deletingRecipe?.name}&quot; akan dipindahkan ke tempat sampah.
+   824→              </DialogDescription>
+   825→            </DialogHeader>
+   826→          </div>
+   827→          <DialogFooter className="bg-muted/30 px-5 py-4 gap-2 sm:gap-0">
+   828→            <Button
+   829→              variant="ghost"
+   830→              onClick={() => setShowDeleteDialog(false)}
+   831→              className="flex-1 rounded-xl"
+   832→            >
+   833→              Batal
+   834→            </Button>
+   835→            <Button
+   836→              variant="destructive"
+   837→              onClick={handleDeleteConfirm}
+   838→              disabled={deleting}
+   839→              className="flex-1 gap-2 rounded-xl"
+   840→            >
+   841→              {deleting ? (
+   842→                <Loader2 className="h-4 w-4 animate-spin" />
+   843→              ) : (
+   844→                <Trash2 className="h-4 w-4" />
+   845→              )}
+   846→              Hapus
+   847→            </Button>
+   848→          </DialogFooter>
+   849→        </DialogContent>
+   850→      </Dialog>
+   851→    </div>
+   852→  );
+   853→}
+   854→
+   855→export default AdminRecipeManager;
+   856→

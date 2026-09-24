@@ -13,9 +13,7 @@ import { BorderBeam } from '@/components/dapurmind/MagicUI';
 import { CaptchaInput } from '@/components/dapurmind/CaptchaInput';
 import { authenticateUser } from '@/lib/auth';
 
-/* ── Admin credentials ── */
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'dapurmind2024';
+/* ── Admin login goes through the server-side API ── */
 
 /* ── Animation variants ───────────────────────────────────────── */
 
@@ -86,26 +84,43 @@ export default function LoginScreen() {
     // Simulate a brief loading delay for UX polish
     await new Promise((r) => setTimeout(r, 400));
 
-    // Check if admin login
-    const isAdminUser =
-      username.trim() === ADMIN_USERNAME && password === ADMIN_PASSWORD;
-
-    if (isAdminUser) {
-      setIsAdmin(true);
-      setIsLoggedIn(true);
-      updateOnboarding({
-        name: 'Admin',
-        isOnboarded: true,
+    // Try admin login via server-side API
+    try {
+      const adminRes = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim(), password }),
       });
-      // Admin goes directly to admin marketplace hub
-      setScreen('admin-affiliate');
-    } else {
-      // Regular user login - authenticate against stored accounts
+
+      if (adminRes.ok) {
+        setIsAdmin(true);
+        setIsLoggedIn(true);
+        updateOnboarding({
+          name: 'Admin',
+          isOnboarded: true,
+        });
+        setScreen('admin-affiliate');
+      } else {
+        // Admin login failed — try regular user login
+        const user = authenticateUser(username, password);
+        if (user) {
+          setIsAdmin(false);
+          setIsLoggedIn(true);
+          updateOnboarding({
+            name: user.username,
+            isOnboarded: false,
+          });
+          setScreen('onboarding');
+        } else {
+          setError(t('login.error.invalid'));
+        }
+      }
+    } catch {
+      // API unreachable — fall back to regular user auth
       const user = authenticateUser(username, password);
       if (user) {
         setIsAdmin(false);
         setIsLoggedIn(true);
-        // Reset user profile with the correct username (clears any stale admin data)
         updateOnboarding({
           name: user.username,
           isOnboarded: false,

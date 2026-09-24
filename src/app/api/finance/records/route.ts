@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - List finance records
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const type = searchParams.get('type');
     const category = searchParams.get('category');
     const month = searchParams.get('month');
     const limit = parseInt(searchParams.get('limit') || '50', 10);
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
 
     const where: Record<string, unknown> = {
       userId,
@@ -45,6 +40,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: records });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching finance records:', error);
     return NextResponse.json(
       { error: 'Gagal memuat catatan keuangan' },
@@ -56,12 +54,14 @@ export async function GET(request: NextRequest) {
 // POST - Create a finance record
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, type, category, amount, description, date } = body;
+    const { type, category, amount, description, date } = body;
 
-    if (!userId || !type || !category || amount === undefined) {
+    if (!type || !category || amount === undefined) {
       return NextResponse.json(
-        { error: 'User ID, tipe, kategori, dan jumlah wajib diisi' },
+        { error: 'Tipe, kategori, dan jumlah wajib diisi' },
         { status: 400 }
       );
     }
@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: record }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating finance record:', error);
     return NextResponse.json(
       { error: 'Gagal membuat catatan keuangan' },
@@ -104,12 +107,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update a finance record
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, ...fields } = body;
+    const { id, ...fields } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -140,6 +145,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: record });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating finance record:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate catatan keuangan' },
@@ -151,12 +159,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a finance record
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -183,6 +193,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting finance record:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus catatan keuangan' },

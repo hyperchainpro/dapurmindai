@@ -32,6 +32,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import {
   Dialog,
   DialogContent,
@@ -267,9 +268,7 @@ export function AdminRecipeManager() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/admin/recipes', {
-        headers: { 'X-Admin-Key': 'dapurmind2025' },
-      });
+      const res = await adminFetch('/api/admin/recipes');
       if (!res.ok) throw new Error('Gagal memuat data resep');
       const data = await res.json();
       setRecipes(data.recipes || []);
@@ -341,11 +340,10 @@ export function AdminRecipeManager() {
     try {
       setSaving(true);
       setError(null);
-      const res = await fetch('/api/admin/recipes', {
+      const res = await adminFetch('/api/admin/recipes', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': 'dapurmind2025',
         },
         body: JSON.stringify({
           id: editingRecipe.id,
@@ -391,11 +389,10 @@ export function AdminRecipeManager() {
     try {
       setDeleting(true);
       setError(null);
-      const res = await fetch('/api/admin/recipes', {
+      const res = await adminFetch('/api/admin/recipes', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': 'dapurmind2025',
         },
         body: JSON.stringify({ id: deletingRecipe.id }),
       });

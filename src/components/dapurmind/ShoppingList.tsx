@@ -537,7 +537,7 @@ export function ShoppingList() {
             {/* Quick marketplace shortcuts */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground">Pilih Marketplace:</p>
-              {['tokopedia-now', 'shopee-segar', 'sayurbox'].map((mpId) => {
+              {['shopee-grocery', 'shopee-segar', 'sayurbox'].map((mpId) => {
                 const mp = AFFILIATE_MARKETPLACES.find((m) => m.id === mpId);
                 if (!mp) return null;
                 const url = buildBulkAffiliateUrl(mp.id, uncheckedItems.map((i) => i.name));

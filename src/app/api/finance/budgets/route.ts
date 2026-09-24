@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - List budgets
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
 
     const budgets = await db.financeBudget.findMany({
       where: {
@@ -24,6 +18,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: budgets });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching finance budgets:', error);
     return NextResponse.json(
       { error: 'Gagal memuat anggaran keuangan' },
@@ -35,12 +32,14 @@ export async function GET(request: NextRequest) {
 // POST - Create a budget
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, category, limitAmount, period, startDate } = body;
+    const { category, limitAmount, period, startDate } = body;
 
-    if (!userId || !category || limitAmount === undefined || !period) {
+    if (!category || limitAmount === undefined || !period) {
       return NextResponse.json(
-        { error: 'User ID, kategori, batas jumlah, dan periode wajib diisi' },
+        { error: 'Kategori, batas jumlah, dan periode wajib diisi' },
         { status: 400 }
       );
     }
@@ -72,6 +71,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: budget }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating finance budget:', error);
     return NextResponse.json(
       { error: 'Gagal membuat anggaran keuangan' },
@@ -83,12 +85,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update a budget
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, ...fields } = body;
+    const { id, ...fields } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -119,6 +123,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: budget });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating finance budget:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate anggaran keuangan' },
@@ -130,12 +137,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a budget
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -162,6 +171,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting finance budget:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus anggaran keuangan' },

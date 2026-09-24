@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-
-/* ── Admin key guard ──────────────────────────────────── */
-function isAdmin(request: NextRequest): boolean {
-  return request.headers.get('X-Admin-Key') === 'dapurmind2025';
-}
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ── GET /api/admin/trash ─────────────────────────────── */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || '';
 
@@ -94,6 +88,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ items, total: items.length });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching trash:', error);
     return NextResponse.json({ error: 'Gagal memuat trash' }, { status: 500 });
   }
@@ -101,11 +98,9 @@ export async function GET(request: NextRequest) {
 
 /* ── DELETE /api/admin/trash — Permanent delete ───────── */
 export async function DELETE(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const id = searchParams.get('id');
@@ -137,6 +132,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Item permanently deleted' });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error permanently deleting:', error);
     return NextResponse.json({ error: 'Gagal menghapus permanen' }, { status: 500 });
   }

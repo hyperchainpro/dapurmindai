@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-
-/* ── Admin key guard ──────────────────────────────────── */
-function isAdmin(request: NextRequest): boolean {
-  return request.headers.get('X-Admin-Key') === 'dapurmind2025';
-}
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ── GET /api/admin/finance ──────────────────────────── */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId') || '';
     const type = searchParams.get('type') || '';
@@ -55,6 +49,9 @@ export async function GET(request: NextRequest) {
       })),
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching finance records:', error);
     return NextResponse.json({ error: 'Gagal memuat data finansial' }, { status: 500 });
   }

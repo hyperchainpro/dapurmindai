@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const period = searchParams.get('period') || '30d';
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID wajib diisi' }, { status: 400 });
-    }
 
     // Calculate date range based on period
     const now = new Date();
@@ -116,6 +114,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching finance report:', error);
     return NextResponse.json({ error: 'Gagal memuat laporan' }, { status: 500 });
   }

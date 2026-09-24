@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - List goals
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
 
     const goals = await db.financeGoal.findMany({
       where: {
@@ -24,6 +18,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: goals });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching finance goals:', error);
     return NextResponse.json(
       { error: 'Gagal memuat tujuan keuangan' },
@@ -35,12 +32,14 @@ export async function GET(request: NextRequest) {
 // POST - Create a goal
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, title, targetAmount, savedAmount, deadline, icon } = body;
+    const { title, targetAmount, savedAmount, deadline, icon } = body;
 
-    if (!userId || !title || targetAmount === undefined) {
+    if (!title || targetAmount === undefined) {
       return NextResponse.json(
-        { error: 'User ID, judul, dan jumlah target wajib diisi' },
+        { error: 'Judul dan jumlah target wajib diisi' },
         { status: 400 }
       );
     }
@@ -65,6 +64,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: goal }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating finance goal:', error);
     return NextResponse.json(
       { error: 'Gagal membuat tujuan keuangan' },
@@ -76,12 +78,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update a goal
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, ...fields } = body;
+    const { id, ...fields } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -112,6 +116,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: goal });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating finance goal:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate tujuan keuangan' },
@@ -123,12 +130,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a goal
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID dan User ID wajib diisi' },
+        { error: 'ID wajib diisi' },
         { status: 400 }
       );
     }
@@ -155,6 +164,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting finance goal:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus tujuan keuangan' },

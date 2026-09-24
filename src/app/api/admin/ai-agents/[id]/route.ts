@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-
-/* ── Admin key guard ──────────────────────────────────── */
-function isAdmin(request: NextRequest): boolean {
-  return request.headers.get('X-Admin-Key') === 'dapurmind2025';
-}
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ── Helper: serialize agent without sensitive fields ──── */
 function serializeAgent(a: {
@@ -56,11 +52,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const agent = await db.aiAgent.findUnique({
@@ -73,6 +67,9 @@ export async function GET(
 
     return NextResponse.json({ agent: serializeAgent(agent) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching AI agent:', error);
     return NextResponse.json({ error: 'Gagal memuat AI agent' }, { status: 500 });
   }
@@ -83,11 +80,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
     const body = await request.json();
 
@@ -137,6 +132,9 @@ export async function PUT(
 
     return NextResponse.json({ agent: serializeAgent(agent) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating AI agent:', error);
     return NextResponse.json({ error: 'Gagal mengupdate AI agent' }, { status: 500 });
   }
@@ -147,11 +145,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
     const body = await request.json();
     const { isDefault, isActive } = body;
@@ -191,6 +187,9 @@ export async function PATCH(
 
     return NextResponse.json({ agent: serializeAgent(agent) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error patching AI agent:', error);
     return NextResponse.json({ error: 'Gagal mengupdate AI agent' }, { status: 500 });
   }
@@ -201,11 +200,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const agent = await db.aiAgent.update({
@@ -218,6 +215,9 @@ export async function DELETE(
 
     return NextResponse.json({ agent: serializeAgent(agent) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error soft-deleting AI agent:', error);
     return NextResponse.json({ error: 'Gagal menghapus AI agent' }, { status: 500 });
   }

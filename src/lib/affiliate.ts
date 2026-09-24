@@ -17,18 +17,18 @@ export interface AffiliateMarketplace {
 
 export const AFFILIATE_MARKETPLACES: AffiliateMarketplace[] = [
   {
-    id: 'tokopedia-now',
-    name: 'Tokopedia Now',
-    tagline: 'Belanja instan, sampai hari ini',
-    logo: '🛒',
-    color: 'from-green-500 to-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-500/10',
-    textColor: 'text-green-600 dark:text-green-400',
-    borderColor: 'border-green-200 dark:border-green-800/40',
-    searchBaseUrl: 'https://www.tokopedia.com/search?st=product&q={query}&source=universe&srp_component_id=02.01.00.00&srp_page_id=&srp_page_title=&navsource=',
+    id: 'shopee-grocery',
+    name: 'Shopee Food & Grocery',
+    tagline: 'Belanja bahan makanan & kebutuhan rumah tangga',
+    logo: '🧡',
+    color: 'from-orange-600 to-red-500',
+    bgColor: 'bg-orange-50 dark:bg-orange-500/10',
+    textColor: 'text-orange-700 dark:text-orange-400',
+    borderColor: 'border-orange-300 dark:border-orange-800/40',
+    searchBaseUrl: 'https://shopee.co.id/search?keyword={query}',
     category: 'grocery',
     rating: 5,
-    features: ['Pengiriman 2 jam', 'Promo harian', 'Cashback 10%'],
+    features: ['Gratis Ongkir XTRA', 'Cashback Harian', 'Flash Sale'],
   },
   {
     id: 'shopee-segar',
@@ -121,17 +121,17 @@ export function getRecommendedMarketplaces(category: string): AffiliateMarketpla
   // Fresh produce → prioritize Sayurbox, Shopee Segar
   if (['Sayuran', 'Susu & Telur'].includes(category)) {
     return AFFILIATE_MARKETPLACES.filter((m) =>
-      ['sayurbox', 'shopee-segar', 'tokopedia-now'].includes(m.id)
+      ['sayurbox', 'shopee-segar', 'shopee-grocery'].includes(m.id)
     );
   }
-  // Meat/Protein → prioritize Tokopedia Now, LotteMart
+  // Meat/Protein → prioritize Shopee Food & Grocery, LotteMart
   if (['Daging'].includes(category)) {
     return AFFILIATE_MARKETPLACES.filter((m) =>
-      ['tokopedia-now', 'lottemart', 'blibli-mart'].includes(m.id)
+      ['shopee-grocery', 'lottemart', 'blibli-mart'].includes(m.id)
     );
   }
   // Spices & Staples → prioritize Klik Indomaret, Blibli Mart
   return AFFILIATE_MARKETPLACES.filter((m) =>
-    ['klikindomaret', 'blibli-mart', 'tokopedia-now'].includes(m.id)
+    ['klikindomaret', 'blibli-mart', 'shopee-grocery'].includes(m.id)
   );
 }

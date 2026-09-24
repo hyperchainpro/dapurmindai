@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    GET/PUT — User notifications
@@ -8,18 +9,12 @@ import { db } from '@/lib/db';
 // GET - List notifications for user
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
 
     const where: Record<string, unknown> = {
       userId,
@@ -48,6 +43,9 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Notifications] GET error:', error);
     return NextResponse.json(
       { error: 'Gagal memuat notifikasi' },
@@ -59,18 +57,13 @@ export async function GET(request: NextRequest) {
 // PUT - Mark notification(s) as read
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { ids, markAll, userId } = body;
+    const { ids, markAll } = body;
 
     if (markAll) {
       // Mark all notifications as read for user
-      if (!userId) {
-        return NextResponse.json(
-          { error: 'User ID wajib diisi untuk markAll' },
-          { status: 400 }
-        );
-      }
-
       const result = await db.notification.updateMany({
         where: { userId, isRead: false, deletedAt: null },
         data: { isRead: true },
@@ -88,12 +81,15 @@ export async function PUT(request: NextRequest) {
     }
 
     const result = await db.notification.updateMany({
-      where: { id: { in: ids }, isRead: false },
+      where: { id: { in: ids }, userId, isRead: false },
       data: { isRead: true },
     });
 
     return NextResponse.json({ success: true, data: { updated: result.count } });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Notifications] PUT error:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate notifikasi' },

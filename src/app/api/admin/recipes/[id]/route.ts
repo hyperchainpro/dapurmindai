@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-
-/* ── Admin key guard ──────────────────────────────────── */
-function isAdmin(request: NextRequest): boolean {
-  return request.headers.get('X-Admin-Key') === 'dapurmind2025';
-}
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ── Helper: serialize recipe ────────────────────────── */
 function serializeRecipe(r: {
@@ -60,11 +56,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const recipe = await db.creatorRecipe.findUnique({
@@ -80,6 +74,9 @@ export async function GET(
 
     return NextResponse.json({ recipe: serializeRecipe(recipe) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching recipe:', error);
     return NextResponse.json({ error: 'Gagal memuat resep' }, { status: 500 });
   }
@@ -90,11 +87,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
     const body = await request.json();
 
@@ -125,6 +120,9 @@ export async function PUT(
 
     return NextResponse.json({ recipe: serializeRecipe(recipe) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating recipe:', error);
     return NextResponse.json({ error: 'Gagal mengupdate resep' }, { status: 500 });
   }
@@ -135,11 +133,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const recipe = await db.creatorRecipe.update({
@@ -155,6 +151,9 @@ export async function DELETE(
 
     return NextResponse.json({ recipe: serializeRecipe(recipe) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error soft-deleting recipe:', error);
     return NextResponse.json({ error: 'Gagal menghapus resep' }, { status: 500 });
   }
@@ -165,11 +164,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!isAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    await requireAdmin(request);
+
     const { id } = await params;
 
     const recipe = await db.creatorRecipe.update({
@@ -185,6 +182,9 @@ export async function PATCH(
 
     return NextResponse.json({ recipe: serializeRecipe(recipe) });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error restoring recipe:', error);
     return NextResponse.json({ error: 'Gagal memulihkan resep' }, { status: 500 });
   }

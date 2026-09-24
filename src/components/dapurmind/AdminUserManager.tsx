@@ -31,6 +31,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 import {
   Dialog,
   DialogContent,
@@ -243,9 +244,7 @@ export function AdminUserManager() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/admin/users', {
-        headers: { 'X-Admin-Key': 'dapurmind2025' },
-      });
+      const res = await adminFetch('/api/admin/users');
       if (!res.ok) throw new Error('Gagal memuat data user');
       const data = await res.json();
       setUsers(data.users || []);
@@ -305,11 +304,10 @@ export function AdminUserManager() {
     try {
       setSaving(true);
       setError(null);
-      const res = await fetch('/api/admin/users', {
+      const res = await adminFetch('/api/admin/users', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': 'dapurmind2025',
         },
         body: JSON.stringify({
           id: editingUser.id,
@@ -343,11 +341,10 @@ export function AdminUserManager() {
     try {
       setDeleting(true);
       setError(null);
-      const res = await fetch('/api/admin/users', {
+      const res = await adminFetch('/api/admin/users', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': 'dapurmind2025',
         },
         body: JSON.stringify({ id: deletingUser.id }),
       });

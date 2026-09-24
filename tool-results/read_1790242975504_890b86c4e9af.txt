@@ -1,0 +1,703 @@
+     1→     1→'use client';
+     2→     2→
+     3→     3→import React, { useState, useEffect, useMemo, useCallback } from 'react';
+     4→     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→     5→import {
+     6→     6→  ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet, Trash2, Edit3,
+     7→     7→  Utensils, Car, ShoppingBag, Receipt, Heart, Gamepad2, GraduationCap,
+     8→     8→  MoreHorizontal, PiggyBank, CalendarDays, TrendingUp, Target, CircleDollarSign,
+     9→     9→  Bot, Send, Sparkles,
+    10→    10→} from 'lucide-react';
+    11→    11→import { useAppStore } from '@/hooks/useAppState';
+    12→    12→import { useTranslation } from '@/hooks/useTranslation';
+    13→    13→import type { FinanceRecord, FinanceBudget, FinanceGoal } from '@/types';
+    14→    14→import { Button } from '@/components/ui/button';
+    15→    15→import { Input } from '@/components/ui/input';
+    16→    16→import { Badge } from '@/components/ui/badge';
+    17→    17→import { Skeleton } from '@/components/ui/skeleton';
+    18→    18→import { Switch } from '@/components/ui/switch';
+    19→    19→import { Progress } from '@/components/ui/progress';
+    20→    20→import {
+    21→    21→  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+    22→    22→} from '@/components/ui/dialog';
+    23→    23→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    24→    24→import { FinanceReportTab } from './FinanceReportTab';
+    25→    25→import { FinanceRecurringTab } from './FinanceRecurringTab';
+    26→    26→
+    27→    27→/* ── Helpers & Constants ────────────────────────────────────────── */
+    28→    28→
+    29→    29→const formatRupiah = (n: number) =>
+    30→    30→  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+    31→    31→
+    32→    32→const EXPENSE_CATS = [
+    33→    33→  { v: 'Makanan', icon: Utensils, c: 'text-orange-500' },
+    34→    34→  { v: 'Transportasi', icon: Car, c: 'text-blue-500' },
+    35→    35→  { v: 'Belanja', icon: ShoppingBag, c: 'text-purple-500' },
+    36→    36→  { v: 'Tagihan', icon: Receipt, c: 'text-rose-500' },
+    37→    37→  { v: 'Kesehatan', icon: Heart, c: 'text-pink-500' },
+    38→    38→  { v: 'Hiburan', icon: Gamepad2, c: 'text-indigo-500' },
+    39→    39→  { v: 'Pendidikan', icon: GraduationCap, c: 'text-teal-500' },
+    40→    40→  { v: 'Lainnya', icon: MoreHorizontal, c: 'text-gray-500' },
+    41→    41→] as const;
+    42→    42→
+    43→    43→const INCOME_CATS = [
+    44→    44→  { v: 'Gaji', icon: CircleDollarSign, c: 'text-emerald-500' },
+    45→    45→  { v: 'Freelance', icon: TrendingUp, c: 'text-blue-500' },
+    46→    46→  { v: 'Investasi', icon: PiggyBank, c: 'text-purple-500' },
+    47→    47→  { v: 'Lainnya', icon: MoreHorizontal, c: 'text-gray-500' },
+    48→    48→] as const;
+    49→    49→
+    50→    50→const ALL_CATS = [...EXPENSE_CATS, ...INCOME_CATS];
+    51→    51→const GOAL_ICONS = ['🏠', '🚗', '🎓', '✈️', '📱', '💍', '💻', '🎮'];
+    52→    52→
+    53→    53→const getCatMeta = (v: string) => ALL_CATS.find((c) => c.v === v) ?? EXPENSE_CATS[7];
+    54→    54→
+    55→    55→const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05 } } };
+    56→    56→const fadeUp = {
+    57→    57→  hidden: { opacity: 0, y: 14, filter: 'blur(3px)' },
+    58→    58→  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } },
+    59→    59→};
+    60→    60→
+    61→    61→/* ── Main Component ──────────────────────────────────────────────── */
+    62→    62→
+    63→    63→export function FinancialPlannerPage() {
+    64→    64→  const { t } = useTranslation();
+    65→    65→  const authUser = useAppStore((s) => s.authUser);
+    66→    66→  const goBack = useAppStore((s) => s.goBack);
+    67→    67→  const records = useAppStore((s) => s.financeRecords);
+    68→    68→  const budgets = useAppStore((s) => s.financeBudgets);
+    69→    69→  const goals = useAppStore((s) => s.financeGoals);
+    70→    70→  const loading = useAppStore((s) => s.isFinanceLoading);
+    71→    71→  const setRecords = useAppStore((s) => s.setFinanceRecords);
+    72→    72→  const setBudgets = useAppStore((s) => s.setFinanceBudgets);
+    73→    73→  const setGoals = useAppStore((s) => s.setFinanceGoals);
+    74→    74→  const addRecord = useAppStore((s) => s.addFinanceRecord);
+    75→    75→  const updateRecord = useAppStore((s) => s.updateFinanceRecord);
+    76→    76→  const removeRecord = useAppStore((s) => s.removeFinanceRecord);
+    77→    77→  const addBudget = useAppStore((s) => s.addFinanceBudget);
+    78→    78→  const updateBudget = useAppStore((s) => s.updateFinanceBudget);
+    79→    79→  const removeBudget = useAppStore((s) => s.removeFinanceBudget);
+    80→    80→  const addGoal = useAppStore((s) => s.addFinanceGoal);
+    81→    81→  const updateGoal = useAppStore((s) => s.updateFinanceGoal);
+    82→    82→  const removeGoal = useAppStore((s) => s.removeFinanceGoal);
+    83→    83→  const setLoading = useAppStore((s) => s.setFinanceLoading);
+    84→    84→  const userId = authUser?.id;
+    85→    85→
+    86→    86→  const [activeTab, setActiveTab] = useState<'records' | 'budgets' | 'goals' | 'report' | 'recurring'>('records');
+    87→    87→
+    88→    88→  // AI Advisor state
+    89→    89→  const [showAiDialog, setShowAiDialog] = useState(false);
+    90→    90→  const [aiQuestion, setAiQuestion] = useState('');
+    91→    91→  const [aiResponse, setAiResponse] = useState('');
+    92→    92→  const [aiLoading, setAiLoading] = useState(false);
+    93→    93→  const [aiHistory, setAiHistory] = useState<{ role: 'user' | 'ai'; content: string }[]>([]);
+    94→    94→
+    95→    95→  // Dialog open states
+    96→    96→  const [dlgRecord, setDlgRecord] = useState(false);
+    97→    97→  const [dlgBudget, setDlgBudget] = useState(false);
+    98→    98→  const [dlgGoal, setDlgGoal] = useState(false);
+    99→    99→  const [dlgSavings, setDlgSavings] = useState<FinanceGoal | null>(null);
+   100→   100→  const [dlgDelete, setDlgDelete] = useState<{ type: string; id: string } | null>(null);
+   101→   101→
+   102→   102→  // Record form
+   103→   103→  const [recType, setRecType] = useState<'income' | 'expense'>('expense');
+   104→   104→  const [recAmt, setRecAmt] = useState('');
+   105→   105→  const [recCat, setRecCat] = useState('');
+   106→   106→  const [recDesc, setRecDesc] = useState('');
+   107→   107→  const [recDate, setRecDate] = useState(() => new Date().toISOString().split('T')[0]);
+   108→   108→  const [editRecId, setEditRecId] = useState<string | null>(null);
+   109→   109→
+   110→   110→  // Budget form
+   111→   111→  const [budCat, setBudCat] = useState('');
+   112→   112→  const [budLimit, setBudLimit] = useState('');
+   113→   113→  const [budPeriod, setBudPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
+   114→   114→  const [editBudId, setEditBudId] = useState<string | null>(null);
+   115→   115→
+   116→   116→  // Goal form
+   117→   117→  const [goTitle, setGoTitle] = useState('');
+   118→   118→  const [goTarget, setGoTarget] = useState('');
+   119→   119→  const [goSaved, setGoSaved] = useState('');
+   120→   120→  const [goDeadline, setGoDeadline] = useState('');
+   121→   121→  const [goIcon, setGoIcon] = useState('🏠');
+   122→   122→  const [editGoId, setEditGoId] = useState<string | null>(null);
+   123→   123→
+   124→   124→  // Savings input
+   125→   125→  const [savAmt, setSavAmt] = useState('');
+   126→   126→
+   127→   127→  /* ── Fetch data ──────────────────────────────────── */
+   128→   128→  useEffect(() => {
+   129→   129→    if (!userId) return;
+   130→   130→    (async () => {
+   131→   131→      setLoading(true);
+   132→   132→      try {
+   133→   133→        const [r, b, g] = await Promise.all([
+   134→   134→          fetch(`/api/finance/records?userId=${userId}`),
+   135→   135→          fetch(`/api/finance/budgets?userId=${userId}`),
+   136→   136→          fetch(`/api/finance/goals?userId=${userId}`),
+   137→   137→        ]);
+   138→   138→        if (r.ok) { const json = await r.json(); setRecords(json.data ?? json); }
+   139→   139→        if (b.ok) { const json = await b.json(); setBudgets(json.data ?? json); }
+   140→   140→        if (g.ok) { const json = await g.json(); setGoals(json.data ?? json); }
+   141→   141→      } catch (e) { console.error(e); }
+   142→   142→      finally { setLoading(false); }
+   143→   143→    })();
+   144→   144→  }, [userId, setRecords, setBudgets, setGoals, setLoading]);
+   145→   145→
+   146→   146→  /* ── Monthly stats ───────────────────────────────── */
+   147→   147→  const now = new Date();
+   148→   148→  const mon = now.getMonth(), yr = now.getFullYear();
+   149→   149→  const monthlyIn = useMemo(() => records.filter((r) => { const d = new Date(r.date); return r.type === 'income' && d.getMonth() === mon && d.getFullYear() === yr; }).reduce((s, r) => s + r.amount, 0), [records, mon, yr]);
+   150→   150→  const monthlyOut = useMemo(() => records.filter((r) => { const d = new Date(r.date); return r.type === 'expense' && d.getMonth() === mon && d.getFullYear() === yr; }).reduce((s, r) => s + r.amount, 0), [records, mon, yr]);
+   151→   151→  const balance = monthlyIn - monthlyOut;
+   152→   152→
+   153→   153→  /* ── Grouped records ──────────────────────────────── */
+   154→   154→  const grouped = useMemo(() => {
+   155→   155→    const m = new Map<string, FinanceRecord[]>();
+   156→   156→    records.slice().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).forEach((r) => {
+   157→   157→      const k = r.date; if (!m.has(k)) m.set(k, []); m.get(k)!.push(r);
+   158→   158→    });
+   159→   159→    return Array.from(m.entries());
+   160→   160→  }, [records]);
+   161→   161→
+   162→   162→  /* ── Budgets with computed spent ─────────────────── */
+   163→   163→  const budgetsWithSpent = useMemo(() => budgets.map((b) => ({
+   164→   164→    ...b,
+   165→   165→    spent: records.filter((r) => r.type === 'expense' && r.category === b.category).reduce((s, r) => s + r.amount, 0),
+   166→   166→  })), [budgets, records]);
+   167→   167→
+   168→   168→  /* ── Form helpers ────────────────────────────────── */
+   169→   169→  const resetRec = () => { setEditRecId(null); setRecType('expense'); setRecAmt(''); setRecCat(''); setRecDesc(''); setRecDate(new Date().toISOString().split('T')[0]); };
+   170→   170→  const resetBud = () => { setEditBudId(null); setBudCat(''); setBudLimit(''); setBudPeriod('monthly'); };
+   171→   171→  const resetGo = () => { setEditGoId(null); setGoTitle(''); setGoTarget(''); setGoSaved(''); setGoDeadline(''); setGoIcon('🏠'); };
+   172→   172→
+   173→   173→  const openEditRec = (r: FinanceRecord) => { setEditRecId(r.id); setRecType(r.type); setRecAmt(String(r.amount)); setRecCat(r.category); setRecDesc(r.description); setRecDate(r.date); setDlgRecord(true); };
+   174→   174→  const openEditBud = (b: FinanceBudget) => { setEditBudId(b.id); setBudCat(b.category); setBudLimit(String(b.limitAmount)); setBudPeriod(b.period); setDlgBudget(true); };
+   175→   175→  const openEditGo = (g: FinanceGoal) => { setEditGoId(g.id); setGoTitle(g.title); setGoTarget(String(g.targetAmount)); setGoSaved(String(g.savedAmount)); setGoDeadline(g.deadline); setGoIcon(g.icon); setDlgGoal(true); };
+   176→   176→
+   177→   177→  /* ── Save handlers ───────────────────────────────── */
+   178→   178→  const saveRec = async () => {
+   179→   179→    if (!userId || !recAmt || !recCat) return;
+   180→   180→    try {
+   181→   181→      const body = { userId, type: recType, category: recCat, amount: Number(recAmt), description: recDesc, date: recDate };
+   182→   182→      const res = await fetch('/api/finance/records', { method: editRecId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editRecId ? { id: editRecId, ...body } : body) });
+   183→   183→      if (res.ok) { const json = await res.json(); const record = json.data ?? json; editRecId ? updateRecord(editRecId, record) : addRecord(record); }
+   184→   184→      setDlgRecord(false); resetRec();
+   185→   185→    } catch (e) { console.error(e); }
+   186→   186→  };
+   187→   187→
+   188→   188→  const saveBud = async () => {
+   189→   189→    if (!userId || !budCat || !budLimit) return;
+   190→   190→    try {
+   191→   191→      const body = { userId, category: budCat, limitAmount: Number(budLimit), period: budPeriod };
+   192→   192→      const res = await fetch('/api/finance/budgets', { method: editBudId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editBudId ? { id: editBudId, ...body } : body) });
+   193→   193→      if (res.ok) { const json = await res.json(); const budget = json.data ?? json; editBudId ? updateBudget(editBudId, budget) : addBudget(budget); }
+   194→   194→      setDlgBudget(false); resetBud();
+   195→   195→    } catch (e) { console.error(e); }
+   196→   196→  };
+   197→   197→
+   198→   198→  const saveGoal = async () => {
+   199→   199→    if (!userId || !goTitle || !goTarget) return;
+   200→   200→    try {
+   201→   201→      const body = { userId, title: goTitle, targetAmount: Number(goTarget), savedAmount: Number(goSaved) || 0, deadline: goDeadline, icon: goIcon };
+   202→   202→      const res = await fetch('/api/finance/goals', { method: editGoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editGoId ? { id: editGoId, ...body } : body) });
+   203→   203→      if (res.ok) { const json = await res.json(); const goal = json.data ?? json; editGoId ? updateGoal(editGoId, goal) : addGoal(goal); }
+   204→   204→      setDlgGoal(false); resetGo();
+   205→   205→    } catch (e) { console.error(e); }
+   206→   206→  };
+   207→   207→
+   208→   208→  const addSavings = async () => {
+   209→   209→    if (!dlgSavings || !userId || !savAmt) return;
+   210→   210→    const newSaved = dlgSavings.savedAmount + Number(savAmt);
+   211→   211→    try {
+   212→   212→      const res = await fetch('/api/finance/goals', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: dlgSavings.id, userId, savedAmount: newSaved }) });
+   213→   213→      if (res.ok) updateGoal(dlgSavings.id, { savedAmount: newSaved });
+   214→   214→      setDlgSavings(null); setSavAmt('');
+   215→   215→    } catch (e) { console.error(e); }
+   216→   216→  };
+   217→   217→
+   218→   218→  const handleDelete = async () => {
+   219→   219→    if (!dlgDelete || !userId) return;
+   220→   220→    const ep = dlgDelete.type === 'record' ? 'records' : dlgDelete.type === 'budget' ? 'budgets' : 'goals';
+   221→   221→    try {
+   222→   222→      const res = await fetch(`/api/finance/${ep}`, {
+   223→   223→        method: 'DELETE',
+   224→   224→        headers: { 'Content-Type': 'application/json' },
+   225→   225→        body: JSON.stringify({ id: dlgDelete.id, userId }),
+   226→   226→      });
+   227→   227→      if (res.ok) {
+   228→   228→        if (dlgDelete.type === 'record') removeRecord(dlgDelete.id);
+   229→   229→        else if (dlgDelete.type === 'budget') removeBudget(dlgDelete.id);
+   230→   230→        else removeGoal(dlgDelete.id);
+   231→   231→      }
+   232→   232→    } catch (e) { console.error(e); }
+   233→   233→    setDlgDelete(null);
+   234→   234→  };
+   235→   235→
+   236→   236→  /* ── AI Advisor ─────────────────────────────────── */
+   237→   237→  const handleAiSend = async () => {
+   238→   238→    if (!aiQuestion.trim() || !userId || aiLoading) return;
+   239→   239→    const q = aiQuestion.trim();
+   240→   240→    setAiQuestion('');
+   241→   241→    setAiHistory((prev) => [...prev, { role: 'user', content: q }]);
+   242→   242→    setAiLoading(true);
+   243→   243→    try {
+   244→   244→      const res = await fetch('/api/finance/ai-advice', {
+   245→   245→        method: 'POST',
+   246→   246→        headers: { 'Content-Type': 'application/json' },
+   247→   247→        body: JSON.stringify({ userId, question: q }),
+   248→   248→      });
+   249→   249→      if (res.ok) {
+   250→   250→        const json = await res.json();
+   251→   251→        const answer = json.data?.response ?? json.response ?? json.data?.answer ?? 'Maaf, saya tidak bisa menjawab saat ini.';
+   252→   252→        setAiHistory((prev) => [...prev, { role: 'ai', content: answer }]);
+   253→   253→      } else {
+   254→   254→        setAiHistory((prev) => [...prev, { role: 'ai', content: 'Maaf, terjadi kesalahan. Coba lagi nanti.' }]);
+   255→   255→      }
+   256→   256→    } catch {
+   257→   257→      setAiHistory((prev) => [...prev, { role: 'ai', content: 'Maaf, terjadi kesalahan koneksi. Coba lagi nanti.' }]);
+   258→   258→    } finally {
+   259→   259→      setAiLoading(false);
+   260→   260→    }
+   261→   261→  };
+   262→   262→
+   263→   263→  /* ── Render ───────────────────────────────────────── */
+   264→   264→  return (
+   265→   265→    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-emerald-50/30 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20">
+   266→   266→      <header className="sticky top-0 z-20 glass">
+   267→   267→        <div className="flex items-center gap-3 px-4 py-3">
+   268→   268→          <motion.button whileTap={{ scale: 0.9 }} onClick={goBack} className="flex h-9 w-9 items-center justify-center rounded-full nm-raised hover:bg-accent">
+   269→   269→            <ArrowLeft className="h-4 w-4" />
+   270→   270→          </motion.button>
+   271→   271→          <div className="flex items-center gap-2"><Wallet className="h-5 w-5 text-emerald-500" /><h1 className="text-lg font-bold tracking-tight">{t('finance.title')}</h1></div>
+   272→   272→        </div>
+   273→   273→      </header>
+   274→   274→
+   275→   275→      <div className="flex flex-col pb-24">
+   276→   276→        {/* ── Overview ──────────────────────────────── */}
+   277→   277→        {loading ? (
+   278→   278→          <div className="mx-4 mt-4 space-y-3"><Skeleton className="h-24 w-full rounded-xl" /><div className="flex gap-3"><Skeleton className="h-16 flex-1 rounded-xl" /><Skeleton className="h-16 flex-1 rounded-xl" /></div></div>
+   279→   279→        ) : (
+   280→   280→          <motion.section variants={stagger} initial="hidden" animate="visible" className="px-4 mt-4">
+   281→   281→            <motion.div variants={fadeUp} className="rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-4">
+   282→   282→              <p className="text-xs text-muted-foreground mb-1">{t('finance.overview')}</p>
+   283→   283→              <p className={`text-2xl font-bold ${balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{formatRupiah(balance)}</p>
+   284→   284→            </motion.div>
+   285→   285→            <div className="grid grid-cols-2 gap-3 mt-3">
+   286→   286→              {[
+   287→   287→                { label: t('finance.income'), val: monthlyIn, icon: ArrowUpRight, bg: 'bg-emerald-50 dark:bg-emerald-500/10', cls: 'text-emerald-600 dark:text-emerald-400' },
+   288→   288→                { label: t('finance.expense'), val: monthlyOut, icon: ArrowDownRight, bg: 'bg-rose-50 dark:bg-rose-500/10', cls: 'text-rose-600 dark:text-rose-400' },
+   289→   289→              ].map((s) => (
+   290→   290→                <motion.div key={s.label} variants={fadeUp} className="rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-3 flex items-center gap-3">
+   291→   291→                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${s.bg}`}><s.icon className={`h-4 w-4 ${s.cls}`} /></div>
+   292→   292→                  <div><p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p><p className={`text-sm font-bold ${s.cls}`}>{formatRupiah(s.val)}</p></div>
+   293→   293→                </motion.div>
+   294→   294→              ))}
+   295→   295→            </div>
+   296→   296→          </motion.section>
+   297→   297→        )}
+   298→   298→
+   299→   299→        {/* ── Tab Bar ────────────────────────────────── */}
+   300→   300→        <div className="mx-4 mt-4">
+   301→   301→          <div className="flex rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-1">
+   302→   302→            {(['records', 'budgets', 'goals', 'report', 'recurring'] as const).map((tab) => (
+   303→   303→              <button key={tab} onClick={() => setActiveTab(tab as any)}
+   304→   304→                className={`flex-1 rounded-lg py-2 text-[10px] sm:text-xs font-semibold transition-all ${activeTab === tab ? 'nm-raised-sm bg-emerald-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}>
+   305→   305→                {tab === 'records' ? t('finance.records') : tab === 'budgets' ? t('finance.budgets') : tab === 'goals' ? t('finance.goals') : tab === 'report' ? 'Laporan' : 'Berulang'}
+   306→   306→              </button>
+   307→   307→            ))}
+   308→   308→          </div>
+   309→   309→        </div>
+   310→   310→
+   311→   311→        {/* ── Tab Content ───────────────────────────── */}
+   312→   312→        <AnimatePresence mode="wait">
+   313→   313→          <motion.div key={activeTab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="px-4 mt-4">
+   314→   314→            {activeTab === 'records' && <RecordsSection grouped={grouped} loading={loading} onAdd={() => { resetRec(); setDlgRecord(true); }} onEdit={openEditRec} onDelete={(id) => setDlgDelete({ type: 'record', id })} />}
+   315→   315→            {activeTab === 'budgets' && <BudgetsSection budgets={budgetsWithSpent} loading={loading} onAdd={() => { resetBud(); setDlgBudget(true); }} onEdit={openEditBud} onDelete={(id) => setDlgDelete({ type: 'budget', id })} />}
+   316→   316→            {activeTab === 'goals' && <GoalsSection goals={goals} loading={loading} onAdd={() => { resetGo(); setDlgGoal(true); }} onEdit={openEditGo} onDelete={(id) => setDlgDelete({ type: 'goal', id })} onAddSavings={(g) => { setDlgSavings(g); setSavAmt(''); }} />}
+   317→   317→            {activeTab === 'report' && userId && <FinanceReportTab userId={userId} />}
+   318→   318→            {activeTab === 'recurring' && userId && <FinanceRecurringTab userId={userId} />}
+   319→   319→          </motion.div>
+   320→   320→        </AnimatePresence>
+   321→   321→      </div>
+   322→   322→
+   323→   323→      {/* ── Dialogs ──────────────────────────────────── */}
+   324→   324→      <RecordFormDialog open={dlgRecord} onClose={() => { setDlgRecord(false); resetRec(); }} recType={recType} setRecType={setRecType} recAmt={recAmt} setRecAmt={setRecAmt} recCat={recCat} setRecCat={setRecCat} recDesc={recDesc} setRecDesc={setRecDesc} recDate={recDate} setRecDate={setRecDate} isEdit={!!editRecId} onSave={saveRec} />
+   325→   325→      <BudgetFormDialog open={dlgBudget} onClose={() => { setDlgBudget(false); resetBud(); }} cat={budCat} setCat={setBudCat} limit={budLimit} setLimit={setBudLimit} period={budPeriod} setPeriod={setBudPeriod} isEdit={!!editBudId} onSave={saveBud} />
+   326→   326→      <GoalFormDialog open={dlgGoal} onClose={() => { setDlgGoal(false); resetGo(); }} title={goTitle} setTitle={setGoTitle} target={goTarget} setTarget={setGoTarget} saved={goSaved} setSaved={setGoSaved} deadline={goDeadline} setDeadline={setGoDeadline} icon={goIcon} setIcon={setGoIcon} isEdit={!!editGoId} onSave={saveGoal} />
+   327→   327→
+   328→   328→      <Dialog open={!!dlgSavings} onOpenChange={() => { setDlgSavings(null); setSavAmt(''); }}>
+   329→   329→        <DialogContent className="rounded-2xl sm:max-w-sm">
+   330→   330→          <DialogHeader>
+   331→   331→            <DialogTitle className="flex items-center gap-2"><PiggyBank className="h-5 w-5 text-emerald-500" />{t('finance.addSavings')}</DialogTitle>
+   332→   332→            <DialogDescription>{dlgSavings?.title}</DialogDescription>
+   333→   333→          </DialogHeader>
+   334→   334→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.amount')}</label><Input type="number" value={savAmt} onChange={(e) => setSavAmt(e.target.value)} placeholder="50000" className="mt-1" /></div>
+   335→   335→          <DialogFooter className="gap-2">
+   336→   336→            <Button variant="outline" onClick={() => { setDlgSavings(null); setSavAmt(''); }} className="flex-1 rounded-full">{t('common.cancel')}</Button>
+   337→   337→            <Button onClick={addSavings} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!savAmt || Number(savAmt) <= 0}>{t('finance.save')}</Button>
+   338→   338→          </DialogFooter>
+   339→   339→        </DialogContent>
+   340→   340→      </Dialog>
+   341→   341→
+   342→   342→      <Dialog open={!!dlgDelete} onOpenChange={() => setDlgDelete(null)}>
+   343→   343→        <DialogContent className="rounded-2xl sm:max-w-sm">
+   344→   344→          <DialogHeader>
+   345→   345→            <DialogTitle className="flex items-center gap-2"><Trash2 className="h-5 w-5 text-rose-500" />{t('finance.delete')}</DialogTitle>
+   346→   346→            <DialogDescription>{t('finance.deleteConfirm')}</DialogDescription>
+   347→   347→          </DialogHeader>
+   348→   348→          <DialogFooter className="gap-2">
+   349→   349→            <Button variant="outline" onClick={() => setDlgDelete(null)} className="flex-1 rounded-full">{t('common.cancel')}</Button>
+   350→   350→            <Button variant="destructive" onClick={handleDelete} className="nm-raised flex-1 rounded-full">{t('finance.delete')}</Button>
+   351→   351→          </DialogFooter>
+   352→   352→        </DialogContent>
+   353→   353→      </Dialog>
+   354→   354→
+   355→   355→      {/* ── AI Financial Advisor Floating Button + Dialog ── */}
+   356→   356→      <motion.button
+   357→   357→        whileHover={{ scale: 1.05 }}
+   358→   358→        whileTap={{ scale: 0.95 }}
+   359→   359→        onClick={() => setShowAiDialog(true)}
+   360→   360→        className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-shadow"
+   361→   361→        aria-label="AI Financial Advisor"
+   362→   362→      >
+   363→   363→        <Sparkles className="h-5 w-5" />
+   364→   364→      </motion.button>
+   365→   365→
+   366→   366→      <Dialog open={showAiDialog} onOpenChange={setShowAiDialog}>
+   367→   367→        <DialogContent className="rounded-2xl sm:max-w-md max-h-[80vh] flex flex-col p-0 gap-0">
+   368→   368→          <DialogHeader className="px-4 pt-4 pb-2">
+   369→   369→            <DialogTitle className="flex items-center gap-2">
+   370→   370→              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600">
+   371→   371→                <Bot className="h-4 w-4 text-white" />
+   372→   372→              </div>
+   373→   373→              AI Financial Advisor
+   374→   374→            </DialogTitle>
+   375→   375→            <DialogDescription>Tanya tentang keuanganmu dan dapatkan saran cerdas</DialogDescription>
+   376→   376→          </DialogHeader>
+   377→   377→
+   378→   378→          {/* Chat history */}
+   379→   379→          <div className="flex-1 overflow-y-auto scroll-compact px-4 py-2 space-y-3 min-h-0 max-h-60">
+   380→   380→            {aiHistory.length === 0 && !aiLoading && (
+   381→   381→              <div className="flex flex-col items-center gap-2 py-6 text-center">
+   382→   382→                <div className="text-4xl">🤖</div>
+   383→   383→                <p className="text-xs text-muted-foreground">Tanyakan apa saja tentang keuanganmu</p>
+   384→   384→              </div>
+   385→   385→            )}
+   386→   386→            {aiHistory.map((msg, i) => (
+   387→   387→              <motion.div
+   388→   388→                key={i}
+   389→   389→                initial={{ opacity: 0, y: 8 }}
+   390→   390→                animate={{ opacity: 1, y: 0 }}
+   391→   391→                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+   392→   392→              >
+   393→   393→                <div
+   394→   394→                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+   395→   395→                    msg.role === 'user'
+   396→   396→                      ? 'bg-emerald-600 text-white rounded-br-md'
+   397→   397→                      : 'bg-muted rounded-bl-md'
+   398→   398→                  }`}
+   399→   399→                >
+   400→   400→                  {msg.content}
+   401→   401→                </div>
+   402→   402→              </motion.div>
+   403→   403→            ))}
+   404→   404→            {aiLoading && (
+   405→   405→              <div className="flex justify-start">
+   406→   406→                <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
+   407→   407→                  <div className="flex gap-1.5 items-center">
+   408→   408→                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+   409→   409→                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+   410→   410→                    <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 rounded-full bg-emerald-500" />
+   411→   411→                  </div>
+   412→   412→                </div>
+   413→   413→              </div>
+   414→   414→            )}
+   415→   415→          </div>
+   416→   416→
+   417→   417→          {/* Suggestions */}
+   418→   418→          {aiHistory.length === 0 && !aiLoading && (
+   419→   419→            <div className="px-4 pb-2 flex gap-2 overflow-x-auto scroll-strip-sm">
+   420→   420→              {['Tips hemat belanja minggu ini', 'Analisa pengeluaran saya', 'Rencana tabungan untuk liburan'].map((s) => (
+   421→   421→                <button
+   422→   422→                  key={s}
+   423→   423→                  onClick={() => setAiQuestion(s)}
+   424→   424→                  className="shrink-0 rounded-full nm-raised-sm border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+   425→   425→                >
+   426→   426→                  {s}
+   427→   427→                </button>
+   428→   428→              ))}
+   429→   429→            </div>
+   430→   430→          )}
+   431→   431→
+   432→   432→          {/* Input area */}
+   433→   433→          <div className="border-t px-4 py-3 flex items-end gap-2">
+   434→   434→            <textarea
+   435→   435→              value={aiQuestion}
+   436→   436→              onChange={(e) => setAiQuestion(e.target.value)}
+   437→   437→              onKeyDown={(e) => {
+   438→   438→                if (e.key === 'Enter' && !e.shiftKey) {
+   439→   439→                  e.preventDefault();
+   440→   440→                  handleAiSend();
+   441→   441→                }
+   442→   442→              }}
+   443→   443→              placeholder="Ketik pertanyaan tentang keuangan..."
+   444→   444→              className="flex-1 resize-none rounded-xl border border-emerald-200/50 bg-muted/30 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 min-h-[40px] max-h-[80px] dark:border-emerald-800/50"
+   445→   445→              rows={1}
+   446→   446→              disabled={aiLoading}
+   447→   447→            />
+   448→   448→            <motion.button
+   449→   449→              whileTap={{ scale: 0.9 }}
+   450→   450→              onClick={handleAiSend}
+   451→   451→              disabled={!aiQuestion.trim() || aiLoading}
+   452→   452→              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full nm-raised-sm bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+   453→   453→            >
+   454→   454→              <Send className="h-4 w-4" />
+   455→   455→            </motion.button>
+   456→   456→          </div>
+   457→   457→        </DialogContent>
+   458→   458→      </Dialog>
+   459→   459→    </div>
+   460→   460→  );
+   461→   461→}
+   462→   462→export default FinancialPlannerPage;
+   463→   463→
+   464→   464→/* ═══════════════════════════════════════════════════════════════════
+   465→   465→   Records Section
+   466→   466→   ═══════════════════════════════════════════════════════════════════ */
+   467→   467→
+   468→   468→function RecordsSection({ grouped, loading, onAdd, onEdit, onDelete }: {
+   469→   469→  grouped: [string, FinanceRecord[]][]; loading: boolean; onAdd: () => void; onEdit: (r: FinanceRecord) => void; onDelete: (id: string) => void;
+   470→   470→}) {
+   471→   471→  const { t } = useTranslation();
+   472→   472→  if (loading) return <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>;
+   473→   473→  return (
+   474→   474→    <div>
+   475→   475→      <motion.button whileTap={{ scale: 0.97 }} onClick={onAdd} className="nm-raised rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex w-full items-center justify-center gap-2 py-3 text-sm font-semibold">
+   476→   476→        <Plus className="h-4 w-4" />{t('finance.addRecord')}
+   477→   477→      </motion.button>
+   478→   478→      {grouped.length === 0 ? (
+   479→   479→        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 pt-12 text-center">
+   480→   480→          <div className="text-5xl">📝</div><p className="text-sm text-muted-foreground">{t('finance.empty')}</p>
+   481→   481→        </motion.div>
+   482→   482→      ) : (
+   483→   483→        <motion.div variants={stagger} initial="hidden" animate="visible" className="mt-3 space-y-3">
+   484→   484→          {grouped.map(([date, items]) => (
+   485→   485→            <motion.div key={date} variants={fadeUp}>
+   486→   486→              <p className="mb-1.5 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+   487→   487→                <CalendarDays className="h-3 w-3" />{new Date(date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+   488→   488→              </p>
+   489→   489→              <div className="space-y-1">{items.map((r) => {
+   490→   490→                const m = getCatMeta(r.category); const Ic = m.icon; const inc = r.type === 'income';
+   491→   491→                return (
+   492→   492→                  <motion.div key={r.id} layout className="group flex items-center gap-3 rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 px-3 py-2.5 hover:bg-muted/30">
+   493→   493→                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted/60"><Ic className={`h-4 w-4 ${m.c}`} /></div>
+   494→   494→                    <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate">{r.description || r.category}</p><Badge variant="secondary" className="mt-0.5 text-[10px]">{r.category}</Badge></div>
+   495→   495→                    <div className="text-right shrink-0"><p className={`text-sm font-bold ${inc ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{inc ? '+' : '-'}{formatRupiah(r.amount)}</p></div>
+   496→   496→                    <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100">
+   497→   497→                      <motion.button whileTap={{ scale: 0.8 }} onClick={() => onEdit(r)} className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted"><Edit3 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   498→   498→                      <motion.button whileTap={{ scale: 0.8 }} onClick={() => onDelete(r.id)} className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"><Trash2 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   499→   499→                    </div>
+   500→   500→                  </motion.div>
+   501→   501→                );
+   502→   502→              })}</div>
+   503→   503→            </motion.div>
+   504→   504→          ))}
+   505→   505→        </motion.div>
+   506→   506→      )}
+   507→   507→    </div>
+   508→   508→  );
+   509→   509→}
+   510→   510→
+   511→   511→/* ═══════════════════════════════════════════════════════════════════
+   512→   512→   Budgets Section
+   513→   513→   ═══════════════════════════════════════════════════════════════════ */
+   514→   514→
+   515→   515→function BudgetsSection({ budgets, loading, onAdd, onEdit, onDelete }: {
+   516→   516→  budgets: (FinanceBudget & { spent: number })[]; loading: boolean; onAdd: () => void; onEdit: (b: FinanceBudget) => void; onDelete: (id: string) => void;
+   517→   517→}) {
+   518→   518→  const { t } = useTranslation();
+   519→   519→  if (loading) return <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}</div>;
+   520→   520→  return (
+   521→   521→    <div>
+   522→   522→      <motion.button whileTap={{ scale: 0.97 }} onClick={onAdd} className="nm-raised rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex w-full items-center justify-center gap-2 py-3 text-sm font-semibold">
+   523→   523→        <Plus className="h-4 w-4" />{t('finance.addBudget')}
+   524→   524→      </motion.button>
+   525→   525→      {budgets.length === 0 ? (
+   526→   526→        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 pt-12 text-center">
+   527→   527→          <div className="text-5xl">📊</div><p className="text-sm text-muted-foreground">{t('finance.empty')}</p>
+   528→   528→        </motion.div>
+   529→   529→      ) : (
+   530→   530→        <motion.div variants={stagger} initial="hidden" animate="visible" className="mt-3 space-y-3">
+   531→   531→          {budgets.map((b) => {
+   532→   532→            const pct = b.limitAmount > 0 ? Math.min((b.spent / b.limitAmount) * 100, 100) : 0;
+   533→   533→            const rem = b.limitAmount - b.spent;
+   534→   534→            const barCls = pct < 50 ? 'bg-emerald-500' : pct < 80 ? 'bg-amber-500' : 'bg-rose-500';
+   535→   535→            const txtCls = pct < 50 ? 'text-emerald-600 dark:text-emerald-400' : pct < 80 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400';
+   536→   536→            const m = getCatMeta(b.category); const Ic = m.icon;
+   537→   537→            return (
+   538→   538→              <motion.div key={b.id} variants={fadeUp} className="group rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-4">
+   539→   539→                <div className="flex items-center gap-3">
+   540→   540→                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/60"><Ic className={`h-5 w-5 ${m.c}`} /></div>
+   541→   541→                  <div className="flex-1 min-w-0">
+   542→   542→                    <div className="flex items-center gap-2"><p className="text-sm font-semibold">{b.category}</p><Badge variant="secondary" className="text-[10px]">{b.period === 'weekly' ? t('finance.weekly') : b.period === 'monthly' ? t('finance.monthly') : t('finance.yearly')}</Badge></div>
+   543→   543→                    <p className="text-xs text-muted-foreground"><span className={txtCls}>{formatRupiah(b.spent)}</span> / {formatRupiah(b.limitAmount)}</p>
+   544→   544→                  </div>
+   545→   545→                  <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100">
+   546→   546→                    <motion.button whileTap={{ scale: 0.8 }} onClick={() => onEdit(b)} className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted"><Edit3 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   547→   547→                    <motion.button whileTap={{ scale: 0.8 }} onClick={() => onDelete(b.id)} className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"><Trash2 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   548→   548→                  </div>
+   549→   549→                </div>
+   550→   550→                <div className="mt-3"><Progress value={pct} className={`h-2 [&>[data-slot=progress-indicator]]:${barCls}`} /></div>
+   551→   551→                <p className="mt-1.5 text-xs"><span className={txtCls}>{t('finance.remaining')}: {formatRupiah(rem)}</span><span className="ml-2 text-muted-foreground">({pct.toFixed(0)}%)</span></p>
+   552→   552→              </motion.div>
+   553→   553→            );
+   554→   554→          })}
+   555→   555→        </motion.div>
+   556→   556→      )}
+   557→   557→    </div>
+   558→   558→  );
+   559→   559→}
+   560→   560→
+   561→   561→/* ═══════════════════════════════════════════════════════════════════
+   562→   562→   Goals Section
+   563→   563→   ═══════════════════════════════════════════════════════════════════ */
+   564→   564→
+   565→   565→function GoalsSection({ goals, loading, onAdd, onEdit, onDelete, onAddSavings }: {
+   566→   566→  goals: FinanceGoal[]; loading: boolean; onAdd: () => void; onEdit: (g: FinanceGoal) => void; onDelete: (id: string) => void; onAddSavings: (g: FinanceGoal) => void;
+   567→   567→}) {
+   568→   568→  const { t } = useTranslation();
+   569→   569→  if (loading) return <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}</div>;
+   570→   570→  return (
+   571→   571→    <div>
+   572→   572→      <motion.button whileTap={{ scale: 0.97 }} onClick={onAdd} className="nm-raised rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex w-full items-center justify-center gap-2 py-3 text-sm font-semibold">
+   573→   573→        <Plus className="h-4 w-4" />{t('finance.addGoal')}
+   574→   574→      </motion.button>
+   575→   575→      {goals.length === 0 ? (
+   576→   576→        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 pt-12 text-center">
+   577→   577→          <div className="text-5xl">🎯</div><p className="text-sm text-muted-foreground">{t('finance.empty')}</p>
+   578→   578→        </motion.div>
+   579→   579→      ) : (
+   580→   580→        <motion.div variants={stagger} initial="hidden" animate="visible" className="mt-3 space-y-3">
+   581→   581→          {goals.map((g) => {
+   582→   582→            const pct = g.targetAmount > 0 ? Math.min((g.savedAmount / g.targetAmount) * 100, 100) : 0;
+   583→   583→            return (
+   584→   584→              <motion.div key={g.id} variants={fadeUp} className="group rounded-xl border border-emerald-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-card/80 p-4">
+   585→   585→                <div className="flex items-center gap-3">
+   586→   586→                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-2xl">{g.icon}</div>
+   587→   587→                  <div className="flex-1 min-w-0">
+   588→   588→                    <div className="flex items-center gap-2"><p className="text-sm font-semibold truncate">{g.title}</p>
+   589→   589→                      <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100">
+   590→   590→                        <motion.button whileTap={{ scale: 0.8 }} onClick={() => onEdit(g)} className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-muted"><Edit3 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   591→   591→                        <motion.button whileTap={{ scale: 0.8 }} onClick={() => onDelete(g.id)} className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"><Trash2 className="h-3 w-3 text-muted-foreground" /></motion.button>
+   592→   592→                      </div>
+   593→   593→                    </div>
+   594→   594→                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">{formatRupiah(g.savedAmount)} / {formatRupiah(g.targetAmount)}</p>
+   595→   595→                    {g.deadline && <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5"><CalendarDays className="h-3 w-3" />{new Date(g.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>}
+   596→   596→                  </div>
+   597→   597→                  <div className="flex flex-col items-end gap-2 shrink-0">
+   598→   598→                    <Badge variant="secondary" className="text-[10px]">{pct.toFixed(0)}%</Badge>
+   599→   599→                    <motion.button whileTap={{ scale: 0.95 }} onClick={() => onAddSavings(g)} className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20">
+   600→   600→                      <PiggyBank className="h-3 w-3" />{t('finance.addSavings')}
+   601→   601→                    </motion.button>
+   602→   602→                  </div>
+   603→   603→                </div>
+   604→   604→                <div className="mt-3"><Progress value={pct} className="h-2 [&>[data-slot=progress-indicator]]:bg-emerald-500" /></div>
+   605→   605→              </motion.div>
+   606→   606→            );
+   607→   607→          })}
+   608→   608→        </motion.div>
+   609→   609→      )}
+   610→   610→    </div>
+   611→   611→  );
+   612→   612→}
+   613→   613→
+   614→   614→/* ═══════════════════════════════════════════════════════════════════
+   615→   615→   Form Dialogs
+   616→   616→   ═══════════════════════════════════════════════════════════════════ */
+   617→   617→
+   618→   618→function RecordFormDialog({ open, onClose, recType, setRecType, recAmt, setRecAmt, recCat, setRecCat, recDesc, setRecDesc, recDate, setRecDate, isEdit, onSave }: {
+   619→   619→  open: boolean; onClose: () => void; recType: 'income' | 'expense'; setRecType: (v: 'income' | 'expense') => void;
+   620→   620→  recAmt: string; setRecAmt: (v: string) => void; recCat: string; setRecCat: (v: string) => void;
+   621→   621→  recDesc: string; setRecDesc: (v: string) => void; recDate: string; setRecDate: (v: string) => void;
+   622→   622→  isEdit: boolean; onSave: () => void;
+   623→   623→}) {
+   624→   624→  const { t } = useTranslation();
+   625→   625→  const cats = recType === 'income' ? INCOME_CATS : EXPENSE_CATS;
+   626→   626→  return (
+   627→   627→    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+   628→   628→      <DialogContent className="rounded-2xl sm:max-w-sm">
+   629→   629→        <DialogHeader><DialogTitle className="flex items-center gap-2"><Wallet className="h-5 w-5 text-emerald-500" />{isEdit ? t('finance.editRecord') : t('finance.addRecord')}</DialogTitle></DialogHeader>
+   630→   630→        <div className="space-y-3">
+   631→   631→          <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
+   632→   632→            <span className="text-sm font-medium">{t('finance.type')}</span>
+   633→   633→            <div className="flex items-center gap-2">
+   634→   634→              <span className={`text-xs font-medium ${recType === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>{t('finance.income')}</span>
+   635→   635→              <Switch checked={recType === 'expense'} onCheckedChange={(c) => setRecType(c ? 'expense' : 'income')} />
+   636→   636→              <span className={`text-xs font-medium ${recType === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}>{t('finance.expense')}</span>
+   637→   637→            </div>
+   638→   638→          </div>
+   639→   639→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.amount')}</label><Input type="number" value={recAmt} onChange={(e) => setRecAmt(e.target.value)} placeholder="50000" className="mt-1" /></div>
+   640→   640→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.category')}</label><Select value={recCat} onValueChange={setRecCat}><SelectTrigger className="mt-1"><SelectValue placeholder={t('finance.category')} /></SelectTrigger><SelectContent>{cats.map((c) => <SelectItem key={c.v} value={c.v}>{c.v}</SelectItem>)}</SelectContent></Select></div>
+   641→   641→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.description')}</label><Input value={recDesc} onChange={(e) => setRecDesc(e.target.value)} placeholder={t('finance.description')} className="mt-1" /></div>
+   642→   642→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.date')}</label><Input type="date" value={recDate} onChange={(e) => setRecDate(e.target.value)} className="mt-1" /></div>
+   643→   643→        </div>
+   644→   644→        <DialogFooter className="gap-2">
+   645→   645→          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
+   646→   646→          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!recAmt || !recCat}>{t('finance.save')}</Button>
+   647→   647→        </DialogFooter>
+   648→   648→      </DialogContent>
+   649→   649→    </Dialog>
+   650→   650→  );
+   651→   651→}
+   652→   652→
+   653→   653→function BudgetFormDialog({ open, onClose, cat, setCat, limit, setLimit, period, setPeriod, isEdit, onSave }: {
+   654→   654→  open: boolean; onClose: () => void; cat: string; setCat: (v: string) => void; limit: string; setLimit: (v: string) => void;
+   655→   655→  period: 'weekly' | 'monthly' | 'yearly'; setPeriod: (v: 'weekly' | 'monthly' | 'yearly') => void; isEdit: boolean; onSave: () => void;
+   656→   656→}) {
+   657→   657→  const { t } = useTranslation();
+   658→   658→  return (
+   659→   659→    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+   660→   660→      <DialogContent className="rounded-2xl sm:max-w-sm">
+   661→   661→        <DialogHeader><DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-emerald-500" />{isEdit ? t('finance.editRecord') : t('finance.addBudget')}</DialogTitle></DialogHeader>
+   662→   662→        <div className="space-y-3">
+   663→   663→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.category')}</label><Select value={cat} onValueChange={setCat}><SelectTrigger className="mt-1"><SelectValue placeholder={t('finance.category')} /></SelectTrigger><SelectContent>{EXPENSE_CATS.map((c) => <SelectItem key={c.v} value={c.v}>{c.v}</SelectItem>)}</SelectContent></Select></div>
+   664→   664→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.limitAmount')}</label><Input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} placeholder="500000" className="mt-1" /></div>
+   665→   665→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.period')}</label><Select value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly' | 'yearly')}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="weekly">{t('finance.weekly')}</SelectItem><SelectItem value="monthly">{t('finance.monthly')}</SelectItem><SelectItem value="yearly">{t('finance.yearly')}</SelectItem></SelectContent></Select></div>
+   666→   666→        </div>
+   667→   667→        <DialogFooter className="gap-2">
+   668→   668→          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
+   669→   669→          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!cat || !limit}>{t('finance.save')}</Button>
+   670→   670→        </DialogFooter>
+   671→   671→      </DialogContent>
+   672→   672→    </Dialog>
+   673→   673→  );
+   674→   674→}
+   675→   675→
+   676→   676→function GoalFormDialog({ open, onClose, title, setTitle, target, setTarget, saved, setSaved, deadline, setDeadline, icon, setIcon, isEdit, onSave }: {
+   677→   677→  open: boolean; onClose: () => void; title: string; setTitle: (v: string) => void; target: string; setTarget: (v: string) => void;
+   678→   678→  saved: string; setSaved: (v: string) => void; deadline: string; setDeadline: (v: string) => void;
+   679→   679→  icon: string; setIcon: (v: string) => void; isEdit: boolean; onSave: () => void;
+   680→   680→}) {
+   681→   681→  const { t } = useTranslation();
+   682→   682→  return (
+   683→   683→    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+   684→   684→      <DialogContent className="rounded-2xl sm:max-w-sm">
+   685→   685→        <DialogHeader><DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5 text-emerald-500" />{isEdit ? t('finance.editRecord') : t('finance.addGoal')}</DialogTitle></DialogHeader>
+   686→   686→        <div className="space-y-3">
+   687→   687→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.progress')}</label><div className="flex gap-2 mt-1 flex-wrap">{GOAL_ICONS.map((e) => (
+   688→   688→            <motion.button key={e} whileTap={{ scale: 0.9 }} onClick={() => setIcon(e)} className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg transition-all ${icon === e ? 'ring-2 ring-emerald-500 bg-emerald-50 dark:bg-emerald-500/10' : 'bg-muted/50 hover:bg-muted'}`}>{e}</motion.button>
+   689→   689→          ))}</div></div>
+   690→   690→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.goalTitle')}</label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Liburan Bali" className="mt-1" /></div>
+   691→   691→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.targetAmount')}</label><Input type="number" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="5000000" className="mt-1" /></div>
+   692→   692→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.savedAmount')}</label><Input type="number" value={saved} onChange={(e) => setSaved(e.target.value)} placeholder="0" className="mt-1" /></div>
+   693→   693→          <div><label className="text-xs font-medium text-muted-foreground">{t('finance.deadline')}</label><Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="mt-1" /></div>
+   694→   694→        </div>
+   695→   695→        <DialogFooter className="gap-2">
+   696→   696→          <Button variant="outline" onClick={onClose} className="flex-1 rounded-full">{t('common.cancel')}</Button>
+   697→   697→          <Button onClick={onSave} className="nm-raised flex-1 rounded-full bg-emerald-600 hover:bg-emerald-700" disabled={!title || !target}>{t('finance.save')}</Button>
+   698→   698→        </DialogFooter>
+   699→   699→      </DialogContent>
+   700→   700→    </Dialog>
+   701→   701→  );
+   702→   702→}
+   703→   703→

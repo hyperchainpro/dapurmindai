@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 let prisma: InstanceType<typeof import('@prisma/client').PrismaClient> | null = null;
 function getPrisma() {
@@ -16,8 +17,10 @@ function getPrisma() {
 // POST /api/financial/records — Create a new finance record
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    const userId = auth.userId;
     const body = await req.json();
-    const { userId, type, category, amount, description, date } = body;
+    const { type, category, amount, description, date } = body;
 
     if (!type || !category || !amount) {
       return NextResponse.json({ error: 'type, category, and amount are required' }, { status: 400 });
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const record = await db.financeRecord.create({
       data: {
-        userId: userId || 'anonymous',
+        userId,
         type,
         category,
         amount: Number(amount),
@@ -48,6 +51,9 @@ export async function POST(req: NextRequest) {
       createdAt: record.createdAt.toISOString(),
     });
   } catch (error: unknown) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     const message = error instanceof Error ? error.message : 'Failed to create record';
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -56,13 +62,13 @@ export async function POST(req: NextRequest) {
 // GET /api/financial/records — List finance records
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    const userId = auth.userId;
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId');
     const type = searchParams.get('type');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const where: Record<string, unknown> = {};
-    if (userId) where.userId = userId;
+    const where: Record<string, unknown> = { userId };
     if (type) where.type = type;
 
     const db = getPrisma();
@@ -87,6 +93,9 @@ export async function GET(req: NextRequest) {
       }))
     );
   } catch (error: unknown) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     const message = error instanceof Error ? error.message : 'Failed to fetch records';
     return NextResponse.json({ error: message }, { status: 500 });
   }

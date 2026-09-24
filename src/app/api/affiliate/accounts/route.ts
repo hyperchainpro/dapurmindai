@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 import type { AffiliateAccount } from '@/types';
 
 // GET - Fetch all affiliate accounts
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+
     const accounts = await db.affiliateAccount.findMany({
       orderBy: { createdAt: 'desc' },
     });
@@ -21,6 +24,9 @@ export async function GET() {
 
     return NextResponse.json({ accounts: mapped });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching affiliate accounts:', error);
     return NextResponse.json(
       { error: 'Gagal memuat akun afiliasi' },
@@ -32,6 +38,7 @@ export async function GET() {
 // POST - Create a new affiliate account
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const body = await request.json();
     const { platform, affiliateId, apiKey, baseUrlTemplate } = body;
 
@@ -65,6 +72,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ account: mapped }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating affiliate account:', error);
     return NextResponse.json(
       { error: 'Gagal membuat akun afiliasi' },
@@ -76,6 +86,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update an affiliate account
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const body = await request.json();
     const { id, platform, affiliateId, apiKey, baseUrlTemplate, isActive } = body;
 
@@ -109,6 +120,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ account: mapped });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating affiliate account:', error);
     return NextResponse.json(
       { error: 'Gagal mengupdate akun afiliasi' },
@@ -120,6 +134,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - Remove an affiliate account
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -147,6 +162,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting affiliate account:', error);
     return NextResponse.json(
       { error: 'Gagal menghapus akun afiliasi' },

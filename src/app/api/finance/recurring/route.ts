@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 // GET - List recurring transactions
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID wajib diisi' }, { status: 400 });
-    }
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
 
     const items = await db.recurringTransaction.findMany({
       where: { userId, isActive: true },
@@ -40,6 +37,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: remapped });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error fetching recurring transactions:', error);
     return NextResponse.json({ error: 'Gagal memuat transaksi berulang' }, { status: 500 });
   }
@@ -48,12 +48,14 @@ export async function GET(request: NextRequest) {
 // POST - Create a recurring transaction
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, type, category, amount, description, frequency, nextDate, endDate } = body;
+    const { type, category, amount, description, frequency, nextDate, endDate } = body;
 
-    if (!userId || !type || !category || amount === undefined || !frequency || !nextDate) {
+    if (!type || !category || amount === undefined || !frequency || !nextDate) {
       return NextResponse.json(
-        { error: 'Data tidak lengkap. User ID, tipe, kategori, jumlah, frekuensi, dan tanggal wajib diisi.' },
+        { error: 'Data tidak lengkap. Tipe, kategori, jumlah, frekuensi, dan tanggal wajib diisi.' },
         { status: 400 },
       );
     }
@@ -81,6 +83,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: item }, { status: 201 });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error creating recurring transaction:', error);
     return NextResponse.json({ error: 'Gagal membuat transaksi berulang' }, { status: 500 });
   }
@@ -89,11 +94,13 @@ export async function POST(request: NextRequest) {
 // PUT - Update a recurring transaction
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId, type, category, amount, description, frequency, nextDate, endDate, isActive } = body;
+    const { id, type, category, amount, description, frequency, nextDate, endDate, isActive } = body;
 
-    if (!id || !userId) {
-      return NextResponse.json({ error: 'ID dan User ID wajib diisi' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'ID wajib diisi' }, { status: 400 });
     }
 
     const existing = await db.recurringTransaction.findFirst({
@@ -125,6 +132,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: item });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error updating recurring transaction:', error);
     return NextResponse.json({ error: 'Gagal mengupdate transaksi berulang' }, { status: 500 });
   }
@@ -133,11 +143,13 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete a recurring transaction
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { id, userId } = body;
+    const { id } = body;
 
-    if (!id || !userId) {
-      return NextResponse.json({ error: 'ID dan User ID wajib diisi' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'ID wajib diisi' }, { status: 400 });
     }
 
     const existing = await db.recurringTransaction.findFirst({
@@ -155,6 +167,9 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error deleting recurring transaction:', error);
     return NextResponse.json({ error: 'Gagal menghapus transaksi berulang' }, { status: 500 });
   }

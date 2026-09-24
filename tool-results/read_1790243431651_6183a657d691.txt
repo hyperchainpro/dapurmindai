@@ -1,0 +1,788 @@
+     1→'use client';
+     2→
+     3→import React, { useEffect, useState, useCallback, useMemo } from 'react';
+     4→import {
+     5→  motion,
+     6→  AnimatePresence,
+     7→  useMotionValue,
+     8→  useTransform,
+     9→  PanInfo,
+    10→} from 'framer-motion';
+    11→import {
+    12→  ArrowLeft,
+    13→  Users,
+    14→  Trash2,
+    15→  Edit3,
+    16→  Search,
+    17→  CheckCircle2,
+    18→  XCircle,
+    19→  Loader2,
+    20→  AlertTriangle,
+    21→  RefreshCw,
+    22→  Shield,
+    23→  ShieldCheck,
+    24→  LogOut,
+    25→  UserCheck,
+    26→  UserX,
+    27→  ChefHat,
+    28→  Link2,
+    29→  BarChart3,
+    30→  Megaphone,
+    31→  LayoutDashboard,
+    32→} from 'lucide-react';
+    33→import { useAppStore } from '@/hooks/useAppState';
+    34→import {
+    35→  Dialog,
+    36→  DialogContent,
+    37→  DialogHeader,
+    38→  DialogTitle,
+    39→  DialogDescription,
+    40→  DialogFooter,
+    41→} from '@/components/ui/dialog';
+    42→import { Button } from '@/components/ui/button';
+    43→import { Badge } from '@/components/ui/badge';
+    44→import { Input } from '@/components/ui/input';
+    45→import { Label } from '@/components/ui/label';
+    46→import { Switch } from '@/components/ui/switch';
+    47→import { Card, CardContent } from '@/components/ui/card';
+    48→import { Skeleton } from '@/components/ui/skeleton';
+    49→import { Bounce } from '@/components/dapurmind/ReactBits';
+    50→
+    51→/* ── Animation variants ───────────────────────────────────────── */
+    52→
+    53→const stagger = {
+    54→  hidden: {},
+    55→  visible: { transition: { staggerChildren: 0.07 } },
+    56→};
+    57→
+    58→const fadeUp = {
+    59→  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+    60→  visible: {
+    61→    opacity: 1,
+    62→    y: 0,
+    63→    filter: 'blur(0px)',
+    64→    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    65→  },
+    66→};
+    67→
+    68→/* ── Types ──────────────────────────────────────────────────── */
+    69→
+    70→interface AdminUser {
+    71→  id: string;
+    72→  name: string | null;
+    73→  email: string;
+    74→  role: string;
+    75→  isActive: boolean;
+    76→  deletedAt: string | null;
+    77→  createdAt: string;
+    78→}
+    79→
+    80→/* ── Swipe-to-delete User Card ──────────────────────────────── */
+    81→
+    82→interface SwipeableUserCardProps {
+    83→  user: AdminUser;
+    84→  onEdit: (user: AdminUser) => void;
+    85→  onDelete: (user: AdminUser) => void;
+    86→}
+    87→
+    88→function SwipeableUserCard({ user, onEdit, onDelete }: SwipeableUserCardProps) {
+    89→  const x = useMotionValue(0);
+    90→  const deleteOpacity = useTransform(x, [-80, -40], [1, 0]);
+    91→  const deleteScale = useTransform(x, [-80, -40], [1, 0.8]);
+    92→
+    93→  const handleDragEnd = (
+    94→    _event: MouseEvent | TouchEvent | PointerEvent,
+    95→    info: PanInfo
+    96→  ) => {
+    97→    if (info.offset.x < -60) {
+    98→      onDelete(user);
+    99→    } else {
+   100→      x.set(0);
+   101→    }
+   102→  };
+   103→
+   104→  const initials = (user.name || user.email)
+   105→    .split(' ')
+   106→    .map((w) => w[0])
+   107→    .join('')
+   108→    .toUpperCase()
+   109→    .slice(0, 2);
+   110→
+   111→  return (
+   112→    <div className="relative overflow-hidden rounded-2xl mb-3">
+   113→      {/* Red delete background */}
+   114→      <motion.div
+   115→        className="absolute inset-0 z-0 flex items-center justify-end pr-5 bg-gradient-to-r from-transparent to-red-500 rounded-2xl"
+   116→        style={{ opacity: deleteOpacity }}
+   117→      >
+   118→        <motion.div
+   119→          style={{ scale: deleteScale }}
+   120→          className="flex items-center gap-2 text-white font-semibold text-sm"
+   121→        >
+   122→          <Trash2 className="h-5 w-5" />
+   123→          Hapus
+   124→        </motion.div>
+   125→      </motion.div>
+   126→
+   127→      {/* Card content */}
+   128→      <motion.div
+   129→        className="relative z-10 cursor-grab active:cursor-grabbing"
+   130→        style={{ x }}
+   131→        drag="x"
+   132→        dragConstraints={{ left: -80, right: 0 }}
+   133→        dragElastic={{ left: 0.1, right: 0 }}
+   134→        onDragEnd={handleDragEnd}
+   135→      >
+   136→        <Card className="border-border/50 bg-card/90 backdrop-blur-sm transition-shadow hover:shadow-md">
+   137→          <CardContent className="p-4">
+   138→            <div className="flex items-center gap-3">
+   139→              {/* Avatar */}
+   140→              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-sm font-bold">
+   141→                {initials}
+   142→              </div>
+   143→
+   144→              {/* Info */}
+   145→              <div className="flex-1 min-w-0">
+   146→                <div className="flex items-center gap-2">
+   147→                  <h3 className="text-sm font-semibold truncate">
+   148→                    {user.name || 'Tanpa Nama'}
+   149→                  </h3>
+   150→                  {/* Status dot */}
+   151→                  <span className="relative flex h-2.5 w-2.5 shrink-0">
+   152→                    {user.isActive ? (
+   153→                      <>
+   154→                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+   155→                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+   156→                      </>
+   157→                    ) : (
+   158→                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gray-400" />
+   159→                    )}
+   160→                  </span>
+   161→                </div>
+   162→                <p className="mt-0.5 text-xs text-muted-foreground truncate">
+   163→                  {user.email}
+   164→                </p>
+   165→                <div className="mt-1 flex items-center gap-1.5">
+   166→                  <Badge
+   167→                    variant="secondary"
+   168→                    className={`text-[10px] px-1.5 ${
+   169→                      user.role === 'admin'
+   170→                        ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800/40'
+   171→                        : 'bg-muted text-muted-foreground'
+   172→                    }`}
+   173→                  >
+   174→                    {user.role === 'admin' ? (
+   175→                      <span className="flex items-center gap-0.5">
+   176→                        <ShieldCheck className="h-3 w-3" />
+   177→                        Admin
+   178→                      </span>
+   179→                    ) : (
+   180→                      'User'
+   181→                    )}
+   182→                  </Badge>
+   183→                  <span className="text-[10px] text-muted-foreground">
+   184→                    {new Date(user.createdAt).toLocaleDateString('id-ID', {
+   185→                      day: 'numeric',
+   186→                      month: 'short',
+   187→                      year: 'numeric',
+   188→                    })}
+   189→                  </span>
+   190→                </div>
+   191→              </div>
+   192→
+   193→              {/* Edit button */}
+   194→              <motion.button
+   195→                whileTap={{ scale: 0.9 }}
+   196→                onClick={(e) => {
+   197→                  e.stopPropagation();
+   198→                  onEdit(user);
+   199→                }}
+   200→                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/40 bg-muted/50 transition-colors hover:bg-accent"
+   201→                aria-label="Edit user"
+   202→              >
+   203→                <Edit3 className="h-4 w-4 text-muted-foreground" />
+   204→              </motion.button>
+   205→            </div>
+   206→          </CardContent>
+   207→        </Card>
+   208→      </motion.div>
+   209→    </div>
+   210→  );
+   211→}
+   212→
+   213→/* ── Main Component ──────────────────────────────────────────── */
+   214→
+   215→export function AdminUserManager() {
+   216→  const setScreen = useAppStore((s) => s.setScreen);
+   217→  const goBack = useAppStore((s) => s.goBack);
+   218→
+   219→  /* ── Local state ───────────────────────────────────────────── */
+   220→  const [loading, setLoading] = useState(true);
+   221→  const [error, setError] = useState<string | null>(null);
+   222→  const [users, setUsers] = useState<AdminUser[]>([]);
+   223→  const [search, setSearch] = useState('');
+   224→  const [tabFilter, setTabFilter] = useState<'all' | 'active' | 'inactive'>('all');
+   225→  const [saving, setSaving] = useState(false);
+   226→  const [deleting, setDeleting] = useState(false);
+   227→  const [refreshKey, setRefreshKey] = useState(0);
+   228→
+   229→  // Edit dialog state
+   230→  const [showEditDialog, setShowEditDialog] = useState(false);
+   231→  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+   232→  const [editName, setEditName] = useState('');
+   233→  const [editEmail, setEditEmail] = useState('');
+   234→  const [editRole, setEditRole] = useState('user');
+   235→  const [editIsActive, setEditIsActive] = useState(true);
+   236→
+   237→  // Delete dialog state
+   238→  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+   239→  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+   240→
+   241→  /* ── Fetch users ────────────────────────────────────────────── */
+   242→  const fetchUsers = useCallback(async () => {
+   243→    try {
+   244→      setLoading(true);
+   245→      setError(null);
+   246→      const res = await fetch('/api/admin/users', {
+   247→        headers: { 'X-Admin-Key': 'dapurmind2025' },
+   248→      });
+   249→      if (!res.ok) throw new Error('Gagal memuat data user');
+   250→      const data = await res.json();
+   251→      setUsers(data.users || []);
+   252→    } catch (err) {
+   253→      setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
+   254→    } finally {
+   255→      setLoading(false);
+   256→    }
+   257→  }, []);
+   258→
+   259→  useEffect(() => {
+   260→    fetchUsers();
+   261→  }, [fetchUsers, refreshKey]);
+   262→
+   263→  /* ── Stats ─────────────────────────────────────────────────── */
+   264→  const stats = useMemo(() => {
+   265→    const nonDeleted = users.filter((u) => !u.deletedAt);
+   266→    return {
+   267→      total: nonDeleted.length,
+   268→      active: nonDeleted.filter((u) => u.isActive).length,
+   269→      deleted: users.filter((u) => u.deletedAt).length,
+   270→    };
+   271→  }, [users]);
+   272→
+   273→  /* ── Filtered users ────────────────────────────────────────── */
+   274→  const filteredUsers = useMemo(() => {
+   275→    let result = users.filter((u) => !u.deletedAt);
+   276→
+   277→    if (tabFilter === 'active') result = result.filter((u) => u.isActive);
+   278→    if (tabFilter === 'inactive') result = result.filter((u) => !u.isActive);
+   279→
+   280→    if (search.trim()) {
+   281→      const q = search.toLowerCase();
+   282→      result = result.filter(
+   283→        (u) =>
+   284→          (u.name || '').toLowerCase().includes(q) ||
+   285→          u.email.toLowerCase().includes(q)
+   286→      );
+   287→    }
+   288→
+   289→    return result;
+   290→  }, [users, tabFilter, search]);
+   291→
+   292→  /* ── Dialog handlers ───────────────────────────────────────── */
+   293→
+   294→  const openEditDialog = useCallback((user: AdminUser) => {
+   295→    setEditingUser(user);
+   296→    setEditName(user.name || '');
+   297→    setEditEmail(user.email);
+   298→    setEditRole(user.role);
+   299→    setEditIsActive(user.isActive);
+   300→    setShowEditDialog(true);
+   301→  }, []);
+   302→
+   303→  const handleEditSubmit = useCallback(async () => {
+   304→    if (!editingUser) return;
+   305→    try {
+   306→      setSaving(true);
+   307→      setError(null);
+   308→      const res = await fetch('/api/admin/users', {
+   309→        method: 'PUT',
+   310→        headers: {
+   311→          'Content-Type': 'application/json',
+   312→          'X-Admin-Key': 'dapurmind2025',
+   313→        },
+   314→        body: JSON.stringify({
+   315→          id: editingUser.id,
+   316→          name: editName.trim(),
+   317→          email: editEmail.trim(),
+   318→          role: editRole,
+   319→          isActive: editIsActive,
+   320→        }),
+   321→      });
+   322→      if (!res.ok) {
+   323→        const data = await res.json();
+   324→        throw new Error(data.error || 'Gagal mengupdate user');
+   325→      }
+   326→      setShowEditDialog(false);
+   327→      setEditingUser(null);
+   328→      setRefreshKey((k) => k + 1);
+   329→    } catch (err) {
+   330→      setError(err instanceof Error ? err.message : 'Gagal mengupdate user');
+   331→    } finally {
+   332→      setSaving(false);
+   333→    }
+   334→  }, [editingUser, editName, editEmail, editRole, editIsActive]);
+   335→
+   336→  const openDeleteDialog = useCallback((user: AdminUser) => {
+   337→    setDeletingUser(user);
+   338→    setShowDeleteDialog(true);
+   339→  }, []);
+   340→
+   341→  const handleDeleteConfirm = useCallback(async () => {
+   342→    if (!deletingUser) return;
+   343→    try {
+   344→      setDeleting(true);
+   345→      setError(null);
+   346→      const res = await fetch('/api/admin/users', {
+   347→        method: 'DELETE',
+   348→        headers: {
+   349→          'Content-Type': 'application/json',
+   350→          'X-Admin-Key': 'dapurmind2025',
+   351→        },
+   352→        body: JSON.stringify({ id: deletingUser.id }),
+   353→      });
+   354→      if (!res.ok) {
+   355→        const data = await res.json();
+   356→        throw new Error(data.error || 'Gagal menghapus user');
+   357→      }
+   358→      setShowDeleteDialog(false);
+   359→      setDeletingUser(null);
+   360→      setRefreshKey((k) => k + 1);
+   361→    } catch (err) {
+   362→      setError(err instanceof Error ? err.message : 'Gagal menghapus user');
+   363→    } finally {
+   364→      setDeleting(false);
+   365→    }
+   366→  }, [deletingUser]);
+   367→
+   368→  /* ── Tabs ───────────────────────────────────────────────────── */
+   369→  const tabs = [
+   370→    { key: 'all' as const, label: 'Semua', count: stats.total },
+   371→    { key: 'active' as const, label: 'Aktif', count: stats.active },
+   372→    { key: 'inactive' as const, label: 'Nonaktif', count: stats.total - stats.active },
+   373→  ];
+   374→
+   375→  /* ── Header nav items ─────────────────────────────────────── */
+   376→  const headerNav = [
+   377→    { icon: LayoutDashboard, screen: 'admin-dashboard' as const, label: 'Dashboard' },
+   378→    { icon: ChefHat, screen: 'admin-recipes' as const, label: 'Resep' },
+   379→    { icon: Trash2, screen: 'admin-trash' as const, label: 'Sampah' },
+   380→    { icon: Link2, screen: 'admin-affiliate' as const, label: 'Afiliasi' },
+   381→    { icon: Megaphone, screen: 'admin-ads' as const, label: 'Iklan' },
+   382→    { icon: BarChart3, screen: 'admin-analytics' as const, label: 'Analitik' },
+   383→  ];
+   384→
+   385→  /* ── Render ────────────────────────────────────────────────── */
+   386→
+   387→  return (
+   388→    <div className="relative min-h-screen pb-28 bg-gradient-to-br from-emerald-50/30 via-white to-amber-50/20 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+   389→      <motion.div
+   390→        variants={stagger}
+   391→        initial="hidden"
+   392→        animate="visible"
+   393→        className="relative z-10 mx-auto max-w-lg px-4 pt-4"
+   394→      >
+   395→        {/* ── Header ──────────────────────────────────────────── */}
+   396→        <motion.div variants={fadeUp} className="mb-5">
+   397→          <div className="flex items-center gap-3">
+   398→            <motion.button
+   399→              whileTap={{ scale: 0.9 }}
+   400→              onClick={goBack}
+   401→              className="flex h-10 w-10 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   402→              aria-label="Kembali"
+   403→            >
+   404→              <ArrowLeft className="h-5 w-5" />
+   405→            </motion.button>
+   406→            <div className="flex-1 min-w-0">
+   407→              <h1 className="text-lg font-bold tracking-tight text-emerald-600 dark:text-emerald-400 leading-tight">
+   408→                Manajemen User
+   409→              </h1>
+   410→              <p className="mt-0.5 text-xs text-muted-foreground">
+   411→                Kelola semua pengguna
+   412→              </p>
+   413→            </div>
+   414→            <div className="flex items-center gap-1.5">
+   415→              {headerNav.map((item) => (
+   416→                <motion.button
+   417→                  key={item.screen}
+   418→                  whileTap={{ scale: 0.9 }}
+   419→                  onClick={() => setScreen(item.screen)}
+   420→                  className="flex h-9 w-9 items-center justify-center rounded-xl nm-raised transition-colors hover:bg-accent"
+   421→                  aria-label={item.label}
+   422→                >
+   423→                  <item.icon className="h-4 w-4 text-muted-foreground" />
+   424→                </motion.button>
+   425→              ))}
+   426→              <motion.button
+   427→                whileTap={{ scale: 0.9 }}
+   428→                onClick={() => {
+   429→                  useAppStore.getState().setAdminLoggedIn(false);
+   430→                  useAppStore.getState().setScreen('dashboard');
+   431→                }}
+   432→                className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50 shadow-sm transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:hover:bg-red-500/20"
+   433→                aria-label="Logout"
+   434→              >
+   435→                <LogOut className="h-4 w-4 text-red-500" />
+   436→              </motion.button>
+   437→            </div>
+   438→          </div>
+   439→        </motion.div>
+   440→
+   441→        {/* ── Error Banner ────────────────────────────────────── */}
+   442→        <AnimatePresence>
+   443→          {error && (
+   444→            <motion.div
+   445→              initial={{ opacity: 0, y: -10 }}
+   446→              animate={{ opacity: 1, y: 0 }}
+   447→              exit={{ opacity: 0, y: -10 }}
+   448→              className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-800/40 dark:bg-red-500/10"
+   449→            >
+   450→              <div className="flex items-start gap-2">
+   451→                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+   452→                <div className="flex-1 min-w-0">
+   453→                  <p className="text-xs font-medium text-red-700 dark:text-red-400">
+   454→                    {error}
+   455→                  </p>
+   456→                </div>
+   457→                <button
+   458→                  onClick={() => setError(null)}
+   459→                  className="shrink-0 text-red-400 hover:text-red-600"
+   460→                >
+   461→                  <XCircle className="h-4 w-4" />
+   462→                </button>
+   463→              </div>
+   464→            </motion.div>
+   465→          )}
+   466→        </AnimatePresence>
+   467→
+   468→        {/* ── Stats Banner ───────────────────────────────────── */}
+   469→        <motion.div variants={fadeUp} className="mb-5">
+   470→          <div className="rounded-2xl border border-border/40 bg-card/80 backdrop-blur-sm p-4">
+   471→            <div className="grid grid-cols-3 gap-3">
+   472→              <div className="text-center">
+   473→                <div className="flex items-center justify-center gap-1">
+   474→                  <Users className="h-4 w-4 text-emerald-500" />
+   475→                  <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+   476→                    {stats.total}
+   477→                  </span>
+   478→                </div>
+   479→                <p className="mt-0.5 text-[11px] text-muted-foreground">Total User</p>
+   480→              </div>
+   481→              <div className="text-center">
+   482→                <div className="flex items-center justify-center gap-1">
+   483→                  <UserCheck className="h-4 w-4 text-blue-500" />
+   484→                  <span className="text-lg font-bold">{stats.active}</span>
+   485→                </div>
+   486→                <p className="mt-0.5 text-[11px] text-muted-foreground">Aktif</p>
+   487→              </div>
+   488→              <div className="text-center">
+   489→                <div className="flex items-center justify-center gap-1">
+   490→                  <UserX className="h-4 w-4 text-red-500" />
+   491→                  <span className="text-lg font-bold">{stats.deleted}</span>
+   492→                </div>
+   493→                <p className="mt-0.5 text-[11px] text-muted-foreground">Dihapus</p>
+   494→              </div>
+   495→            </div>
+   496→          </div>
+   497→        </motion.div>
+   498→
+   499→        {/* ── Search Bar ──────────────────────────────────────── */}
+   500→        <motion.div variants={fadeUp} className="mb-4">
+   501→          <div className="relative">
+   502→            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+   503→            <Input
+   504→              placeholder="Cari user berdasarkan nama atau email..."
+   505→              value={search}
+   506→              onChange={(e) => setSearch(e.target.value)}
+   507→              className="rounded-xl pl-10"
+   508→            />
+   509→          </div>
+   510→        </motion.div>
+   511→
+   512→        {/* ── Tab Filter ──────────────────────────────────────── */}
+   513→        <motion.div variants={fadeUp} className="mb-4">
+   514→          <div className="flex gap-2">
+   515→            {tabs.map((tab) => (
+   516→              <motion.button
+   517→                key={tab.key}
+   518→                whileTap={{ scale: 0.96 }}
+   519→                onClick={() => setTabFilter(tab.key)}
+   520→                className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-all ${
+   521→                  tabFilter === tab.key
+   522→                    ? 'border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800/40'
+   523→                    : 'border-border/40 bg-card text-muted-foreground hover:bg-muted/50'
+   524→                }`}
+   525→              >
+   526→                {tab.label}
+   527→                <Badge
+   528→                  variant="secondary"
+   529→                  className={`text-[10px] px-1 ${
+   530→                    tabFilter === tab.key
+   531→                      ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+   532→                      : ''
+   533→                  }`}
+   534→                >
+   535→                  {tab.count}
+   536→                </Badge>
+   537→              </motion.button>
+   538→            ))}
+   539→          </div>
+   540→        </motion.div>
+   541→
+   542→        {/* ── Refresh Button ──────────────────────────────────── */}
+   543→        <motion.div variants={fadeUp} className="mb-3 flex items-center justify-between">
+   544→          <div className="flex items-center gap-2">
+   545→            <Shield className="h-4 w-4 text-emerald-500" />
+   546→            <h2 className="text-sm font-semibold">Daftar User</h2>
+   547→            <Badge variant="secondary" className="text-[10px] px-1.5">
+   548→              {filteredUsers.length}
+   549→            </Badge>
+   550→          </div>
+   551→          <button
+   552→            onClick={() => setRefreshKey((k) => k + 1)}
+   553→            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+   554→          >
+   555→            <RefreshCw className="h-3 w-3" />
+   556→            Segarkan
+   557→          </button>
+   558→        </motion.div>
+   559→
+   560→        {/* ── Loading State ──────────────────────────────────── */}
+   561→        {loading && (
+   562→          <motion.div variants={fadeUp} className="space-y-3 mb-6">
+   563→            {Array.from({ length: 4 }).map((_, i) => (
+   564→              <div key={i} className="rounded-2xl nm-raised p-4">
+   565→                <div className="flex items-center gap-3">
+   566→                  <Skeleton className="h-11 w-11 rounded-xl" />
+   567→                  <div className="flex-1 space-y-2">
+   568→                    <Skeleton className="h-4 w-32" />
+   569→                    <Skeleton className="h-3 w-24" />
+   570→                    <Skeleton className="h-3 w-16" />
+   571→                  </div>
+   572→                  <Skeleton className="h-9 w-9 rounded-xl" />
+   573→                </div>
+   574→              </div>
+   575→            ))}
+   576→          </motion.div>
+   577→        )}
+   578→
+   579→        {/* ── User List ────────────────────────────────────────── */}
+   580→        {!loading && filteredUsers.length > 0 && (
+   581→          <motion.div variants={fadeUp} className="mb-6 space-y-0">
+   582→            {filteredUsers.map((user) => (
+   583→              <SwipeableUserCard
+   584→                key={user.id}
+   585→                user={user}
+   586→                onEdit={openEditDialog}
+   587→                onDelete={openDeleteDialog}
+   588→              />
+   589→            ))}
+   590→          </motion.div>
+   591→        )}
+   592→
+   593→        {/* ── Empty State ─────────────────────────────────────── */}
+   594→        {!loading && filteredUsers.length === 0 && (
+   595→          <motion.div variants={fadeUp} className="mb-6">
+   596→            <Bounce delay={0.2} intensity={2} hover>
+   597→              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-muted/20 px-6 py-10 text-center">
+   598→                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 mb-4">
+   599→                  <span className="text-3xl">👥</span>
+   600→                </div>
+   601→                <h3 className="text-base font-semibold">
+   602→                  {search.trim() ? 'User Tidak Ditemukan' : 'Belum Ada User'}
+   603→                </h3>
+   604→                <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+   605→                  {search.trim()
+   606→                    ? 'Coba kata kunci lain untuk mencari user'
+   607→                    : 'User yang terdaftar akan muncul di sini'}
+   608→                </p>
+   609→              </div>
+   610→            </Bounce>
+   611→          </motion.div>
+   612→        )}
+   613→      </motion.div>
+   614→
+   615→      {/* ═══════════════════════════════════════════════════════ */}
+   616→      {/* ── EDIT DIALOG ──────────────────────────────────────── */}
+   617→      {/* ═══════════════════════════════════════════════════════ */}
+   618→      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+   619→        <DialogContent className="max-h-[85vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+   620→          <div className="border-b border-border/40 bg-card px-5 pt-5 pb-4">
+   621→            <DialogHeader className="text-left">
+   622→              <DialogTitle className="flex items-center gap-2 text-lg">
+   623→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
+   624→                  <Edit3 className="h-4 w-4" />
+   625→                </div>
+   626→                <span className="font-bold text-amber-600 dark:text-amber-400">
+   627→                  Edit User
+   628→                </span>
+   629→              </DialogTitle>
+   630→              <DialogDescription className="mt-1 text-sm">
+   631→                {editingUser ? editingUser.email : ''}
+   632→              </DialogDescription>
+   633→            </DialogHeader>
+   634→          </div>
+   635→
+   636→          <div className="overflow-y-auto max-h-[55vh] px-5 py-4 space-y-5">
+   637→            {/* Active Status Toggle */}
+   638→            <div className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 p-4">
+   639→              <div className="flex items-center gap-3">
+   640→                {editIsActive ? (
+   641→                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+   642→                ) : (
+   643→                  <XCircle className="h-5 w-5 text-muted-foreground" />
+   644→                )}
+   645→                <div>
+   646→                  <p className="text-sm font-semibold">Status Aktif</p>
+   647→                  <p className="text-[11px] text-muted-foreground">
+   648→                    {editIsActive
+   649→                      ? 'User dapat mengakses aplikasi'
+   650→                      : 'User dinonaktifkan sementara'}
+   651→                  </p>
+   652→                </div>
+   653→              </div>
+   654→              <Switch
+   655→                checked={editIsActive}
+   656→                onCheckedChange={setEditIsActive}
+   657→              />
+   658→            </div>
+   659→
+   660→            {/* Name */}
+   661→            <div className="space-y-2">
+   662→              <Label htmlFor="edit-name" className="text-xs font-semibold">
+   663→                Nama
+   664→              </Label>
+   665→              <Input
+   666→                id="edit-name"
+   667→                placeholder="Nama lengkap"
+   668→                value={editName}
+   669→                onChange={(e) => setEditName(e.target.value)}
+   670→                className="rounded-xl"
+   671→              />
+   672→            </div>
+   673→
+   674→            {/* Email */}
+   675→            <div className="space-y-2">
+   676→              <Label htmlFor="edit-email" className="text-xs font-semibold">
+   677→                Email <span className="text-red-500">*</span>
+   678→              </Label>
+   679→              <Input
+   680→                id="edit-email"
+   681→                type="email"
+   682→                placeholder="email@contoh.com"
+   683→                value={editEmail}
+   684→                onChange={(e) => setEditEmail(e.target.value)}
+   685→                className="rounded-xl"
+   686→              />
+   687→            </div>
+   688→
+   689→            {/* Role */}
+   690→            <div className="space-y-2">
+   691→              <Label className="text-xs font-semibold">Role</Label>
+   692→              <div className="grid grid-cols-2 gap-2">
+   693→                <motion.button
+   694→                  whileTap={{ scale: 0.96 }}
+   695→                  onClick={() => setEditRole('user')}
+   696→                  className={`flex items-center gap-2 rounded-xl border p-3 transition-all ${
+   697→                    editRole === 'user'
+   698→                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10'
+   699→                      : 'border-border/40 bg-card hover:border-border'
+   700→                  }`}
+   701→                >
+   702→                  <Users className="h-4 w-4" />
+   703→                  <span className="text-xs font-medium">User</span>
+   704→                </motion.button>
+   705→                <motion.button
+   706→                  whileTap={{ scale: 0.96 }}
+   707→                  onClick={() => setEditRole('admin')}
+   708→                  className={`flex items-center gap-2 rounded-xl border p-3 transition-all ${
+   709→                    editRole === 'admin'
+   710→                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-500/10'
+   711→                      : 'border-border/40 bg-card hover:border-border'
+   712→                  }`}
+   713→                >
+   714→                  <Shield className="h-4 w-4" />
+   715→                  <span className="text-xs font-medium">Admin</span>
+   716→                </motion.button>
+   717→              </div>
+   718→            </div>
+   719→          </div>
+   720→
+   721→          <div className="bg-muted/30 px-5 py-4">
+   722→            <Button
+   723→              onClick={handleEditSubmit}
+   724→              disabled={!editEmail.trim() || saving}
+   725→              className="w-full gap-2 rounded-xl bg-amber-500 text-white shadow-sm shadow-amber-500/25 hover:bg-amber-600 disabled:opacity-50"
+   726→            >
+   727→              {saving ? (
+   728→                <Loader2 className="h-4 w-4 animate-spin" />
+   729→              ) : (
+   730→                <CheckCircle2 className="h-4 w-4" />
+   731→              )}
+   732→              Simpan Perubahan
+   733→            </Button>
+   734→          </div>
+   735→        </DialogContent>
+   736→      </Dialog>
+   737→
+   738→      {/* ═══════════════════════════════════════════════════════ */}
+   739→      {/* ── DELETE DIALOG ──────────────────────────────────────── */}
+   740→      {/* ═══════════════════════════════════════════════════════ */}
+   741→      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+   742→        <DialogContent className="rounded-2xl sm:max-w-sm p-0 gap-0">
+   743→          <div className="px-5 pt-5 pb-4">
+   744→            <DialogHeader className="text-left">
+   745→              <DialogTitle className="flex items-center gap-2 text-lg">
+   746→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/15">
+   747→                  <Trash2 className="h-4 w-4 text-red-500" />
+   748→                </div>
+   749→                <span className="font-bold text-red-600 dark:text-red-400">
+   750→                  Pindahkan ke Tempat Sampah?
+   751→                </span>
+   752→              </DialogTitle>
+   753→              <DialogDescription className="mt-2 text-sm text-muted-foreground">
+   754→                User &quot;{deletingUser?.name || deletingUser?.email}&quot; akan dipindahkan ke
+   755→                tempat sampah dan dinonaktifkan.
+   756→              </DialogDescription>
+   757→            </DialogHeader>
+   758→          </div>
+   759→          <DialogFooter className="bg-muted/30 px-5 py-4 gap-2 sm:gap-0">
+   760→            <Button
+   761→              variant="ghost"
+   762→              onClick={() => setShowDeleteDialog(false)}
+   763→              className="flex-1 rounded-xl"
+   764→            >
+   765→              Batal
+   766→            </Button>
+   767→            <Button
+   768→              variant="destructive"
+   769→              onClick={handleDeleteConfirm}
+   770→              disabled={deleting}
+   771→              className="flex-1 gap-2 rounded-xl"
+   772→            >
+   773→              {deleting ? (
+   774→                <Loader2 className="h-4 w-4 animate-spin" />
+   775→              ) : (
+   776→                <Trash2 className="h-4 w-4" />
+   777→              )}
+   778→              Hapus
+   779→            </Button>
+   780→          </DialogFooter>
+   781→        </DialogContent>
+   782→      </Dialog>
+   783→    </div>
+   784→  );
+   785→}
+   786→
+   787→export default AdminUserManager;
+   788→

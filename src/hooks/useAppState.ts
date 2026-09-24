@@ -12,6 +12,9 @@ import type {
   ProductLink,
   AuthUser,
   Language,
+  FinanceRecord,
+  FinanceBudget,
+  FinanceGoal,
 } from '@/types';
 
 interface AppState {
@@ -92,6 +95,25 @@ interface AppState {
   addProductLink: (link: ProductLink) => void;
   isGeneratingLinks: boolean;
   setGeneratingLinks: (loading: boolean) => void;
+
+  // Finance
+  financeRecords: FinanceRecord[];
+  financeBudgets: FinanceBudget[];
+  financeGoals: FinanceGoal[];
+  isFinanceLoading: boolean;
+  setFinanceRecords: (records: FinanceRecord[]) => void;
+  setFinanceBudgets: (budgets: FinanceBudget[]) => void;
+  setFinanceGoals: (goals: FinanceGoal[]) => void;
+  setFinanceLoading: (loading: boolean) => void;
+  addFinanceRecord: (record: FinanceRecord) => void;
+  updateFinanceRecord: (id: string, data: Partial<FinanceRecord>) => void;
+  removeFinanceRecord: (id: string) => void;
+  addFinanceBudget: (budget: FinanceBudget) => void;
+  updateFinanceBudget: (id: string, data: Partial<FinanceBudget>) => void;
+  removeFinanceBudget: (id: string) => void;
+  addFinanceGoal: (goal: FinanceGoal) => void;
+  updateFinanceGoal: (id: string, data: Partial<FinanceGoal>) => void;
+  removeFinanceGoal: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -251,6 +273,43 @@ export const useAppStore = create<AppState>()(
         })),
       isGeneratingLinks: false,
       setGeneratingLinks: (loading) => set({ isGeneratingLinks: loading }),
+
+      // Finance
+      financeRecords: [],
+      financeBudgets: [],
+      financeGoals: [],
+      isFinanceLoading: false,
+      setFinanceRecords: (records) => set({ financeRecords: records }),
+      setFinanceBudgets: (budgets) => set({ financeBudgets: budgets }),
+      setFinanceGoals: (goals) => set({ financeGoals: goals }),
+      setFinanceLoading: (loading) => set({ isFinanceLoading: loading }),
+      addFinanceRecord: (record) => set((state) => ({
+        financeRecords: [...state.financeRecords, record],
+      })),
+      updateFinanceRecord: (id, data) => set((state) => ({
+        financeRecords: state.financeRecords.map((r) => r.id === id ? { ...r, ...data } : r),
+      })),
+      removeFinanceRecord: (id) => set((state) => ({
+        financeRecords: state.financeRecords.filter((r) => r.id !== id),
+      })),
+      addFinanceBudget: (budget) => set((state) => ({
+        financeBudgets: [...state.financeBudgets, budget],
+      })),
+      updateFinanceBudget: (id, data) => set((state) => ({
+        financeBudgets: state.financeBudgets.map((b) => b.id === id ? { ...b, ...data } : b),
+      })),
+      removeFinanceBudget: (id) => set((state) => ({
+        financeBudgets: state.financeBudgets.filter((b) => b.id !== id),
+      })),
+      addFinanceGoal: (goal) => set((state) => ({
+        financeGoals: [...state.financeGoals, goal],
+      })),
+      updateFinanceGoal: (id, data) => set((state) => ({
+        financeGoals: state.financeGoals.map((g) => g.id === id ? { ...g, ...data } : g),
+      })),
+      removeFinanceGoal: (id) => set((state) => ({
+        financeGoals: state.financeGoals.filter((g) => g.id !== id),
+      })),
     }),
     {
       name: 'dapurmind-store',

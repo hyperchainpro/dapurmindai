@@ -66,6 +66,7 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <head>
         <ThemeInitScript />
+        <meta name="monetag" content="6c39347612ef415a4b027d515583df8c" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-app-capable" content="yes" />
         <meta name="apple-mobile-app-status-bar-style" content="default" />

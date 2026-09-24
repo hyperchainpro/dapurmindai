@@ -28,6 +28,7 @@ import {
   BrainCircuit,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
+import { adminFetch } from '@/lib/admin-fetch';
 
 /* ── Animation variants ───────────────────────────────────────── */
 
@@ -179,7 +180,7 @@ const PURPOSE_OPTIONS: AgentPurpose[] = [
   'affiliate',
 ];
 
-const ADMIN_KEY = 'dapurmind2025';
+/* ADMIN_KEY removed – use adminFetch() instead */
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 
@@ -458,9 +459,7 @@ export function AdminAiAgents() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/admin/ai-agents', {
-        headers: { 'X-Admin-Key': ADMIN_KEY },
-      });
+      const res = await adminFetch('/api/admin/ai-agents');
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         throw new Error(data?.error || 'Gagal memuat data AI agents');
@@ -543,11 +542,10 @@ export function AdminAiAgents() {
         body.id = editingAgent.id;
       }
 
-      const res = await fetch(url, {
+      const res = await adminFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': ADMIN_KEY,
         },
         body: JSON.stringify(body),
       });
@@ -584,11 +582,10 @@ export function AdminAiAgents() {
     try {
       setSaving(true);
       setError(null);
-      const res = await fetch('/api/admin/ai-agents', {
+      const res = await adminFetch('/api/admin/ai-agents', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': ADMIN_KEY,
         },
         body: JSON.stringify({ id: agent.id, isDefault: true }),
       });
@@ -608,11 +605,10 @@ export function AdminAiAgents() {
     try {
       setSaving(true);
       setError(null);
-      const res = await fetch('/api/admin/ai-agents', {
+      const res = await adminFetch('/api/admin/ai-agents', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Key': ADMIN_KEY,
         },
         body: JSON.stringify({ id: agent.id, isActive: !agent.isActive }),
       });
@@ -638,9 +634,8 @@ export function AdminAiAgents() {
     try {
       setDeleting(true);
       setError(null);
-      const res = await fetch(`/api/admin/ai-agents?id=${encodeURIComponent(deletingAgent.id)}`, {
+      const res = await adminFetch(`/api/admin/ai-agents?id=${encodeURIComponent(deletingAgent.id)}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Key': ADMIN_KEY },
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);

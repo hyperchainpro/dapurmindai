@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir, unlink, stat } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 /* ── User store (shared with auth) ───────────────────────── */
 
@@ -50,20 +51,14 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const formData = await request.formData();
     const file = formData.get('avatar') as File | null;
-    const userId = formData.get('userId') as string | null;
 
     if (!file) {
       return NextResponse.json(
         { error: 'File avatar tidak ditemukan.' },
-        { status: 400 }
-      );
-    }
-
-    if (!userId || typeof userId !== 'string') {
-      return NextResponse.json(
-        { error: 'User ID diperlukan.' },
         { status: 400 }
       );
     }
@@ -140,6 +135,9 @@ export async function POST(request: NextRequest) {
       message: 'Avatar berhasil diperbarui.',
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Profile API] Error:', error);
 
     if (error instanceof Error) {

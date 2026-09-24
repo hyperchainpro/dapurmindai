@@ -368,18 +368,18 @@ export function MarketplaceHub() {
 
   /* ── Handlers ──────────────────────────────────────── */
   const handleBuyItem = useCallback((item: ShoppingItem) => {
-    const url = buildAffiliateUrl('tokopedia-now', item.name);
+    const url = buildAffiliateUrl('shopee-grocery', item.name);
     window.open(url, '_blank', 'noopener,noreferrer');
   }, []);
 
-  const handleBuyAllTokopedia = useCallback(() => {
+  const handleBuyAllShopee = useCallback(() => {
     const names = filteredItems.map((i) => i.name);
     if (names.length === 0) return;
-    const url = buildBulkAffiliateUrl('tokopedia-now', names);
+    const url = buildBulkAffiliateUrl('shopee-grocery', names);
     window.open(url, '_blank', 'noopener,noreferrer');
   }, [filteredItems]);
 
-  const handleBuyAllShopee = useCallback(() => {
+  const handleBuyAllShopeeSegar = useCallback(() => {
     const names = filteredItems.map((i) => i.name);
     if (names.length === 0) return;
     const url = buildBulkAffiliateUrl('shopee-segar', names);
@@ -389,7 +389,7 @@ export function MarketplaceHub() {
   const handleBuyAllMulti = useCallback(() => {
     const names = filteredItems.map((i) => i.name);
     if (names.length === 0) return;
-    ['tokopedia-now', 'shopee-segar', 'sayurbox'].forEach((mpId, idx) => {
+    ['shopee-grocery', 'shopee-segar', 'sayurbox'].forEach((mpId, idx) => {
       setTimeout(() => {
         const url = buildBulkAffiliateUrl(mpId, names);
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -758,11 +758,11 @@ export function MarketplaceHub() {
           </motion.div>
 
           <motion.div variants={stagger} className="space-y-2">
-            {/* Tokopedia Now */}
+            {/* Shopee Food & Grocery */}
             <motion.div variants={fadeUp}>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
-                  onClick={handleBuyAllTokopedia}
+                  onClick={handleBuyAllShopee}
                   disabled={filteredItems.length === 0}
                   className="flex w-full items-center gap-3 rounded-xl border border-green-200/60 bg-green-50/50 p-3 text-left transition-all hover:shadow-md dark:border-green-800/30 dark:bg-green-500/5 disabled:opacity-40 disabled:pointer-events-none"
                 >
@@ -770,7 +770,7 @@ export function MarketplaceHub() {
                     🛒
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Beli Semua di Tokopedia Now</p>
+                    <p className="text-sm font-semibold text-foreground">Beli Semua di Shopee</p>
                     <p className="text-[11px] text-muted-foreground truncate">
                       Pengiriman 2 jam · Cashback 10% · {filteredItems.length} item
                     </p>
@@ -783,7 +783,7 @@ export function MarketplaceHub() {
             <motion.div variants={fadeUp}>
                 <motion.button
                   whileTap={{ scale: 0.97 }}
-                  onClick={handleBuyAllShopee}
+                  onClick={handleBuyAllShopeeSegar}
                   disabled={filteredItems.length === 0}
                   className="flex w-full items-center gap-3 rounded-xl border border-orange-200/60 bg-orange-50/50 p-3 text-left transition-all hover:shadow-md dark:border-orange-800/30 dark:bg-orange-500/5 disabled:opacity-40 disabled:pointer-events-none"
                 >
@@ -937,7 +937,7 @@ export function MarketplaceHub() {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   if (filteredItems.length > 0) {
-                    handleBuyAllTokopedia();
+                    handleBuyAllShopee();
                   }
                 }}
                 disabled={filteredItems.length === 0}

@@ -11,10 +11,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 
-/* ── Admin credentials (client-side only) ─────────────────── */
-
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'dapurmind2025';
+/* ── Admin login goes through the server-side API ── */
 
 /* ── Animation variants ──────────────────────────────────── */
 
@@ -49,11 +46,21 @@ export function AdminLogin() {
     // Simulate brief loading for UX
     await new Promise((r) => setTimeout(r, 600));
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      setAdminLoggedIn(true);
-      setScreen('admin-affiliate');
-    } else {
-      setError('Username atau password salah');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+
+      if (res.ok) {
+        setAdminLoggedIn(true);
+        setScreen('admin-affiliate');
+      } else {
+        setError('Username atau password salah');
+      }
+    } catch {
+      setError('Gagal menghubungi server');
     }
 
     setIsLoading(false);

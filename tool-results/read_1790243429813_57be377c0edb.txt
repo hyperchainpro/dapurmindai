@@ -1,0 +1,703 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useMemo, useCallback } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  ArrowLeft,
+     7→  ShoppingCart,
+     8→  Trash2,
+     9→  ExternalLink,
+    10→  CheckCircle2,
+    11→  Circle,
+    12→  ShoppingBag,
+    13→  Sparkles,
+    14→} from 'lucide-react';
+    15→import { useAppStore } from '@/hooks/useAppState';
+    16→import type { ShoppingItem } from '@/types';
+    17→import {
+    18→  Accordion,
+    19→  AccordionItem,
+    20→  AccordionTrigger,
+    21→  AccordionContent,
+    22→} from '@/components/ui/accordion';
+    23→import {
+    24→  Dialog,
+    25→  DialogContent,
+    26→  DialogHeader,
+    27→  DialogTitle,
+    28→  DialogDescription,
+    29→  DialogFooter,
+    30→} from '@/components/ui/dialog';
+    31→import { Button } from '@/components/ui/button';
+    32→import { NumberTicker, BorderBeam, BentoGrid, BentoGridItem } from '@/components/dapurmind/MagicUI';
+    33→import { Bounce, GlowingText, CountUp, ClickSpark } from '@/components/dapurmind/ReactBits';
+    34→import { AffiliatePicker } from '@/components/dapurmind/AffiliatePicker';
+    35→import { AFFILIATE_MARKETPLACES, buildBulkAffiliateUrl, buildAffiliateUrl } from '@/lib/affiliate';
+    36→
+    37→/* ── Category config ──────────────────────────────────────────── */
+    38→
+    39→const CATEGORY_META: Record<
+    40→  string,
+    41→  { label: string; emoji: string; color: string }
+    42→> = {
+    43→  Sayuran: { label: 'Sayuran', emoji: '🥬', color: 'text-green-600 dark:text-green-400' },
+    44→  Daging: { label: 'Daging & Protein', emoji: '🥩', color: 'text-rose-600 dark:text-rose-400' },
+    45→  Bumbu: { label: 'Bumbu & Rempah', emoji: '🌶️', color: 'text-amber-600 dark:text-amber-400' },
+    46→  'Bahan Pokok': {
+    47→    label: 'Bahan Pokok',
+    48→    emoji: '🍚',
+    49→    color: 'text-orange-600 dark:text-orange-400',
+    50→  },
+    51→  'Susu & Telur': {
+    52→    label: 'Susu & Telur',
+    53→    emoji: '🥚',
+    54→    color: 'text-yellow-600 dark:text-yellow-400',
+    55→  },
+    56→  Lainnya: { label: 'Lainnya', emoji: '📦', color: 'text-slate-600 dark:text-slate-400' },
+    57→};
+    58→
+    59→const DEFAULT_CATEGORY = 'Lainnya';
+    60→
+    61→function mapToCategory(category: string): string {
+    62→  const lc = category.toLowerCase();
+    63→  if (lc.includes('sayur') || lc.includes('kol') || lc.includes('tauge') || lc.includes('kangkung') || lc.includes('sawi') || lc.includes('daun bawang') || lc.includes('seledri') || lc.includes('nangka') || lc.includes('kacang panjang') || lc.includes('labu') || lc.includes('melinjo') || lc.includes('kecipir')) return 'Sayuran';
+    64→  if (lc.includes('protein') || lc.includes('ayam') || lc.includes('daging') || lc.includes('sapi') || lc.includes('telur') || lc.includes('tempe') || lc.includes('tahu') || lc.includes('ikan')) return 'Daging';
+    65→  if (lc.includes('bumbu') || lc.includes('cabai') || lc.includes('bawang') || lc.includes('kunyit') || lc.includes('jahe') || lc.includes('lengkuas') || lc.includes('serai') || lc.includes('garam') || lc.includes('gula') || lc.includes('kecap') || lc.includes('santan') || lc.includes('merica') || lc.includes('sambal')) return 'Bumbu';
+    66→  if (lc.includes('bahan utama') || lc.includes('nasi') || lc.includes('beras') || lc.includes('mie') || lc.includes('tepung') || lc.includes('air') || lc.includes('minyak') || lc.includes('susu')) return 'Bahan Pokok';
+    67→  if (lc.includes('susu') || lc.includes('telur') || lc.includes('kelapa')) return 'Susu & Telur';
+    68→  return DEFAULT_CATEGORY;
+    69→}
+    70→
+    71→/* ── Format helpers ───────────────────────────────────────────── */
+    72→
+    73→function formatRupiah(amount: number): string {
+    74→  return `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
+    75→}
+    76→
+    77→/* ── Animation variants ───────────────────────────────────────── */
+    78→
+    79→const stagger = {
+    80→  hidden: {},
+    81→  visible: { transition: { staggerChildren: 0.05 } },
+    82→};
+    83→
+    84→const fadeUp = {
+    85→  hidden: { opacity: 0, y: 14, filter: 'blur(3px)' },
+    86→  visible: {
+    87→    opacity: 1,
+    88→    y: 0,
+    89→    filter: 'blur(0px)',
+    90→    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    91→  },
+    92→};
+    93→
+    94→/* ── ShoppingList component ───────────────────────────────────── */
+    95→
+    96→export function ShoppingList() {
+    97→  const shoppingItems = useAppStore((s) => s.shoppingItems);
+    98→  const setShoppingItems = useAppStore((s) => s.setShoppingItems);
+    99→  const toggleShoppingItem = useAppStore((s) => s.toggleShoppingItem);
+   100→  const goBack = useAppStore((s) => s.goBack);
+   101→  const setScreen = useAppStore((s) => s.setScreen);
+   102→
+   103→  const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
+   104→  const [showBuyAllDialog, setShowBuyAllDialog] = useState(false);
+   105→  const [selectedAffiliateItem, setSelectedAffiliateItem] = useState<ShoppingItem | null>(null);
+   106→  const [showSingleAffiliate, setShowSingleAffiliate] = useState(false);
+   107→  const [showBulkAffiliate, setShowBulkAffiliate] = useState(false);
+   108→  const [isGeneratingLinks, setIsGeneratingLinks] = useState(false);
+   109→
+   110→  /* ── Derived state ──────────────────────────────────── */
+   111→  const uncheckedItems = useMemo(
+   112→    () => shoppingItems.filter((i) => !i.checked),
+   113→    [shoppingItems]
+   114→  );
+   115→
+   116→  /* ── Group by category ─────────────────────────────── */
+   117→  const grouped = useMemo(() => {
+   118→    const groups: Record<string, ShoppingItem[]> = {};
+   119→    shoppingItems.forEach((item) => {
+   120→      const cat = mapToCategory(item.category);
+   121→      if (!groups[cat]) groups[cat] = [];
+   122→      groups[cat].push(item);
+   123→    });
+   124→    const order = ['Sayuran', 'Daging', 'Bumbu', 'Bahan Pokok', 'Susu & Telur', 'Lainnya'];
+   125→    const sorted: [string, ShoppingItem[]][] = [];
+   126→    order.forEach((cat) => {
+   127→      if (groups[cat]) sorted.push([cat, groups[cat]]);
+   128→    });
+   129→    Object.keys(groups).forEach((cat) => {
+   130→      if (!order.includes(cat)) sorted.push([cat, groups[cat]]);
+   131→    });
+   132→    return sorted;
+   133→  }, [shoppingItems]);
+   134→
+   135→  /* ── Stats ─────────────────────────────────────────── */
+   136→  const checkedCount = useMemo(
+   137→    () => shoppingItems.filter((i) => i.checked).length,
+   138→    [shoppingItems]
+   139→  );
+   140→  const totalPrice = useMemo(
+   141→    () => shoppingItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
+   142→    [shoppingItems]
+   143→  );
+   144→  const totalUncheckedPrice = useMemo(
+   145→    () => uncheckedItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 0), 0),
+   146→    [uncheckedItems]
+   147→  );
+   148→
+   149→  /* ── Handlers ──────────────────────────────────────── */
+   150→  const handleDeleteItem = useCallback(
+   151→    (id: string) => {
+   152→      setShoppingItems(shoppingItems.filter((i) => i.id !== id));
+   153→      setShowDeleteDialog(null);
+   154→    },
+   155→    [shoppingItems, setShoppingItems]
+   156→  );
+   157→
+   158→  const handleAffiliateSingle = useCallback(
+   159→    (item: ShoppingItem) => {
+   160→      setSelectedAffiliateItem(item);
+   161→      setShowSingleAffiliate(true);
+   162→    },
+   163→    []
+   164→  );
+   165→
+   166→  const handleAffiliateBulk = useCallback(() => {
+   167→    setShowBuyAllDialog(false);
+   168→    setSelectedAffiliateItem(null);
+   169→    setShowBulkAffiliate(true);
+   170→  }, []);
+   171→
+   172→  /* ── Click logging ──────────────────────────────── */
+   173→  const logAffiliateClick = useCallback(async (platform: string, context: string, productName?: string) => {
+   174→    try {
+   175→      await fetch('/api/affiliate/click-log', {
+   176→        method: 'POST',
+   177→        headers: { 'Content-Type': 'application/json' },
+   178→        body: JSON.stringify({
+   179→          productLinkId: `manual-${platform}-${productName || 'bulk'}-${Date.now()}`,
+   180→          platform,
+   181→          context,
+   182→        }),
+   183→      });
+   184→    } catch { /* silent fail */ }
+   185→  }, []);
+   186→
+   187→  /* ── Multi-platform buy handler ──────────────────── */
+   188→  const handleMultiPlatformBuy = useCallback(() => {
+   189→    setShowBuyAllDialog(false);
+   190→    const itemNames = uncheckedItems.map((i) => i.name);
+   191→    // Open top 3 marketplaces in new tabs
+   192→    AFFILIATE_MARKETPLACES.slice(0, 3).forEach((mp, idx) => {
+   193→      setTimeout(() => {
+   194→        const url = buildBulkAffiliateUrl(mp.id, itemNames);
+   195→        window.open(url, '_blank', 'noopener,noreferrer');
+   196→        logAffiliateClick(mp.platform, 'multi_platform_buy');
+   197→      }, idx * 300);
+   198→    });
+   199→  }, [uncheckedItems, logAffiliateClick]);
+   200→
+   201→  /* ── AI Generate Links ───────────────────────────── */
+   202→  const handleGenerateAILinks = useCallback(async (itemName: string, category: string) => {
+   203→    setIsGeneratingLinks(true);
+   204→    try {
+   205→      const res = await fetch('/api/affiliate/generate-link', {
+   206→        method: 'POST',
+   207→        headers: { 'Content-Type': 'application/json' },
+   208→        body: JSON.stringify({ productName: itemName, category }),
+   209→      });
+   210→      const data = await res.json();
+   211→      if (data.links && data.links.length > 0) {
+   212→        // Open the first link
+   213→        window.open(data.links[0].affiliateUrl, '_blank', 'noopener,noreferrer');
+   214→        logAffiliateClick(data.links[0].platform, 'ai_generated', itemName);
+   215→      }
+   216→    } catch { /* fallback to regular search */ } finally {
+   217→      setIsGeneratingLinks(false);
+   218→    }
+   219→  }, [logAffiliateClick]);
+   220→
+   221→  /* ── Empty state ───────────────────────────────────── */
+   222→  if (shoppingItems.length === 0) {
+   223→    return (
+   224→      <div className="min-h-screen px-4 pb-28 pt-4">
+   225→        <motion.div
+   226→          variants={stagger}
+   227→          initial="hidden"
+   228→          animate="visible"
+   229→          className="flex flex-col items-center justify-center gap-6 pt-20 text-center"
+   230→        >
+   231→          <motion.div variants={fadeUp}>
+   232→            <Bounce intensity={3} repeat>
+   233→              <div className="relative">
+   234→                <div className="text-8xl">🛒</div>
+   235→                <motion.div
+   236→                  className="absolute -right-2 -top-2 text-2xl"
+   237→                  animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
+   238→                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+   239→                >
+   240→                  😅
+   241→                </motion.div>
+   242→              </div>
+   243→            </Bounce>
+   244→          </motion.div>
+   245→          <motion.div variants={fadeUp} className="space-y-2">
+   246→            <h2 className="text-xl font-bold text-foreground">
+   247→              Belum ada daftar belanja
+   248→            </h2>
+   249→            <p className="max-w-[260px] text-sm text-muted-foreground">
+   250→              Buat rencana menu dulu yuk, biar bisa langsung belanja bahan-bahannya!
+   251→            </p>
+   252→          </motion.div>
+   253→          <motion.div variants={fadeUp}>
+   254→            <Button
+   255→              onClick={() => setScreen('chat')}
+   256→              className="gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
+   257→            >
+   258→              <Sparkles className="h-4 w-4" />
+   259→              Buat Rencana Menu
+   260→            </Button>
+   261→          </motion.div>
+   262→        </motion.div>
+   263→      </div>
+   264→    );
+   265→  }
+   266→
+   267→  /* ── Main render ───────────────────────────────────── */
+   268→  return (
+   269→    <div className="min-h-screen bg-[var(--nm-bg)]">
+   270→      <div className="flex flex-col pb-40">
+   271→        {/* ── Header ─────────────────────────────────── */}
+   272→        <header className="sticky top-0 z-20 glass">
+   273→          <div className="flex items-center gap-3 px-4 py-3">
+   274→            <motion.button
+   275→              whileTap={{ scale: 0.9 }}
+   276→              onClick={goBack}
+   277→              className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
+   278→              aria-label="Kembali"
+   279→            >
+   280→              <ArrowLeft className="h-4 w-4" />
+   281→            </motion.button>
+   282→            <div className="flex-1">
+   283→              <div className="flex items-center gap-2">
+   284→                <ShoppingCart className="h-5 w-5 text-emerald-500" />
+   285→                <h1 className="text-lg font-bold tracking-tight">
+   286→                  <GlowingText color="emerald" intensity={1}>
+   287→                    Daftar Belanja
+   288→                  </GlowingText>
+   289→                </h1>
+   290→              </div>
+   291→              <p className="mt-0.5 text-xs text-muted-foreground">
+   292→                <NumberTicker value={shoppingItems.length} duration={1} /> item total
+   293→                {' · '}
+   294→                <NumberTicker value={checkedCount} duration={1} /> sudah dibeli
+   295→              </p>
+   296→            </div>
+   297→            <div className="text-right">
+   298→              <p className="text-xs text-muted-foreground">Estimasi</p>
+   299→              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+   300→                <NumberTicker value={totalPrice} duration={1.5} />
+   301→              </p>
+   302→            </div>
+   303→          </div>
+   304→        </header>
+   305→
+   306→        {/* ── Affiliate Marketplace Banner ───────────── */}
+   307→        {uncheckedItems.length > 0 && (
+   308→          <motion.div
+   309→            initial={{ opacity: 0, y: -10 }}
+   310→            animate={{ opacity: 1, y: 0 }}
+   311→            className="mx-4 mt-3"
+   312→          >
+   313→            <button
+   314→              onClick={handleAffiliateBulk}
+   315→              className="flex w-full items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-3 text-left transition-all hover:shadow-md dark:from-emerald-500/10 dark:via-background dark:to-amber-500/10 border border-emerald-200/50 dark:border-emerald-800/30"
+   316→            >
+   317→              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-amber-500 text-white">
+   318→                <ShoppingBag className="h-5 w-5" />
+   319→              </div>
+   320→              <div className="flex-1 min-w-0">
+   321→                <p className="text-sm font-semibold text-foreground">
+   322→                  Beli Online Sekarang
+   323→                </p>
+   324→                <p className="text-xs text-muted-foreground truncate">
+   325→                  {uncheckedItems.length} bahan belum dibeli · {formatRupiah(totalUncheckedPrice)}
+   326→                </p>
+   327→              </div>
+   328→              <div className="flex -space-x-1.5">
+   329→                {['🛒', '🧡', '🥬'].map((e, i) => (
+   330→                  <span
+   331→                    key={i}
+   332→                    className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-muted text-xs"
+   333→                  >
+   334→                    {e}
+   335→                  </span>
+   336→                ))}
+   337→              </div>
+   338→            </button>
+   339→          </motion.div>
+   340→        )}
+   341→
+   342→        {/* ── Category grouped list ──────────────────── */}
+   343→        <motion.section
+   344→          variants={stagger}
+   345→          initial="hidden"
+   346→          animate="visible"
+   347→          className="px-4 pt-3"
+   348→        >
+   349→          <Accordion
+   350→            type="multiple"
+   351→            defaultValue={grouped.map(([cat]) => cat)}
+   352→            className="space-y-2"
+   353→          >
+   354→            {grouped.map(([category, items]) => {
+   355→              const meta = CATEGORY_META[category] ?? CATEGORY_META[DEFAULT_CATEGORY];
+   356→              const catChecked = items.filter((i) => i.checked).length;
+   357→              const catTotal = items.reduce((s, i) => s + (i.estimatedPrice ?? 0), 0);
+   358→
+   359→              return (
+   360→                <motion.div key={category} variants={fadeUp}>
+   361→                  <AccordionItem
+   362→                    value={category}
+   363→                    className="rounded-xl nm-raised overflow-hidden"
+   364→                  >
+   365→                    <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
+   366→                      <div className="flex items-center gap-3 text-left">
+   367→                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/60 text-lg">
+   368→                          {meta.emoji}
+   369→                        </span>
+   370→                        <div className="flex-1">
+   371→                          <div className="flex items-center gap-2">
+   372→                            <span className={`text-sm font-semibold ${meta.color}`}>
+   373→                              {meta.label}
+   374→                            </span>
+   375→                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+   376→                              {catChecked}/{items.length}
+   377→                            </span>
+   378→                          </div>
+   379→                          <p className="text-xs text-muted-foreground">
+   380→                            {formatRupiah(catTotal)}
+   381→                          </p>
+   382→                        </div>
+   383→                      </div>
+   384→                    </AccordionTrigger>
+   385→                    <AccordionContent className="px-2 pb-2">
+   386→                      <div className="space-y-1">
+   387→                        {items.map((item) => (
+   388→                          <ShoppingItemRow
+   389→                            key={item.id}
+   390→                            item={item}
+   391→                            onToggle={toggleShoppingItem}
+   392→                            onDelete={() => setShowDeleteDialog(item.id)}
+   393→                            onAffiliate={() => handleAffiliateSingle(item)}
+   394→                          />
+   395→                        ))}
+   396→                      </div>
+   397→                    </AccordionContent>
+   398→                  </AccordionItem>
+   399→                </motion.div>
+   400→              );
+   401→            })}
+   402→          </Accordion>
+   403→        </motion.section>
+   404→      </div>
+   405→
+   406→      {/* ── Summary Bar (fixed bottom) ──────────────── */}
+   407→      <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
+   408→        <div className="relative overflow-hidden rounded-2xl nm-raised p-4 shadow-lg backdrop-blur-xl">
+   409→          <BorderBeam
+   410→            duration={6}
+   411→            size={120}
+   412→            color={['#10b981', '#f59e0b', '#10b981']}
+   413→            borderWidth={1.5}
+   414→            borderRadius={16}
+   415→          />
+   416→
+   417→          <div className="relative z-10 space-y-3">
+   418→            {/* Progress */}
+   419→            <div className="flex items-center justify-between text-sm">
+   420→              <span className="text-muted-foreground">
+   421→                <CheckCircle2 className="mr-1 inline h-3.5 w-3.5 text-emerald-500" />
+   422→                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+   423→                  {checkedCount}
+   424→                </span>
+   425→                <span className="text-muted-foreground">
+   426→                  /{shoppingItems.length} sudah dibeli
+   427→                </span>
+   428→              </span>
+   429→              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+   430→                {formatRupiah(totalPrice)}
+   431→              </span>
+   432→            </div>
+   433→
+   434→            {/* Progress bar */}
+   435→            <div className="h-1.5 w-full rounded-full bg-muted/60">
+   436→              <motion.div
+   437→                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600"
+   438→                initial={{ width: 0 }}
+   439→                animate={{
+   440→                  width:
+   441→                    shoppingItems.length > 0
+   442→                      ? `${(checkedCount / shoppingItems.length) * 100}%`
+   443→                      : '0%',
+   444→                }}
+   445→                transition={{ duration: 0.6, ease: 'easeOut' }}
+   446→              />
+   447→            </div>
+   448→
+   449→            {/* CTA Button */}
+   450→            <motion.button
+   451→              whileTap={{ scale: 0.97 }}
+   452→              onClick={() => setShowBuyAllDialog(true)}
+   453→              disabled={uncheckedItems.length === 0}
+   454→              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+   455→            >
+   456→              <ShoppingBag className="h-4 w-4" />
+   457→              Beli Semua Bahan
+   458→              {totalUncheckedPrice > 0 && (
+   459→                <span className="ml-1 text-xs opacity-80">
+   460→                  ({formatRupiah(totalUncheckedPrice)})
+   461→                </span>
+   462→              )}
+   463→            </motion.button>
+   464→          </div>
+   465→        </div>
+   466→      </div>
+   467→
+   468→      {/* ── Single Item Affiliate Picker ──────────────── */}
+   469→      <AffiliatePicker
+   470→        open={showSingleAffiliate}
+   471→        onOpenChange={setShowSingleAffiliate}
+   472→        singleItem={selectedAffiliateItem}
+   473→      />
+   474→
+   475→      {/* ── Bulk Affiliate Picker ──────────────────────── */}
+   476→      <AffiliatePicker
+   477→        open={showBulkAffiliate}
+   478→        onOpenChange={setShowBulkAffiliate}
+   479→        bulkItems={uncheckedItems}
+   480→      />
+   481→
+   482→      {/* ── Delete Confirmation Dialog ───────────────── */}
+   483→      <Dialog
+   484→        open={showDeleteDialog !== null}
+   485→        onOpenChange={(open) => !open && setShowDeleteDialog(null)}
+   486→      >
+   487→        <DialogContent className="rounded-2xl sm:max-w-sm">
+   488→          <DialogHeader>
+   489→            <DialogTitle className="flex items-center gap-2">
+   490→              <Trash2 className="h-5 w-5 text-rose-500" />
+   491→              Hapus Item
+   492→            </DialogTitle>
+   493→            <DialogDescription>
+   494→              Yakin ingin menghapus item ini dari daftar belanja?
+   495→            </DialogDescription>
+   496→          </DialogHeader>
+   497→          <DialogFooter className="gap-2">
+   498→            <Button
+   499→              variant="outline"
+   500→              onClick={() => setShowDeleteDialog(null)}
+   501→              className="flex-1 rounded-full"
+   502→            >
+   503→              Batal
+   504→            </Button>
+   505→            <Button
+   506→              variant="destructive"
+   507→              onClick={() => showDeleteDialog && handleDeleteItem(showDeleteDialog)}
+   508→              className="flex-1 rounded-full"
+   509→            >
+   510→              Hapus
+   511→            </Button>
+   512→          </DialogFooter>
+   513→        </DialogContent>
+   514→      </Dialog>
+   515→
+   516→      {/* ── Buy All Confirmation Dialog ────────────────── */}
+   517→      <Dialog open={showBuyAllDialog} onOpenChange={setShowBuyAllDialog}>
+   518→        <DialogContent className="rounded-2xl sm:max-w-sm">
+   519→          <DialogHeader>
+   520→            <DialogTitle className="flex items-center gap-2">
+   521→              <ShoppingBag className="h-5 w-5 text-emerald-500" />
+   522→              Beli Semua Bahan
+   523→            </DialogTitle>
+   524→            <DialogDescription>
+   525→              Pilih marketplace untuk membeli {uncheckedItems.length} bahan yang belum dicentang.
+   526→            </DialogDescription>
+   527→          </DialogHeader>
+   528→          <div className="space-y-3">
+   529→            <div className="rounded-xl bg-muted/50 p-3">
+   530→              <p className="text-xs text-muted-foreground">
+   531→                Total bahan belum dibeli
+   532→              </p>
+   533→              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+   534→                {formatRupiah(totalUncheckedPrice)}
+   535→              </p>
+   536→            </div>
+   537→            {/* Quick marketplace shortcuts */}
+   538→            <div className="space-y-2">
+   539→              <p className="text-xs font-semibold text-muted-foreground">Pilih Marketplace:</p>
+   540→              {['tokopedia-now', 'shopee-segar', 'sayurbox'].map((mpId) => {
+   541→                const mp = AFFILIATE_MARKETPLACES.find((m) => m.id === mpId);
+   542→                if (!mp) return null;
+   543→                const url = buildBulkAffiliateUrl(mp.id, uncheckedItems.map((i) => i.name));
+   544→                return (
+   545→                  <button
+   546→                    key={mp.id}
+   547→                    onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+   548→                    className="flex w-full items-center gap-3 rounded-xl border border-border/50 p-3 text-left transition-colors hover:bg-muted/50"
+   549→                  >
+   550→                    <span className={`flex h-9 w-9 items-center justify-center rounded-lg text-lg ${mp.bgColor}`}>
+   551→                      {mp.logo}
+   552→                    </span>
+   553→                    <div className="flex-1">
+   554→                      <p className="text-sm font-semibold">{mp.name}</p>
+   555→                      <p className="text-[11px] text-muted-foreground">{mp.tagline}</p>
+   556→                    </div>
+   557→                    <ExternalLink className={`h-4 w-4 ${mp.textColor}`} />
+   558→                  </button>
+   559→                );
+   560→              })}
+   561→            </div>
+   562→            <button
+   563→              onClick={handleAffiliateBulk}
+   564→              className="w-full text-center text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+   565→            >
+   566→              Lihat semua marketplace ({AFFILIATE_MARKETPLACES.length}) →
+   567→            </button>
+   568→            {/* Multi-platform buy button */}
+   569→            <ClickSpark color="#f59e0b" count={6}>
+   570→              <motion.button
+   571→                whileTap={{ scale: 0.97 }}
+   572→                onClick={handleMultiPlatformBuy}
+   573→                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-sm font-semibold text-white shadow-md shadow-amber-500/25 transition-all hover:from-amber-600 hover:to-orange-600"
+   574→              >
+   575→                <ShoppingBag className="h-4 w-4" />
+   576→                Beli Semua (Multi-Platform)
+   577→                <span className="ml-1 text-xs opacity-80">
+   578→                  ({formatRupiah(totalUncheckedPrice)})
+   579→                </span>
+   580→              </motion.button>
+   581→            </ClickSpark>
+   582→          </div>
+   583→          <DialogFooter className="gap-2">
+   584→            <Button
+   585→              variant="outline"
+   586→              onClick={() => setShowBuyAllDialog(false)}
+   587→              className="flex-1 rounded-full"
+   588→            >
+   589→              Kembali
+   590→            </Button>
+   591→          </DialogFooter>
+   592→        </DialogContent>
+   593→      </Dialog>
+   594→    </div>
+   595→  );
+   596→}
+   597→
+   598→/* ── Shopping Item Row ────────────────────────────────────────── */
+   599→
+   600→function ShoppingItemRow({
+   601→  item,
+   602→  onToggle,
+   603→  onDelete,
+   604→  onAffiliate,
+   605→}: {
+   606→  item: ShoppingItem;
+   607→  onToggle: (id: string) => void;
+   608→  onDelete: () => void;
+   609→  onAffiliate: () => void;
+   610→}) {
+   611→  return (
+   612→    <motion.div
+   613→      layout
+   614→      className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+   615→        item.checked
+   616→          ? 'bg-muted/30'
+   617→          : 'bg-transparent hover:bg-muted/30'
+   618→      }`}
+   619→    >
+   620→      {/* Checkbox */}
+   621→      <motion.button
+   622→        whileTap={{ scale: 0.8 }}
+   623→        onClick={() => onToggle(item.id)}
+   624→        className="shrink-0"
+   625→        aria-label={item.checked ? 'Tandai belum dibeli' : 'Tandai sudah dibeli'}
+   626→      >
+   627→        <AnimatePresence mode="wait">
+   628→          {item.checked ? (
+   629→            <motion.div
+   630→              key="checked"
+   631→              initial={{ scale: 0 }}
+   632→              animate={{ scale: 1 }}
+   633→              exit={{ scale: 0 }}
+   634→            >
+   635→              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+   636→            </motion.div>
+   637→          ) : (
+   638→            <motion.div
+   639→              key="unchecked"
+   640→              initial={{ scale: 0 }}
+   641→              animate={{ scale: 1 }}
+   642→              exit={{ scale: 0 }}
+   643→            >
+   644→              <Circle className="h-5 w-5 text-muted-foreground/40" />
+   645→            </motion.div>
+   646→          )}
+   647→        </AnimatePresence>
+   648→      </motion.button>
+   649→
+   650→      {/* Info */}
+   651→      <div className="flex-1 min-w-0">
+   652→        <p
+   653→          className={`text-sm font-medium transition-all ${
+   654→            item.checked
+   655→              ? 'text-muted-foreground line-through opacity-60'
+   656→              : 'text-foreground'
+   657→          }`}
+   658→        >
+   659→          {item.name}
+   660→        </p>
+   661→        <p
+   662→          className={`text-xs transition-all ${
+   663→            item.checked
+   664→              ? 'text-muted-foreground/50 line-through'
+   665→              : 'text-muted-foreground'
+   666→          }`}
+   667→        >
+   668→          {item.amount} {item.unit}
+   669→          {item.estimatedPrice !== undefined && item.estimatedPrice > 0 && (
+   670→            <span className="ml-2 font-medium text-emerald-600/80 dark:text-emerald-400/80">
+   671→              {formatRupiah(item.estimatedPrice)}
+   672→            </span>
+   673→          )}
+   674→        </p>
+   675→      </div>
+   676→
+   677→      {/* Actions */}
+   678→      <div className="flex items-center gap-1 shrink-0">
+   679→        {/* Affiliate Buy button - always show */}
+   680→        <motion.button
+   681→          whileTap={{ scale: 0.9 }}
+   682→          onClick={onAffiliate}
+   683→          className="flex h-7 items-center gap-1 rounded-full bg-emerald-50 px-2.5 text-[10px] font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+   684→        >
+   685→          Beli
+   686→          <ExternalLink className="h-2.5 w-2.5" />
+   687→        </motion.button>
+   688→        {/* Delete button */}
+   689→        <motion.button
+   690→          whileTap={{ scale: 0.8 }}
+   691→          onClick={onDelete}
+   692→          className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/40 opacity-0 transition-all group-hover:opacity-100 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10 sm:opacity-100"
+   693→          aria-label="Hapus item"
+   694→        >
+   695→          <Trash2 className="h-3.5 w-3.5" />
+   696→        </motion.button>
+   697→      </div>
+   698→    </motion.div>
+   699→  );
+   700→}
+   701→
+   702→export default ShoppingList;
+   703→

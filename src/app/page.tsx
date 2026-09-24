@@ -77,6 +77,14 @@ const AdminAnalytics = dynamic(
   () => import('@/components/dapurmind/AdminAnalytics').then(m => ({ default: m.AdminAnalytics })),
   { ssr: false }
 );
+const FinancialPlannerPage = dynamic(
+  () => import('@/components/dapurmind/FinancialPlannerPage').then(m => ({ default: m.FinancialPlannerPage })),
+  { ssr: false }
+);
+const CreatorPage = dynamic(
+  () => import('@/components/dapurmind/CreatorPage').then(m => ({ default: m.CreatorPage })),
+  { ssr: false }
+);
 
 /* ── Screen renderer ──────────────────────────────────────────── */
 
@@ -195,6 +203,16 @@ function ScreenRouter() {
       {currentScreen === 'admin-analytics' && (
         <motion.div key="admin-analytics" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <AdminAnalytics />
+        </motion.div>
+      )}
+      {currentScreen === 'finance' && (
+        <motion.div key="finance" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <FinancialPlannerPage />
+        </motion.div>
+      )}
+      {currentScreen === 'creator' && (
+        <motion.div key="creator" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <CreatorPage />
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,0 +1,1088 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useMemo, useCallback } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  ArrowLeft,
+     7→  Search,
+     8→  Star,
+     9→  ExternalLink,
+    10→  Sparkles,
+    11→  ShoppingBag,
+    12→  Zap,
+    13→  RefreshCw,
+    14→  AlertCircle,
+    15→  ChevronRight,
+    16→  Globe,
+    17→  TrendingUp,
+    18→} from 'lucide-react';
+    19→import { useAppStore } from '@/hooks/useAppState';
+    20→import type { ShoppingItem, ProductLink } from '@/types';
+    21→import {
+    22→  AFFILIATE_MARKETPLACES,
+    23→  buildAffiliateUrl,
+    24→  buildBulkAffiliateUrl,
+    25→  getRecommendedMarketplaces,
+    26→} from '@/lib/affiliate';
+    27→import type { AffiliateMarketplace } from '@/lib/affiliate';
+    28→import { Button } from '@/components/ui/button';
+    29→import { Badge } from '@/components/ui/badge';
+    30→import { Input } from '@/components/ui/input';
+    31→import { Separator } from '@/components/ui/separator';
+    32→import { Skeleton } from '@/components/ui/skeleton';
+    33→import {
+    34→  Dialog,
+    35→  DialogContent,
+    36→  DialogHeader,
+    37→  DialogTitle,
+    38→  DialogDescription,
+    39→} from '@/components/ui/dialog';
+    40→import {
+    41→  ShineBorder,
+    42→  BentoGrid,
+    43→  BentoGridItem,
+    44→  NumberTicker,
+    45→  Marquee,
+    46→} from '@/components/dapurmind/MagicUI';
+    47→import {
+    48→  GlowingText,
+    49→  CountUp,
+    50→  ClickSpark,
+    51→  Bounce,
+    52→} from '@/components/dapurmind/ReactBits';
+    53→
+    54→/* ── Animation variants ───────────────────────────────────────── */
+    55→
+    56→const stagger = {
+    57→  hidden: {},
+    58→  visible: { transition: { staggerChildren: 0.07 } },
+    59→};
+    60→
+    61→const fadeUp = {
+    62→  hidden: { opacity: 0, y: 18, filter: 'blur(3px)' },
+    63→  visible: {
+    64→    opacity: 1,
+    65→    y: 0,
+    66→    filter: 'blur(0px)',
+    67→    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    68→  },
+    69→};
+    70→
+    71→const fadeIn = {
+    72→  hidden: { opacity: 0 },
+    73→  visible: { opacity: 1, transition: { duration: 0.3 } },
+    74→};
+    75→
+    76→/* ── Constants ────────────────────────────────────────────────── */
+    77→
+    78→const CATEGORY_TABS = [
+    79→  { id: 'semua', label: 'Semua', emoji: '🔍' },
+    80→  { id: 'Sayuran', label: 'Sayuran', emoji: '🥬' },
+    81→  { id: 'Daging', label: 'Daging', emoji: '🥩' },
+    82→  { id: 'Bumbu', label: 'Bumbu', emoji: '🌶️' },
+    83→  { id: 'Bahan Pokok', label: 'Bahan Pokok', emoji: '🍚' },
+    84→  { id: 'Susu & Telur', label: 'Susu & Telur', emoji: '🥚' },
+    85→];
+    86→
+    87→const CATEGORY_ICONS: Record<string, string> = {
+    88→  Sayuran: '🥬',
+    89→  Daging: '🥩',
+    90→  Bumbu: '🌶️',
+    91→  'Bahan Pokok': '🍚',
+    92→  'Susu & Telur': '🥚',
+    93→  Lainnya: '📦',
+    94→};
+    95→
+    96→const CATEGORY_COLORS: Record<string, string> = {
+    97→  Sayuran: 'from-green-500 to-emerald-600',
+    98→  Daging: 'from-rose-500 to-red-600',
+    99→  Bumbu: 'from-amber-500 to-orange-500',
+   100→  'Bahan Pokok': 'from-orange-500 to-yellow-500',
+   101→  'Susu & Telur': 'from-yellow-400 to-amber-500',
+   102→  Lainnya: 'from-slate-400 to-slate-600',
+   103→};
+   104→
+   105→function formatRupiah(amount: number): string {
+   106→  return `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
+   107→}
+   108→
+   109→function mapToCategory(category: string): string {
+   110→  const lc = category.toLowerCase();
+   111→  if (lc.includes('sayur') || lc.includes('kol') || lc.includes('tauge') || lc.includes('kangkung') || lc.includes('sawi') || lc.includes('daun bawang') || lc.includes('seledri') || lc.includes('nangka') || lc.includes('kacang panjang') || lc.includes('labu') || lc.includes('melinjo') || lc.includes('kecipir')) return 'Sayuran';
+   112→  if (lc.includes('protein') || lc.includes('ayam') || lc.includes('daging') || lc.includes('sapi') || lc.includes('telur') || lc.includes('tempe') || lc.includes('tahu') || lc.includes('ikan')) return 'Daging';
+   113→  if (lc.includes('bumbu') || lc.includes('cabai') || lc.includes('bawang') || lc.includes('kunyit') || lc.includes('jahe') || lc.includes('lengkuas') || lc.includes('serai') || lc.includes('garam') || lc.includes('gula') || lc.includes('kecap') || lc.includes('santan') || lc.includes('merica') || lc.includes('sambal')) return 'Bumbu';
+   114→  if (lc.includes('bahan utama') || lc.includes('nasi') || lc.includes('beras') || lc.includes('mie') || lc.includes('tepung') || lc.includes('air') || lc.includes('minyak') || lc.includes('susu')) return 'Bahan Pokok';
+   115→  if (lc.includes('susu') || lc.includes('telur') || lc.includes('kelapa')) return 'Susu & Telur';
+   116→  return 'Lainnya';
+   117→}
+   118→
+   119→/* ── Sub-components ───────────────────────────────────────────── */
+   120→
+   121→function StarRating({ rating }: { rating: number }) {
+   122→  return (
+   123→    <div className="flex items-center gap-0.5">
+   124→      {Array.from({ length: 5 }).map((_, i) => (
+   125→        <Star
+   126→          key={i}
+   127→          className={`h-3 w-3 ${
+   128→            i < rating
+   129→              ? 'fill-amber-400 text-amber-400'
+   130→              : 'fill-muted text-muted'
+   131→          }`}
+   132→        />
+   133→      ))}
+   134→    </div>
+   135→  );
+   136→}
+   137→
+   138→/* ── Marketplace Horizontal Card ──────────────────────────────── */
+   139→
+   140→function MarketplaceHCard({
+   141→  marketplace,
+   142→  isTopPick,
+   143→}: {
+   144→  marketplace: AffiliateMarketplace;
+   145→  isTopPick: boolean;
+   146→}) {
+   147→  const handleOpen = () => {
+   148→    window.open(marketplace.searchBaseUrl, '_blank', 'noopener,noreferrer');
+   149→  };
+   150→
+   151→  const cardContent = (
+   152→    <motion.div
+   153→      whileTap={{ scale: 0.97 }}
+   154→      onClick={handleOpen}
+   155→      className={`relative w-[200px] shrink-0 cursor-pointer overflow-hidden rounded-2xl nm-raised p-4 text-left transition-shadow hover:shadow-lg ${marketplace.bgColor}`}
+   156→    >
+   157→      {/* Top pick badge */}
+   158→      {isTopPick && (
+   159→        <div className="absolute top-2 right-2 z-10">
+   160→          <span className="flex items-center gap-0.5 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[9px] font-bold text-white shadow-sm">
+   161→            <Sparkles className="h-2.5 w-2.5" />
+   162→            #1
+   163→          </span>
+   164→        </div>
+   165→      )}
+   166→
+   167→      {/* Logo */}
+   168→      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl text-3xl shadow-sm">
+   169→        {marketplace.logo}
+   170→      </div>
+   171→
+   172→      {/* Info */}
+   173→      <h3 className="text-sm font-bold text-foreground truncate">{marketplace.name}</h3>
+   174→      <p className="mt-0.5 text-[11px] text-muted-foreground truncate">{marketplace.tagline}</p>
+   175→
+   176→      {/* Rating */}
+   177→      <div className="mt-2">
+   178→        <StarRating rating={marketplace.rating} />
+   179→      </div>
+   180→
+   181→      {/* Features */}
+   182→      <div className="mt-2 flex flex-wrap gap-1">
+   183→        {marketplace.features.slice(0, 2).map((f) => (
+   184→          <Badge key={f} variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-medium">
+   185→            {f}
+   186→          </Badge>
+   187→        ))}
+   188→      </div>
+   189→
+   190→      {/* CTA */}
+   191→      <div className="mt-3 flex items-center gap-1">
+   192→        <div className={`flex items-center gap-1 rounded-full bg-gradient-to-r ${marketplace.color} px-3 py-1 text-[10px] font-semibold text-white`}>
+   193→          <ExternalLink className="h-2.5 w-2.5" />
+   194→          Kunjungi
+   195→        </div>
+   196→      </div>
+   197→    </motion.div>
+   198→  );
+   199→
+   200→  if (isTopPick) {
+   201→    return (
+   202→        <ShineBorder borderWidth={2} borderRadius={16} duration={4} color={['#10b981', '#f59e0b', '#10b981']}>
+   203→          {cardContent}
+   204→        </ShineBorder>
+   205→    );
+   206→  }
+   207→
+   208→  return cardContent;
+   209→}
+   210→
+   211→/* ── Product Recommendation Card ──────────────────────────────── */
+   212→
+   213→function ProductCard({
+   214→  item,
+   215→  onBuy,
+   216→}: {
+   217→  item: ShoppingItem;
+   218→  onBuy: (item: ShoppingItem) => void;
+   219→}) {
+   220→  const category = mapToCategory(item.category);
+   221→  const icon = CATEGORY_ICONS[category] || '📦';
+   222→  const gradient = CATEGORY_COLORS[category] || 'from-slate-400 to-slate-600';
+   223→
+   224→  return (
+   225→    <motion.div variants={fadeUp} className="group">
+   226→      <div className="rounded-xl nm-raised p-3 transition-all hover:border-border hover:shadow-sm">
+   227→        <div className="flex items-start gap-3">
+   228→          {/* Icon */}
+   229→          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${gradient} text-white shadow-sm`}>
+   230→            <span className="text-lg">{icon}</span>
+   231→          </div>
+   232→
+   233→          {/* Content */}
+   234→          <div className="flex-1 min-w-0">
+   235→            <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+   236→            <p className="text-xs text-muted-foreground">
+   237→              {item.amount} {item.unit}
+   238→            </p>
+   239→
+   240→            {/* Price & Buy */}
+   241→            <div className="mt-2 flex items-center justify-between">
+   242→              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+   243→                {item.estimatedPrice ? formatRupiah(item.estimatedPrice) : 'Est. ~Rp 15.000'}
+   244→              </span>
+   245→                <motion.button
+   246→                  whileTap={{ scale: 0.92 }}
+   247→                  onClick={() => onBuy(item)}
+   248→                  className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+   249→                >
+   250→                  <ShoppingBag className="h-2.5 w-2.5" />
+   251→                  Beli
+   252→                </motion.button>
+   253→            </div>
+   254→          </div>
+   255→        </div>
+   256→      </div>
+   257→    </motion.div>
+   258→  );
+   259→}
+   260→
+   261→/* ── AI Result Card ───────────────────────────────────────────── */
+   262→
+   263→interface AILinkResult {
+   264→  platform: string;
+   265→  affiliateUrl: string;
+   266→  originalPrice?: number | null;
+   267→}
+   268→
+   269→function AILinkResultCard({ result, index }: { result: AILinkResult; index: number }) {
+   270→  return (
+   271→    <motion.div
+   272→      initial={{ opacity: 0, x: -10 }}
+   273→      animate={{ opacity: 1, x: 0 }}
+   274→      transition={{ delay: index * 0.1, duration: 0.3 }}
+   275→    >
+   276→        <button
+   277→          onClick={() => window.open(result.affiliateUrl, '_blank', 'noopener,noreferrer')}
+   278→          className="flex w-full items-center gap-3 rounded-xl nm-raised p-3 text-left transition-all hover:bg-muted/30 hover:shadow-sm"
+   279→        >
+   280→          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/10">
+   281→            <Globe className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+   282→          </div>
+   283→          <div className="flex-1 min-w-0">
+   284→            <p className="text-sm font-semibold text-foreground truncate">{result.platform}</p>
+   285→            {result.originalPrice && (
+   286→              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+   287→                {formatRupiah(result.originalPrice)}
+   288→              </p>
+   289→            )}
+   290→          </div>
+   291→          <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+   292→            <span className="text-[10px] font-medium">Buka</span>
+   293→            <ChevronRight className="h-3.5 w-3.5" />
+   294→          </div>
+   295→        </button>
+   296→    </motion.div>
+   297→  );
+   298→}
+   299→
+   300→/* ── Main Component ───────────────────────────────────────────── */
+   301→
+   302→export function MarketplaceHub() {
+   303→  const setScreen = useAppStore((s) => s.setScreen);
+   304→  const goBack = useAppStore((s) => s.goBack);
+   305→  const shoppingItems = useAppStore((s) => s.shoppingItems);
+   306→  const setShoppingItems = useAppStore((s) => s.setShoppingItems);
+   307→  const user = useAppStore((s) => s.user);
+   308→  const setAILoading = useAppStore((s) => s.setAILoading);
+   309→  const isAILoading = useAppStore((s) => s.isAILoading);
+   310→
+   311→  /* ── Local state ───────────────────────────────────── */
+   312→  const [searchQuery, setSearchQuery] = useState('');
+   313→  const [activeCategory, setActiveCategory] = useState('semua');
+   314→  const [aiResults, setAiResults] = useState<AILinkResult[]>([]);
+   315→  const [aiError, setAiError] = useState<string | null>(null);
+   316→  const [aiProductName, setAiProductName] = useState('');
+   317→  const [showAIDialog, setShowAIDialog] = useState(false);
+   318→  const [isAILinkLoading, setIsAILinkLoading] = useState(false);
+   319→
+   320→  /* ── Derived state ─────────────────────────────────── */
+   321→  const uncheckedItems = useMemo(
+   322→    () => shoppingItems.filter((i) => !i.checked),
+   323→    [shoppingItems]
+   324→  );
+   325→
+   326→  const filteredItems = useMemo(() => {
+   327→    let items = uncheckedItems;
+   328→    if (activeCategory !== 'semua') {
+   329→      items = items.filter((i) => mapToCategory(i.category) === activeCategory);
+   330→    }
+   331→    if (searchQuery.trim()) {
+   332→      const q = searchQuery.toLowerCase();
+   333→      items = items.filter((i) => i.name.toLowerCase().includes(q));
+   334→    }
+   335→    return items;
+   336→  }, [uncheckedItems, activeCategory, searchQuery]);
+   337→
+   338→  // Group filtered items by category
+   339→  const groupedItems = useMemo(() => {
+   340→    const groups: Record<string, ShoppingItem[]> = {};
+   341→    filteredItems.forEach((item) => {
+   342→      const cat = mapToCategory(item.category);
+   343→      if (!groups[cat]) groups[cat] = [];
+   344→      groups[cat].push(item);
+   345→    });
+   346→    const order = ['Sayuran', 'Daging', 'Bumbu', 'Bahan Pokok', 'Susu & Telur', 'Lainnya'];
+   347→    const sorted: [string, ShoppingItem[]][] = [];
+   348→    order.forEach((cat) => {
+   349→      if (groups[cat]) sorted.push([cat, groups[cat]]);
+   350→    });
+   351→    Object.keys(groups).forEach((cat) => {
+   352→      if (!order.includes(cat)) sorted.push([cat, groups[cat]]);
+   353→    });
+   354→    return sorted;
+   355→  }, [filteredItems]);
+   356→
+   357→  // Estimated total
+   358→  const estimatedTotal = useMemo(
+   359→    () => filteredItems.reduce((sum, i) => sum + (i.estimatedPrice ?? 15000), 0),
+   360→    [filteredItems]
+   361→  );
+   362→
+   363→  // Top recommended marketplace
+   364→  const topMarketplace = useMemo(
+   365→    () => AFFILIATE_MARKETPLACES.find((m) => m.rating === 5) ?? AFFILIATE_MARKETPLACES[0],
+   366→    []
+   367→  );
+   368→
+   369→  /* ── Handlers ──────────────────────────────────────── */
+   370→  const handleBuyItem = useCallback((item: ShoppingItem) => {
+   371→    const url = buildAffiliateUrl('tokopedia-now', item.name);
+   372→    window.open(url, '_blank', 'noopener,noreferrer');
+   373→  }, []);
+   374→
+   375→  const handleBuyAllTokopedia = useCallback(() => {
+   376→    const names = filteredItems.map((i) => i.name);
+   377→    if (names.length === 0) return;
+   378→    const url = buildBulkAffiliateUrl('tokopedia-now', names);
+   379→    window.open(url, '_blank', 'noopener,noreferrer');
+   380→  }, [filteredItems]);
+   381→
+   382→  const handleBuyAllShopee = useCallback(() => {
+   383→    const names = filteredItems.map((i) => i.name);
+   384→    if (names.length === 0) return;
+   385→    const url = buildBulkAffiliateUrl('shopee-segar', names);
+   386→    window.open(url, '_blank', 'noopener,noreferrer');
+   387→  }, [filteredItems]);
+   388→
+   389→  const handleBuyAllMulti = useCallback(() => {
+   390→    const names = filteredItems.map((i) => i.name);
+   391→    if (names.length === 0) return;
+   392→    ['tokopedia-now', 'shopee-segar', 'sayurbox'].forEach((mpId, idx) => {
+   393→      setTimeout(() => {
+   394→        const url = buildBulkAffiliateUrl(mpId, names);
+   395→        window.open(url, '_blank', 'noopener,noreferrer');
+   396→      }, idx * 300);
+   397→    });
+   398→  }, [filteredItems]);
+   399→
+   400→  const handleSearchAllMarketplaces = useCallback(() => {
+   401→    const query = searchQuery.trim() || 'bahan masakan';
+   402→    AFFILIATE_MARKETPLACES.forEach((mp, idx) => {
+   403→      setTimeout(() => {
+   404→        const url = buildAffiliateUrl(mp.id, query);
+   405→        window.open(url, '_blank', 'noopener,noreferrer');
+   406→      }, idx * 500);
+   407→    });
+   408→  }, [searchQuery]);
+   409→
+   410→  const handleAIGenerateLinks = useCallback(async (productName: string) => {
+   411→    setIsAILinkLoading(true);
+   412→    setAiError(null);
+   413→    setAiResults([]);
+   414→    setAiProductName(productName);
+   415→
+   416→    try {
+   417→      const response = await fetch('/api/affiliate/generate-link', {
+   418→        method: 'POST',
+   419→        headers: { 'Content-Type': 'application/json' },
+   420→        body: JSON.stringify({
+   421→          productName,
+   422→          category: activeCategory !== 'semua' ? activeCategory : 'Lainnya',
+   423→          context: 'marketplace-hub',
+   424→        }),
+   425→      });
+   426→
+   427→      const data = await response.json();
+   428→
+   429→      if (!response.ok) {
+   430→        setAiError(data.error || 'Gagal generate tautan. Coba lagi.');
+   431→        return;
+   432→      }
+   433→
+   434→      if (data.links && data.links.length > 0) {
+   435→        setAiResults(data.links);
+   436→      } else {
+   437→        setAiError('Tidak ada akun afiliasi aktif. Hubungi admin.');
+   438→      }
+   439→    } catch {
+   440→      setAiError('Terjadi kesalahan jaringan. Periksa koneksi dan coba lagi.');
+   441→    } finally {
+   442→      setIsAILinkLoading(false);
+   443→    }
+   444→  }, [activeCategory]);
+   445→
+   446→  const handleRetryAI = useCallback(() => {
+   447→    if (aiProductName) {
+   448→      handleAIGenerateLinks(aiProductName);
+   449→    }
+   450→  }, [aiProductName, handleAIGenerateLinks]);
+   451→
+   452→  /* ── Empty state ───────────────────────────────────── */
+   453→  if (shoppingItems.length === 0) {
+   454→    return (
+   455→      <div className="min-h-screen bg-[var(--nm-bg)]">
+   456→        <div className="flex flex-col pb-28">
+   457→          {/* Header */}
+   458→          <header className="sticky top-0 z-20 glass">
+   459→            <div className="flex items-center gap-3 px-4 py-3">
+   460→              <motion.button
+   461→                whileTap={{ scale: 0.9 }}
+   462→                onClick={goBack}
+   463→                className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
+   464→                aria-label="Kembali"
+   465→              >
+   466→                <ArrowLeft className="h-4 w-4" />
+   467→              </motion.button>
+   468→              <div className="flex items-center gap-2">
+   469→                <ShoppingBag className="h-5 w-5 text-emerald-500" />
+   470→                <h1 className="text-lg font-bold tracking-tight">
+   471→                  <GlowingText color="emerald" intensity={1}>
+   472→                    Marketplace Hub
+   473→                  </GlowingText>
+   474→                </h1>
+   475→              </div>
+   476→            </div>
+   477→          </header>
+   478→
+   479→          {/* Empty content */}
+   480→          <motion.div
+   481→            variants={stagger}
+   482→            initial="hidden"
+   483→            animate="visible"
+   484→            className="flex flex-col items-center justify-center gap-6 px-4 pt-20 text-center"
+   485→          >
+   486→            <motion.div variants={fadeUp}>
+   487→              <Bounce intensity={3} repeat>
+   488→                <div className="relative">
+   489→                  <div className="text-8xl">🛒</div>
+   490→                  <motion.div
+   491→                    className="absolute -right-2 -top-2 text-2xl"
+   492→                    animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
+   493→                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+   494→                  >
+   495→                    ✨
+   496→                  </motion.div>
+   497→                </div>
+   498→              </Bounce>
+   499→            </motion.div>
+   500→
+   501→            <motion.div variants={fadeUp} className="space-y-2">
+   502→              <h2 className="text-xl font-bold text-foreground">
+   503→                Belum ada bahan belanja
+   504→              </h2>
+   505→              <p className="max-w-[280px] text-sm text-muted-foreground">
+   506→                Buat rencana menu mingguan dulu yuk, biar bisa langsung belanja bahan-bahannya dengan harga terbaik!
+   507→              </p>
+   508→            </motion.div>
+   509→
+   510→            <motion.div variants={fadeUp}>
+   511→              <Button
+   512→                onClick={() => setScreen('chat')}
+   513→                className="gap-2 rounded-full bg-emerald-500 px-6 shadow-nm-accent hover:bg-emerald-600"
+   514→              >
+   515→                <Sparkles className="h-4 w-4" />
+   516→                Buat Rencana Menu
+   517→              </Button>
+   518→            </motion.div>
+   519→          </motion.div>
+   520→        </div>
+   521→      </div>
+   522→    );
+   523→  }
+   524→
+   525→  /* ── Main render ───────────────────────────────────── */
+   526→  return (
+   527→    <div className="min-h-screen bg-[var(--nm-bg)]">
+   528→      <div className="flex flex-col pb-40">
+   529→        {/* ── Header ─────────────────────────────────────── */}
+   530→        <header className="sticky top-0 z-20 glass">
+   531→          <div className="flex items-center gap-3 px-4 py-3">
+   532→            <motion.button
+   533→              whileTap={{ scale: 0.9 }}
+   534→              onClick={goBack}
+   535→              className="flex h-9 w-9 items-center justify-center rounded-full nm-raised transition-colors hover:bg-accent"
+   536→              aria-label="Kembali"
+   537→            >
+   538→              <ArrowLeft className="h-4 w-4" />
+   539→            </motion.button>
+   540→            <div className="flex-1">
+   541→              <div className="flex items-center gap-2">
+   542→                <ShoppingBag className="h-5 w-5 text-emerald-500" />
+   543→                <h1 className="text-lg font-bold tracking-tight">
+   544→                  <GlowingText color="emerald" intensity={1}>
+   545→                    Marketplace Hub
+   546→                  </GlowingText>
+   547→                </h1>
+   548→              </div>
+   549→              <p className="mt-0.5 text-xs text-muted-foreground">
+   550→                <NumberTicker value={uncheckedItems.length} duration={1} /> bahan siap beli
+   551→                {' · '}
+   552→                {AFFILIATE_MARKETPLACES.length} marketplace
+   553→              </p>
+   554→            </div>
+   555→          </div>
+   556→        </header>
+   557→
+   558→        {/* ── Search Bar ─────────────────────────────────── */}
+   559→        <motion.div
+   560→          initial={{ opacity: 0, y: -8 }}
+   561→          animate={{ opacity: 1, y: 0 }}
+   562→          transition={{ duration: 0.3, delay: 0.1 }}
+   563→          className="px-4 pt-4"
+   564→        >
+   565→          <div className="relative">
+   566→            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+   567→            <Input
+   568→              value={searchQuery}
+   569→              onChange={(e) => setSearchQuery(e.target.value)}
+   570→              placeholder="Cari di Marketplace..."
+   571→              className="h-10 rounded-xl border-border/50 bg-muted/30 pl-9 pr-12 text-sm placeholder:text-muted-foreground/60 focus-visible:ring-emerald-500/30"
+   572→            />
+   573→            <motion.button
+   574→              whileTap={{ scale: 0.9 }}
+   575→              onClick={handleSearchAllMarketplaces}
+   576→              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-7 items-center gap-1 rounded-lg bg-emerald-500 px-2 text-[10px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-colors"
+   577→            >
+   578→              <Globe className="h-3 w-3" />
+   579→              Semua
+   580→            </motion.button>
+   581→          </div>
+   582→        </motion.div>
+   583→
+   584→        {/* ── Category Tabs ──────────────────────────────── */}
+   585→        <div className="mt-3 px-4">
+   586→          <div className="relative">
+   587→            <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
+   588→              {CATEGORY_TABS.map((tab) => (
+   589→                <button
+   590→                  key={tab.id}
+   591→                  onClick={() => setActiveCategory(tab.id)}
+   592→                  className="relative shrink-0 px-3 py-1.5 text-xs font-medium transition-colors"
+   593→                >
+   594→                  <span
+   595→                    className={`flex items-center gap-1 rounded-full px-3 py-1.5 transition-colors ${
+   596→                      activeCategory === tab.id
+   597→                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+   598→                        : 'text-muted-foreground hover:text-foreground'
+   599→                    }`}
+   600→                  >
+   601→                    <span>{tab.emoji}</span>
+   602→                    {tab.label}
+   603→                  </span>
+   604→                  {activeCategory === tab.id && (
+   605→                    <motion.div
+   606→                      layoutId="category-underline"
+   607→                      className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-emerald-500"
+   608→                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+   609→                    />
+   610→                  )}
+   611→                </button>
+   612→              ))}
+   613→            </div>
+   614→          </div>
+   615→        </div>
+   616→
+   617→        {/* ── Featured Marketplaces ─────────────────────── */}
+   618→        <motion.section
+   619→          variants={stagger}
+   620→          initial="hidden"
+   621→          animate="visible"
+   622→          className="mt-5"
+   623→        >
+   624→          {/* Section Header */}
+   625→          <motion.div variants={fadeUp} className="px-4 flex items-center justify-between mb-3">
+   626→            <div className="flex items-center gap-2">
+   627→              <TrendingUp className="h-4 w-4 text-amber-500" />
+   628→              <h2 className="text-sm font-bold text-foreground">Marketplace Pilihan</h2>
+   629→            </div>
+   630→            <div className="flex items-center gap-1">
+   631→              <Sparkles className="h-3 w-3 text-emerald-500" />
+   632→              <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+   633→                Rekomendasi AI
+   634→              </span>
+   635→            </div>
+   636→          </motion.div>
+   637→
+   638→          {/* Marquee scroll */}
+   639→          <div className="mb-3 overflow-hidden">
+   640→            <Marquee pauseOnHover className="[--duration:15s]">
+   641→              <div className="flex gap-2">
+   642→                {Array.from({ length: 3 }).map((_, i) => (
+   643→                  <span key={i} className="shrink-0 flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+   644→                    <Sparkles className="h-2.5 w-2.5" />
+   645→                    Rekomendasi AI · Harga Terbaik · Pengiriman Tercepat
+   646→                  </span>
+   647→                ))}
+   648→              </div>
+   649→            </Marquee>
+   650→          </div>
+   651→
+   652→          {/* Horizontal scroll cards */}
+   653→          <div className="overflow-x-auto no-scrollbar">
+   654→            <motion.div
+   655→              variants={stagger}
+   656→              className="flex gap-3 px-4 pb-2"
+   657→            >
+   658→              {AFFILIATE_MARKETPLACES.map((mp) => (
+   659→                <motion.div key={mp.id} variants={fadeUp}>
+   660→                  <MarketplaceHCard
+   661→                    marketplace={mp}
+   662→                    isTopPick={mp.id === topMarketplace.id}
+   663→                  />
+   664→                </motion.div>
+   665→              ))}
+   666→            </motion.div>
+   667→          </div>
+   668→        </motion.section>
+   669→
+   670→        <Separator className="mx-4 my-4 bg-border/30" />
+   671→
+   672→        {/* ── Product Recommendations Grid ──────────────── */}
+   673→        <motion.section
+   674→          variants={stagger}
+   675→          initial="hidden"
+   676→          animate="visible"
+   677→          className="px-4"
+   678→        >
+   679→          <motion.div variants={fadeUp} className="flex items-center justify-between mb-3">
+   680→            <div className="flex items-center gap-2">
+   681→              <Zap className="h-4 w-4 text-amber-500" />
+   682→              <h2 className="text-sm font-bold text-foreground">Rekomendasi Bahan</h2>
+   683→            </div>
+   684→            <Badge variant="outline" className="text-[10px] font-medium px-2 py-0">
+   685→              {filteredItems.length} item
+   686→              {filteredItems.length !== 1 ? 's' : ''}
+   687→            </Badge>
+   688→          </motion.div>
+   689→
+   690→          {filteredItems.length === 0 ? (
+   691→            <motion.div
+   692→              initial={{ opacity: 0 }}
+   693→              animate={{ opacity: 1 }}
+   694→              className="flex flex-col items-center gap-3 py-12 text-center"
+   695→            >
+   696→              <div className="text-5xl">🔍</div>
+   697→              <p className="text-sm text-muted-foreground">
+   698→                {searchQuery
+   699→                  ? `Tidak ada bahan yang cocok dengan "${searchQuery}"`
+   700→                  : 'Tidak ada bahan dalam kategori ini'}
+   701→              </p>
+   702→              {(searchQuery || activeCategory !== 'semua') && (
+   703→                <Button
+   704→                  variant="ghost"
+   705→                  size="sm"
+   706→                  onClick={() => {
+   707→                    setSearchQuery('');
+   708→                    setActiveCategory('semua');
+   709→                  }}
+   710→                  className="text-xs text-emerald-600 dark:text-emerald-400"
+   711→                >
+   712→                  Reset Filter
+   713→                </Button>
+   714→              )}
+   715→            </motion.div>
+   716→          ) : (
+   717→            <BentoGrid className="grid-cols-1 sm:grid-cols-2 gap-2">
+   718→              {groupedItems.map(([category, items]) => (
+   719→                <motion.div key={category} variants={fadeUp}>
+   720→                  <BentoGridItem className="col-span-1 sm:col-span-2 p-0 gap-0">
+   721→                    {/* Category group header */}
+   722→                    <div className="flex items-center gap-2 px-1 pb-2 pt-1">
+   723→                      <span className="text-base">{CATEGORY_ICONS[category] || '📦'}</span>
+   724→                      <span className="text-xs font-semibold text-foreground">{category}</span>
+   725→                      <span className="text-[10px] text-muted-foreground">
+   726→                        ({items.length} item)
+   727→                      </span>
+   728→                    </div>
+   729→                    {/* Items */}
+   730→                    <div className="space-y-1.5">
+   731→                      {items.map((item) => (
+   732→                        <ProductCard
+   733→                          key={item.id}
+   734→                          item={item}
+   735→                          onBuy={handleBuyItem}
+   736→                        />
+   737→                      ))}
+   738→                    </div>
+   739→                  </BentoGridItem>
+   740→                </motion.div>
+   741→              ))}
+   742→            </BentoGrid>
+   743→          )}
+   744→        </motion.section>
+   745→
+   746→        <Separator className="mx-4 my-4 bg-border/30" />
+   747→
+   748→        {/* ── Quick Shopping Actions ────────────────────── */}
+   749→        <motion.section
+   750→          variants={stagger}
+   751→          initial="hidden"
+   752→          animate="visible"
+   753→          className="px-4"
+   754→        >
+   755→          <motion.div variants={fadeUp} className="flex items-center gap-2 mb-3">
+   756→            <Zap className="h-4 w-4 text-emerald-500" />
+   757→            <h2 className="text-sm font-bold text-foreground">Belanja Cepat</h2>
+   758→          </motion.div>
+   759→
+   760→          <motion.div variants={stagger} className="space-y-2">
+   761→            {/* Tokopedia Now */}
+   762→            <motion.div variants={fadeUp}>
+   763→                <motion.button
+   764→                  whileTap={{ scale: 0.97 }}
+   765→                  onClick={handleBuyAllTokopedia}
+   766→                  disabled={filteredItems.length === 0}
+   767→                  className="flex w-full items-center gap-3 rounded-xl border border-green-200/60 bg-green-50/50 p-3 text-left transition-all hover:shadow-md dark:border-green-800/30 dark:bg-green-500/5 disabled:opacity-40 disabled:pointer-events-none"
+   768→                >
+   769→                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-2xl shadow-sm">
+   770→                    🛒
+   771→                  </div>
+   772→                  <div className="flex-1 min-w-0">
+   773→                    <p className="text-sm font-semibold text-foreground">Beli Semua di Tokopedia Now</p>
+   774→                    <p className="text-[11px] text-muted-foreground truncate">
+   775→                      Pengiriman 2 jam · Cashback 10% · {filteredItems.length} item
+   776→                    </p>
+   777→                  </div>
+   778→                  <ExternalLink className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+   779→                </motion.button>
+   780→            </motion.div>
+   781→
+   782→            {/* Shopee Segar */}
+   783→            <motion.div variants={fadeUp}>
+   784→                <motion.button
+   785→                  whileTap={{ scale: 0.97 }}
+   786→                  onClick={handleBuyAllShopee}
+   787→                  disabled={filteredItems.length === 0}
+   788→                  className="flex w-full items-center gap-3 rounded-xl border border-orange-200/60 bg-orange-50/50 p-3 text-left transition-all hover:shadow-md dark:border-orange-800/30 dark:bg-orange-500/5 disabled:opacity-40 disabled:pointer-events-none"
+   789→                >
+   790→                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-2xl shadow-sm">
+   791→                    🧡
+   792→                  </div>
+   793→                  <div className="flex-1 min-w-0">
+   794→                    <p className="text-sm font-semibold text-foreground">Beli Semua di Shopee Segar</p>
+   795→                    <p className="text-[11px] text-muted-foreground truncate">
+   796→                      Segar dari kebun · Gratis Ongkir XTRA · {filteredItems.length} item
+   797→                    </p>
+   798→                  </div>
+   799→                  <ExternalLink className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
+   800→                </motion.button>
+   801→            </motion.div>
+   802→
+   803→            {/* Multi-Platform */}
+   804→            <motion.div variants={fadeUp}>
+   805→                <motion.button
+   806→                  whileTap={{ scale: 0.97 }}
+   807→                  onClick={handleBuyAllMulti}
+   808→                  disabled={filteredItems.length === 0}
+   809→                  className="flex w-full items-center gap-3 rounded-xl border border-emerald-200/60 bg-emerald-50/50 p-3 text-left transition-all hover:shadow-md dark:border-emerald-800/30 dark:bg-emerald-500/5 disabled:opacity-40 disabled:pointer-events-none"
+   810→                >
+   811→                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white shadow-sm">
+   812→                    <Globe className="h-5 w-5" />
+   813→                  </div>
+   814→                  <div className="flex-1 min-w-0">
+   815→                    <p className="text-sm font-semibold text-foreground">Beli Semua (Multi-Platform)</p>
+   816→                    <p className="text-[11px] text-muted-foreground truncate">
+   817→                      Bandingkan harga di 3 marketplace sekaligus
+   818→                    </p>
+   819→                  </div>
+   820→                  <div className="flex -space-x-1.5 shrink-0">
+   821→                    {['🛒', '🧡', '🥬'].map((e, i) => (
+   822→                      <span
+   823→                        key={i}
+   824→                        className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px]"
+   825→                      >
+   826→                        {e}
+   827→                      </span>
+   828→                    ))}
+   829→                  </div>
+   830→                </motion.button>
+   831→            </motion.div>
+   832→          </motion.div>
+   833→        </motion.section>
+   834→
+   835→        <Separator className="mx-4 my-4 bg-border/30" />
+   836→
+   837→        {/* ── AI Link Generation Section ────────────────── */}
+   838→        <motion.section
+   839→          variants={stagger}
+   840→          initial="hidden"
+   841→          animate="visible"
+   842→          className="px-4 pb-6"
+   843→        >
+   844→          <motion.div variants={fadeUp} className="flex items-center gap-2 mb-3">
+   845→            <Sparkles className="h-4 w-4 text-amber-500" />
+   846→            <h2 className="text-sm font-bold text-foreground">Cari Produk AI</h2>
+   847→          </motion.div>
+   848→
+   849→          <motion.div variants={fadeUp}>
+   850→            <div className="rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-50/50 via-white to-emerald-50/50 p-4 dark:from-amber-500/5 dark:via-background dark:to-emerald-500/5 dark:border-amber-800/20">
+   851→              <div className="flex items-start gap-2 mb-3">
+   852→                <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+   853→                <p className="text-xs text-muted-foreground leading-relaxed">
+   854→                  Cari tautan afiliasi terbaik untuk produk tertentu menggunakan AI. 
+   855→                  Kami akan menemukan harga terbaik di semua platform.
+   856→                </p>
+   857→              </div>
+   858→
+   859→              <div className="flex gap-2">
+   860→                <Input
+   861→                  placeholder="Contoh: Ayam broiler 1 kg"
+   862→                  className="h-9 rounded-lg border-border/50 bg-background text-sm flex-1"
+   863→                  onKeyDown={(e) => {
+   864→                    if (e.key === 'Enter') {
+   865→                      const val = (e.target as HTMLInputElement).value.trim();
+   866→                      if (val) {
+   867→                        setShowAIDialog(true);
+   868→                        handleAIGenerateLinks(val);
+   869→                      }
+   870→                    }
+   871→                  }}
+   872→                  id="ai-product-input"
+   873→                />
+   874→                  <Button
+   875→                    size="sm"
+   876→                    onClick={() => {
+   877→                      const input = document.getElementById('ai-product-input') as HTMLInputElement;
+   878→                      const val = input?.value.trim();
+   879→                      if (val) {
+   880→                        setShowAIDialog(true);
+   881→                        handleAIGenerateLinks(val);
+   882→                      }
+   883→                    }}
+   884→                    disabled={isAILinkLoading}
+   885→                    className="gap-1.5 h-9 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm hover:from-amber-600 hover:to-amber-700 shrink-0"
+   886→                  >
+   887→                    {isAILinkLoading ? (
+   888→                      <Bounce intensity={2}>
+   889→                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+   890→                      </Bounce>
+   891→                    ) : (
+   892→                      <Sparkles className="h-3.5 w-3.5" />
+   893→                    )}
+   894→                    Cari
+   895→                  </Button>
+   896→              </div>
+   897→            </div>
+   898→          </motion.div>
+   899→        </motion.section>
+   900→      </div>
+   901→
+   902→      {/* ── Fixed Bottom Bar ──────────────────────────────── */}
+   903→      <div className="fixed bottom-[68px] inset-x-0 z-30 px-4 pb-2">
+   904→        <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-card p-4 shadow-lg backdrop-blur-xl">
+   905→          {/* Animated gradient border replacement */}
+   906→          <div className="pointer-events-none absolute inset-0 rounded-2xl">
+   907→            <div className="absolute inset-0 rounded-2xl border-2 border-transparent"
+   908→              style={{
+   909→                background: 'linear-gradient(var(--tw-gradient-from, #10b981), #f59e0b, var(--tw-gradient-to, #10b981)) border-box',
+   910→                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+   911→                WebkitMaskComposite: 'xor',
+   912→                maskComposite: 'exclude',
+   913→                opacity: 0.4,
+   914→              }}
+   915→            />
+   916→          </div>
+   917→
+   918→          <div className="relative z-10 space-y-2">
+   919→            {/* Price summary */}
+   920→            <div className="flex items-center justify-between">
+   921→              <span className="text-xs text-muted-foreground">
+   922→                Estimasi total ({filteredItems.length} item)
+   923→              </span>
+   924→              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+   925→                <CountUp
+   926→                  from={0}
+   927→                  to={estimatedTotal}
+   928→                  duration={1.2}
+   929→                  formatter={(val) => formatRupiah(val)}
+   930→                />
+   931→              </span>
+   932→            </div>
+   933→
+   934→            {/* CTA */}
+   935→            <ClickSpark color="#10b981" count={10}>
+   936→              <motion.button
+   937→                whileTap={{ scale: 0.97 }}
+   938→                onClick={() => {
+   939→                  if (filteredItems.length > 0) {
+   940→                    handleBuyAllTokopedia();
+   941→                  }
+   942→                }}
+   943→                disabled={filteredItems.length === 0}
+   944→                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 py-3 text-sm font-semibold text-white shadow-nm-accent transition-all hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+   945→              >
+   946→                <ShoppingBag className="h-4 w-4" />
+   947→                Beli Semua Bahan
+   948→                {estimatedTotal > 0 && (
+   949→                  <span className="ml-1 text-xs opacity-80">
+   950→                    ({formatRupiah(estimatedTotal)})
+   951→                  </span>
+   952→                )}
+   953→              </motion.button>
+   954→            </ClickSpark>
+   955→          </div>
+   956→        </div>
+   957→      </div>
+   958→
+   959→      {/* ── AI Results Dialog ────────────────────────────── */}
+   960→      <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
+   961→        <DialogContent className="max-h-[80vh] overflow-hidden rounded-2xl sm:max-w-md p-0 gap-0">
+   962→          {/* Header */}
+   963→          <div className="sticky top-0 z-10 border-b border-border/40 bg-card px-5 pt-5 pb-4">
+   964→            <DialogHeader className="text-left">
+   965→              <DialogTitle className="flex items-center gap-2 text-lg">
+   966→                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-emerald-500 text-white">
+   967→                  <Sparkles className="h-4 w-4" />
+   968→                </div>
+   969→                <GlowingText color="emerald" intensity={1}>
+   970→                  Hasil Pencarian AI
+   971→                </GlowingText>
+   972→              </DialogTitle>
+   973→              <DialogDescription className="mt-1 text-sm">
+   974→                {aiProductName
+   975→                  ? `Tautan afiliasi untuk "${aiProductName}" di berbagai platform.`
+   976→                  : 'Mencari tautan terbaik...'}
+   977→              </DialogDescription>
+   978→            </DialogHeader>
+   979→          </div>
+   980→
+   981→          {/* Content */}
+   982→          <div className="overflow-y-auto max-h-[50vh] px-4 py-3">
+   983→            <AnimatePresence mode="wait">
+   984→              {isAILinkLoading ? (
+   985→                <motion.div
+   986→                  key="loading"
+   987→                  initial={{ opacity: 0 }}
+   988→                  animate={{ opacity: 1 }}
+   989→                  exit={{ opacity: 0 }}
+   990→                  className="flex flex-col items-center gap-4 py-8"
+   991→                >
+   992→                  <Bounce intensity={4} repeat>
+   993→                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-emerald-100 dark:from-amber-500/10 dark:to-emerald-500/10">
+   994→                      <Sparkles className="h-8 w-8 text-amber-500 animate-pulse" />
+   995→                    </div>
+   996→                  </Bounce>
+   997→                  <div className="text-center space-y-1">
+   998→                    <p className="text-sm font-semibold text-foreground">AI sedang mencari...</p>
+   999→                    <p className="text-xs text-muted-foreground">
+  1000→                      Menemukan tautan terbaik di semua marketplace
+  1001→                    </p>
+  1002→                  </div>
+  1003→                  <div className="w-full space-y-2 px-4">
+  1004→                    <Skeleton className="h-14 w-full rounded-xl" />
+  1005→                    <Skeleton className="h-14 w-full rounded-xl" />
+  1006→                    <Skeleton className="h-14 w-full rounded-xl" />
+  1007→                  </div>
+  1008→                </motion.div>
+  1009→              ) : aiError ? (
+  1010→                <motion.div
+  1011→                  key="error"
+  1012→                  initial={{ opacity: 0, scale: 0.95 }}
+  1013→                  animate={{ opacity: 1, scale: 1 }}
+  1014→                  exit={{ opacity: 0 }}
+  1015→                  className="flex flex-col items-center gap-4 py-8 text-center"
+  1016→                >
+  1017→                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-500/10">
+  1018→                    <AlertCircle className="h-7 w-7 text-rose-500" />
+  1019→                  </div>
+  1020→                  <div className="space-y-1">
+  1021→                    <p className="text-sm font-semibold text-foreground">Oops, terjadi kesalahan</p>
+  1022→                    <p className="max-w-[240px] text-xs text-muted-foreground">{aiError}</p>
+  1023→                  </div>
+  1024→                  <Button
+  1025→                    variant="outline"
+  1026→                    size="sm"
+  1027→                    onClick={handleRetryAI}
+  1028→                    className="gap-1.5 rounded-full"
+  1029→                  >
+  1030→                    <RefreshCw className="h-3.5 w-3.5" />
+  1031→                    Coba Lagi
+  1032→                  </Button>
+  1033→                </motion.div>
+  1034→              ) : aiResults.length > 0 ? (
+  1035→                <motion.div
+  1036→                  key="results"
+  1037→                  initial={{ opacity: 0 }}
+  1038→                  animate={{ opacity: 1 }}
+  1039→                  exit={{ opacity: 0 }}
+  1040→                  className="space-y-2"
+  1041→                >
+  1042→                  <div className="mb-2 flex items-center gap-2 px-1">
+  1043→                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+  1044→                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+  1045→                      Ditemukan {aiResults.length} tautan
+  1046→                    </span>
+  1047→                  </div>
+  1048→                  {aiResults.map((result, idx) => (
+  1049→                    <AILinkResultCard key={idx} result={result} index={idx} />
+  1050→                  ))}
+  1051→                </motion.div>
+  1052→              ) : null}
+  1053→            </AnimatePresence>
+  1054→          </div>
+  1055→
+  1056→          {/* Footer */}
+  1057→          <div className=" bg-muted/30 px-5 py-3">
+  1058→            <p className="text-center text-[10px] text-muted-foreground">
+  1059→              Tautan dihasilkan oleh AI dan mungkin perlu verifikasi. DapurMind AI mendapat komisi dari pembelian yang berhasil.
+  1060→            </p>
+  1061→          </div>
+  1062→        </DialogContent>
+  1063→      </Dialog>
+  1064→    </div>
+  1065→  );
+  1066→}
+  1067→
+  1068→/* ── Small helper icon ─────────────────────────────────────── */
+  1069→
+  1070→function CheckIcon({ className }: { className?: string }) {
+  1071→  return (
+  1072→    <svg
+  1073→      xmlns="http://www.w3.org/2000/svg"
+  1074→      viewBox="0 0 24 24"
+  1075→      fill="none"
+  1076→      stroke="currentColor"
+  1077→      strokeWidth="2"
+  1078→      strokeLinecap="round"
+  1079→      strokeLinejoin="round"
+  1080→      className={className}
+  1081→    >
+  1082→      <path d="M20 6 9 17l-5-5" />
+  1083→    </svg>
+  1084→  );
+  1085→}
+  1086→
+  1087→export default MarketplaceHub;
+  1088→

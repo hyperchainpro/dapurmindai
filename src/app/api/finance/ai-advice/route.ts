@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import ZAI from 'z-ai-web-dev-sdk';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
     const body = await request.json();
-    const { userId, question } = body;
+    const { question } = body;
 
-    if (!userId || !question) {
-      return NextResponse.json({ error: 'User ID dan pertanyaan wajib diisi' }, { status: 400 });
+    if (!question) {
+      return NextResponse.json({ error: 'Pertanyaan wajib diisi' }, { status: 400 });
     }
 
     // Fetch user's recent financial data for context
@@ -71,6 +74,9 @@ Panduan jawaban:
 
     return NextResponse.json({ success: true, data: { response } });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('Error in AI financial advisor:', error);
 
     // Fallback response when AI is unavailable

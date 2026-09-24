@@ -14,6 +14,8 @@ import {
   Trophy,
   ArrowRight,
   Sparkles,
+  Wallet,
+  PenTool,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { recipes } from '@/lib/recipes';
@@ -119,6 +121,20 @@ const quickActions: QuickAction[] = [
     title: 'Marketplace',
     desc: 'Belanja bahan langsung dari app',
     gradient: 'from-sky-500/10 to-sky-500/5',
+  },
+  {
+    screen: 'finance',
+    icon: Wallet,
+    title: 'Keuangan',
+    desc: 'Atur budget & catat pengeluaran',
+    gradient: 'from-violet-500/10 to-violet-500/5',
+  },
+  {
+    screen: 'creator',
+    icon: PenTool,
+    title: 'Creator',
+    desc: 'Bagikan resep & bangun audiens',
+    gradient: 'from-pink-500/10 to-pink-500/5',
   },
   {
     screen: 'recipes',
@@ -338,7 +354,7 @@ function DashboardInner() {
                 </div>
                 <div className="mt-3 overflow-hidden rounded-lg">
                   <Marquee pauseOnHover className="[--duration:20s]">
-                    {['Gratis Ongkir Tokopedia Now', 'Cashback 10% Shopee Segar', 'Produk Organik Sayurbox', 'Promo Harian Blibli Mart', 'Harga Grosir LotteMart', '24 Jam Klik Indomaret'].map((deal) => (
+                    {['Gratis Ongkir Shopee', 'Cashback 10% Shopee Segar', 'Produk Organik Sayurbox', 'Promo Harian Blibli Mart', 'Harga Grosir LotteMart', '24 Jam Klik Indomaret'].map((deal) => (
                       <span key={deal} className="mx-4 inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
                         <Sparkles className="h-3 w-3" />
                         {deal}

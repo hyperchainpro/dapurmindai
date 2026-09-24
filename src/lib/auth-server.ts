@@ -4,14 +4,18 @@ import { db } from './db';
 
 /* ── Constants ─────────────────────────────────────────── */
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dapurmind-jwt-secret-change-in-production-2024'
-);
+if (!process.env.JWT_SECRET) {
+  throw new Error('[AUTH] FATAL: JWT_SECRET env var is not set. Refusing to start with insecure default.');
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const TOKEN_EXPIRY_HOURS = 24 * 7; // 7 days
 
-// Hardcoded admin secret (matches AdminLogin.tsx credentials)
-const ADMIN_API_KEY = 'dapurmind-admin-key-2025';
+// Admin API key from env — no fallback, fail fast if missing
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+if (!ADMIN_API_KEY) {
+  console.warn('[AUTH] ADMIN_API_KEY env var not set — admin key auth will be disabled.');
+}
 
 /* ── Password Helpers ──────────────────────────────────── */
 
@@ -126,9 +130,11 @@ export async function requireAuth(req: Request): Promise<{ userId: string; role:
 
 export async function requireAdmin(req: Request): Promise<{ userId: string; role: string }> {
   // 1. Check for admin API key header (client-side admin login)
-  const adminKey = req.headers.get('x-admin-key');
-  if (adminKey === ADMIN_API_KEY) {
-    return { userId: 'admin-system', role: 'superadmin' };
+  if (ADMIN_API_KEY) {
+    const adminKey = req.headers.get('x-admin-key');
+    if (adminKey === ADMIN_API_KEY) {
+      return { userId: 'admin-system', role: 'superadmin' };
+    }
   }
 
   // 2. Fall back to JWT session-based auth

@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    GET /api/creator/analytics — Creator dashboard analytics
-   Query: userId (required)
    ═══════════════════════════════════════════════════════════ */
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID wajib diisi' },
-        { status: 400 }
-      );
-    }
+    const auth = await requireAuth(request);
+    const userId = auth.userId;
 
     // Run all queries in parallel
     const [
@@ -110,6 +103,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Creator Analytics] Error:', error);
     return NextResponse.json(
       { error: 'Gagal memuat analytics creator' },

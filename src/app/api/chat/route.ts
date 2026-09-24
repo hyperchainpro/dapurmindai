@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAIResponse, buildChatSystemPrompt } from '@/lib/ai';
+import { requireAuth, AuthError } from '@/lib/auth-server';
 import type { UserProfile } from '@/types';
 
 interface ChatRequestBody {
@@ -13,6 +14,7 @@ interface ChatRequestBody {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
     const body: ChatRequestBody = await request.json();
     const { message, context } = body;
 
@@ -61,6 +63,9 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[Chat API] Error:', error);
 
     if (error instanceof Error) {

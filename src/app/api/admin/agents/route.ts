@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireAdmin, AuthError } from '@/lib/auth-server';
 
 /* ═══════════════════════════════════════════════════════════
    AI Agent Management API
@@ -7,8 +8,10 @@ import { db } from '@/lib/db';
    ═══════════════════════════════════════════════════════════ */
 
 // GET /api/admin/agents — List all agents
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    await requireAdmin(request);
+
     const agents = await db.aiAgent.findMany({
       where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
@@ -36,6 +39,9 @@ export async function GET() {
 
     return NextResponse.json({ success: true, agents });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[AdminAgents GET]', error);
     return NextResponse.json({ success: false, error: 'Gagal mengambil data agent' }, { status: 500 });
   }
@@ -44,6 +50,8 @@ export async function GET() {
 // POST /api/admin/agents — Create a new agent
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin(request);
+
     const body = await request.json();
     const { name, provider, model, apiKey, apiBaseUrl, maxTokens, description, purpose, isDefault, isActive } = body;
 
@@ -88,6 +96,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, agent });
   } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error('[AdminAgents POST]', error);
     return NextResponse.json({ success: false, error: 'Gagal membuat agent baru' }, { status: 500 });
   }
