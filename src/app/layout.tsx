@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dapurmindai.vercel.app"),
   title: "DapurMind AI – Asisten Perencana Makanan Cerdas",
   description:
     "DapurMind AI adalah asisten perencana makanan & belanja cerdas untuk keluarga Indonesia. Rencanakan menu mingguan, temukan resep kreatif, dan hemat budget belanja.",
