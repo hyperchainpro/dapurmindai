@@ -122,6 +122,7 @@ export type AppScreen =
   | 'recipe-detail'
   | 'meal-plan-detail'
   | 'marketplace'
+  | 'explore'
   | 'finance'
   | 'creator'
   | 'admin-login'

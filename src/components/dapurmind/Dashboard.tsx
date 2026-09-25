@@ -16,6 +16,8 @@ import {
   Sparkles,
   Wallet,
   PenTool,
+  Compass,
+  Play,
 } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import { recipes } from '@/lib/recipes';
@@ -114,6 +116,13 @@ const quickActions: QuickAction[] = [
     title: 'Zero Waste',
     desc: 'Selamatkan bahan makananmu',
     gradient: 'from-amber-500/10 to-amber-500/5',
+  },
+  {
+    screen: 'explore',
+    icon: Compass,
+    title: 'Explore',
+    desc: 'Jelajahi resep & video YouTube',
+    gradient: 'from-red-500/10 to-red-500/5',
   },
   {
     screen: 'marketplace',

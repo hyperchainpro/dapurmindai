@@ -2,7 +2,7 @@
 
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Home, MessageCircle, Leaf, BookOpen, User } from 'lucide-react';
+import { Home, MessageCircle, Leaf, BookOpen, Compass, User } from 'lucide-react';
 import { useAppStore } from '@/hooks/useAppState';
 import type { AppScreen } from '@/types';
 
@@ -15,7 +15,7 @@ interface NavTab {
 
 const tabs: NavTab[] = [
   { screen: 'dashboard', label: 'Beranda', icon: Home },
-  { screen: 'chat', label: 'Chat', icon: MessageCircle },
+  { screen: 'explore', label: 'Explore', icon: Compass },
   { screen: 'zero-waste', label: 'Zero Waste', icon: Leaf, isCenter: true },
   { screen: 'recipes', label: 'Resep', icon: BookOpen },
   { screen: 'profile', label: 'Profil', icon: User },

@@ -4,10 +4,15 @@ import { db } from './db';
 
 /* == Constants =========================================== */
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('[AUTH] FATAL: JWT_SECRET env var is not set. Refusing to start with insecure default.');
-}
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+// Lazy JWT_SECRET: validate at request time, not import time, so the build
+// does not crash when env vars are absent during static generation.
+const _getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('[AUTH] FATAL: JWT_SECRET env var is not set. Refusing to start with insecure default.');
+  }
+  return new TextEncoder().encode(secret);
+};
 
 const TOKEN_EXPIRY_HOURS = 24 * 7; // 7 days
 
@@ -34,12 +39,12 @@ export async function createToken(payload: { userId: string; role: string }): Pr
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${TOKEN_EXPIRY_HOURS}h`)
-    .sign(JWT_SECRET);
+    .sign(_getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<{ userId: string; role: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, _getJwtSecret());
     return {
       userId: payload.userId as string,
       role: (payload.role as string) || 'user',

@@ -85,6 +85,10 @@ const CreatorPage = dynamic(
   () => import('@/components/dapurmind/CreatorPage').then(m => ({ default: m.CreatorPage })),
   { ssr: false }
 );
+const ExplorePage = dynamic(
+  () => import('@/components/dapurmind/ExplorePage'),
+  { ssr: false }
+);
 
 /* == Screen renderer ============================================ */
 
@@ -213,6 +217,11 @@ function ScreenRouter() {
       {currentScreen === 'creator' && (
         <motion.div key="creator" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <CreatorPage />
+        </motion.div>
+      )}
+      {currentScreen === 'explore' && (
+        <motion.div key="explore" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <ExplorePage />
         </motion.div>
       )}
     </AnimatePresence>
