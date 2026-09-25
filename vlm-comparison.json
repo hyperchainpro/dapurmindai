@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "The only visual difference between the two images is the **Captcha math question**:\n\n*   **Image 1 (LAC/reference):** The captcha displays **`9 × 7 = ?`**\n*   **Image 2 (Main):** The captcha displays **`13 - 3 = ?`**\n\nAll other elements, including layout, colors, fonts, spacing, icons, and text, are identical.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1790304820,
+  "id": "20260925105338fec2aff39c2e4e19",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260925105338fec2aff39c2e4e19",
+  "usage": {
+    "completion_tokens": 87,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 2174,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 2261
+  }
+}
