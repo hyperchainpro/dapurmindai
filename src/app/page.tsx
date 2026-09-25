@@ -89,6 +89,10 @@ const ExplorePage = dynamic(
   () => import('@/components/dapurmind/ExplorePage'),
   { ssr: false }
 );
+const FavoritePage = dynamic(
+  () => import('@/components/dapurmind/FavoritePage'),
+  { ssr: false }
+);
 
 /* == Screen renderer ============================================ */
 
@@ -222,6 +226,11 @@ function ScreenRouter() {
       {currentScreen === 'explore' && (
         <motion.div key="explore" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
           <ExplorePage />
+        </motion.div>
+      )}
+      {currentScreen === 'favorite' && (
+        <motion.div key="favorite" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
+          <FavoritePage />
         </motion.div>
       )}
     </AnimatePresence>

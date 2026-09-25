@@ -87,8 +87,11 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only rate limit API routes
+  // Non-API routes: add security headers (CSP, etc.)
   if (!pathname.startsWith('/api/')) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    addSecurityHeaders(response);
+    return response;
   }
 
   const ip =
@@ -114,6 +117,26 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
+/* == CSP & Security Headers for non-API routes ================== */
+
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://silent-ocelot-29.convex.cloud",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://silent-ocelot-29.convex.cloud https://silent-ocelot-29.convex.site",
+      "frame-ancestors 'none'",
+    ].join('; ')
+  );
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  return response;
+}
+
 export const config = {
-  matcher: '/api/:path*',
+  matcher: ['/api/:path*', '/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

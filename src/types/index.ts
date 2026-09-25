@@ -123,6 +123,7 @@ export type AppScreen =
   | 'meal-plan-detail'
   | 'marketplace'
   | 'explore'
+  | 'favorite'
   | 'finance'
   | 'creator'
   | 'admin-login'
