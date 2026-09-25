@@ -10,6 +10,24 @@ const config: Config = {
     "./src/hooks/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    // Ensure key utility classes are always generated (matching gamma build)
+    { pattern: /bg-(amber|blue|gray|pink|teal)-\d+/ },
+    { pattern: /from-(teal|amber|blue|pink)-\d+/ },
+    { pattern: /to-(teal|amber|blue|pink)-\d+/ },
+    'animate-marquee',
+    'backdrop-blur',
+    'border-e', 'border-s', 'border-be', 'border-bs',
+    'bottom-6',
+    'drop-shadow',
+    'ease-in', 'ease-out',
+    'flow-root',
+    'inline-grid',
+    'lowercase',
+    'no-underline',
+    'normal-case',
+    'uppercase',
+  ],
   theme: {
         extend: {
                 colors: {
