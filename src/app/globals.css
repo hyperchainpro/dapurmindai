@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Ensure Tailwind scans all source files for class usage */
+@source "../components/**/*.{ts,tsx,js,jsx}";
+@source "../app/**/*.{ts,tsx,js,jsx}";
+@source "../hooks/**/*.{ts,tsx,js,jsx}";
+@source "../lib/**/*.{ts,tsx,js,jsx}";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
